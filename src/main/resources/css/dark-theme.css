@@ -1,0 +1,194 @@
+/* ============================================
+   Tema Oscuro - MultiMinecraft Launcher
+   ESTILOS GLOBALES COMPARTIDOS
+   (Usados por todas las vistas)
+   ============================================ */
+
+/* ---- Root / Base ---- */
+.root {
+    -fx-background-color: #0f1923;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ---- Barra de título personalizada ---- */
+.custom-title-bar {
+    -fx-background-color: #0a1018;
+    -fx-background-radius: 8 8 0 0;
+    -fx-pref-height: 32;
+    -fx-min-height: 32;
+    -fx-max-height: 32;
+}
+
+.title-bar-text {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 12px;
+}
+
+.title-bar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 13px;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+}
+
+.title-bar-button:hover {
+    -fx-background-color: #1a2a3a;
+    -fx-text-fill: #ffffff;
+}
+
+.close-button:hover {
+    -fx-background-color: #c42b1c;
+    -fx-text-fill: #ffffff;
+}
+
+/* ---- Root pane ---- */
+.root-pane {
+    -fx-background-color: #0f1923;
+}
+
+/* ---- Backgrounds ---- */
+.background-primary {
+    -fx-background-color: #162030;
+}
+
+.background-secondary {
+    -fx-background-color: #131d2a;
+}
+
+.background-tertiary {
+    -fx-background-color: #0f1923;
+}
+
+/* ---- Text Fields ---- */
+.text-field {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #2a3f5f;
+}
+
+.text-field:focused {
+    -fx-border-color: #26d9a0;
+}
+
+/* ---- ComboBox ---- */
+.combo-box {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #1a2940;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #243650;
+}
+
+/* ---- Labels ---- */
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ---- Separators ---- */
+.separator .line {
+    -fx-border-color: #1a2940;
+}
+
+/* ---- ScrollBar ---- */
+.scroll-bar {
+    -fx-background-color: #162030;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #2a3f55;
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #3a5570;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-shape: "";
+    -fx-padding: 0;
+}
+
+/* ---- Progress Bar ---- */
+.progress-bar {
+    -fx-accent: #26d9a0;
+    -fx-control-inner-background: #0f1923;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+}
+
+/* ---- Progress Indicator (circular) ---- */
+.progress-indicator {
+    -fx-progress-color: #26d9a0;
+}
+
+/* ---- Botones genéricos ---- */
+.action-button {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.action-button:hover {
+    -fx-background-color: #243650;
+    -fx-border-color: #3a5570;
+}
+
+.action-button:disabled {
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+/* ---- Botones de ventana (legacy) ---- */
+.window-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-padding: 5px;
+}
+
+.window-button:hover {
+    -fx-background-color: #1a2940;
+    -fx-border-color: #3a5570;
+}
+
+.window-button-close:hover {
+    -fx-background-color: #f44336;
+    -fx-border-color: #f44336;
+    -fx-text-fill: white;
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.multiminecraft.launcher.controller.InstancesController"
+      spacing="20">
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Label text="Mis Instancias" styleClass="label-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="➕ Nueva Instancia" styleClass="button-primary" onAction="#onCreateNewInstance"/>
+    </HBox>
+    
+    <Separator/>
+    
+    <!-- Lista de instancias -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+        <FlowPane fx:id="instancesContainer" hgap="15" vgap="15">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <!-- Las instancias se cargarán dinámicamente aquí -->
+        </FlowPane>
+    </ScrollPane>
+    
+    <!-- Mensaje cuando no hay instancias -->
+    <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="20" VBox.vgrow="ALWAYS" visible="false">
+        <Label text="No tienes instancias creadas" styleClass="label-subtitle"/>
+        <Label text="Crea tu primera instancia para comenzar a jugar"/>
+        <Button text="➕ Crear Primera Instancia" styleClass="button-primary" onAction="#onCreateNewInstance"/>
+    </VBox>
+    
+</VBox>

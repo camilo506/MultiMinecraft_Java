@@ -1,0 +1,59 @@
+/* ============================================
+   Vista: CreateInstanceView (Crear Instancia)
+   Estilos del formulario de creación
+   ============================================ */
+
+/* ---- Borde verde de la ventana ---- */
+.root-pane {
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+/* ---- Contenedor de progreso (parte inferior) ---- */
+.creation-progress-container {
+    -fx-background-color: #131d2a;
+    -fx-border-color: #26d9a055 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.progress-status-label {
+    -fx-text-fill: #b0c4d8;
+    -fx-font-size: 12px;
+}
+
+/* ---- ProgressIndicator circular verde ---- */
+.creation-progress-container .progress-indicator .indicator {
+    -fx-progress-color: #26d9a0;
+}
+
+.creation-progress-container .progress-indicator {
+    -fx-progress-color: #26d9a0;
+}
+
+/* ---- Label de porcentaje sobre el ProgressIndicator ---- */
+.progress-percent-label {
+    -fx-text-fill: #e0e8f0;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Slider de RAM en verde ---- */
+.slider .track {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 5;
+}
+
+.slider .thumb {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 50;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: #33edb0;
+}
+
+.slider .colored-track {
+    -fx-background-color: #26d9a0;
+}

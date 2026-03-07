@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.multiminecraft.launcher.controller.SelectIconController"
+      spacing="15"
+      styleClass="background-primary">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Label text="Icono de instancia" styleClass="label-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="✕" onAction="#onClose" style="-fx-background-color: transparent; -fx-text-fill: -fx-text-base-color;"/>
+    </HBox>
+    
+    <Separator/>
+    
+    <!-- Contenido principal -->
+    <HBox spacing="20" HBox.hgrow="ALWAYS">
+        
+        <!-- Lista de iconos -->
+        <VBox spacing="10" prefWidth="400">
+            <Label text="Iconos disponibles" styleClass="label-header"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="background-secondary" style="-fx-background: -fx-background-secondary; -fx-background-color: -fx-background-secondary;">
+                <FlowPane fx:id="iconsContainer" hgap="10" vgap="10" styleClass="background-secondary">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                </FlowPane>
+            </ScrollPane>
+        </VBox>
+        
+        <!-- Vista previa -->
+        <VBox spacing="15" prefWidth="200" alignment="CENTER">
+            <Label text="Vista previa" styleClass="label-header"/>
+            <VBox alignment="CENTER" spacing="10" styleClass="background-secondary" style="-fx-background-color: derive(-fx-base, -10%); -fx-background-radius: 5px; -fx-padding: 15;">
+                <ImageView fx:id="previewImageView" fitWidth="120" fitHeight="120" preserveRatio="true" 
+                           style="-fx-border-color: -fx-text-base-color; -fx-border-width: 2px; -fx-border-radius: 5px;"/>
+            </VBox>
+            <Button text="Seleccionar" styleClass="button-primary" onAction="#onSelect" prefWidth="150"/>
+        </VBox>
+        
+    </HBox>
+    
+</VBox>
+

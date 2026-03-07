@@ -1,0 +1,25 @@
+# Ignorar archivos de compilación
+target/
+*.class
+*.jar
+!maven-wrapper.jar
+
+# Ignorar archivos de IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar logs
+*.log
+
+# Ignorar archivos temporales
+*.tmp
+*.swp
+*~

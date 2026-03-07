@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox alignment="CENTER" spacing="20" styleClass="welcome-container" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.multiminecraft.launcher.controller.WelcomeController">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    
+    <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
+        <image>
+            <Image url="@/icons/art-Crafting_Table.png"/>
+        </image>
+    </ImageView>
+    <Label text="¡Bienvenido a MonkeyCraft!" styleClass="welcome-title"/>
+    <Label text="Ingresa tu nombre de jugador para continuar" styleClass="welcome-subtitle"/>
+    
+    <VBox spacing="8" alignment="CENTER" maxWidth="300">
+        <TextField fx:id="playerNameField" promptText="Nombre del jugador" maxWidth="300" alignment="CENTER" styleClass="welcome-input"/>
+        <Label fx:id="errorLabel" text="" styleClass="welcome-error" visible="false" managed="false"/>
+    </VBox>
+    
+    <Button fx:id="continueButton" text="Continuar" styleClass="button-primary" onAction="#onContinue" prefWidth="200" prefHeight="36"/>
+</VBox>

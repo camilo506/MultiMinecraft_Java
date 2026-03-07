@@ -1,0 +1,48 @@
+/* ============================================
+   Vista: WelcomeView (Pantalla de bienvenida)
+   ============================================ */
+
+.welcome-container {
+    -fx-background-color: #0e1621;
+    -fx-background-radius: 12;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+}
+
+.welcome-icon {
+    -fx-font-size: 48px;
+}
+
+.welcome-title {
+    -fx-text-fill: #e0e8f0;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.welcome-subtitle {
+    -fx-text-fill: #7a8fa6;
+    -fx-font-size: 13px;
+}
+
+.welcome-input {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #e0e8f0;
+    -fx-border-color: #26d9a055;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER;
+    -fx-prompt-text-fill: #5a6a7a;
+}
+
+.welcome-input:focused {
+    -fx-border-color: #26d9a0;
+}
+
+.welcome-error {
+    -fx-text-fill: #ff5555;
+    -fx-font-size: 11px;
+}

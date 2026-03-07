@@ -1,0 +1,143 @@
+/* Estilos base del launcher */
+
+* {
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.root {
+    -fx-font-size: 12px;
+}
+
+/* Botones */
+.button {
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-padding: 6px 14px;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.button:hover {
+    -fx-opacity: 0.9;
+}
+
+.button:pressed {
+    -fx-opacity: 0.7;
+}
+
+.button-primary {
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0f1923;
+}
+
+.button-secondary {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.button-danger {
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+}
+
+/* Text Fields */
+.text-field {
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px;
+}
+
+.text-field:focused {
+    -fx-border-width: 2px;
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-radius: 6px;
+}
+
+/* Labels */
+.label-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+
+}
+
+.label-subtitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.label-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Progress Bar */
+.progress-bar {
+    -fx-background-radius: 3px;
+    -fx-accent: #26d9a0;
+    -fx-control-inner-background: #1a2940;
+}
+
+.progress-bar>.bar {
+    -fx-background-radius: 3px;
+    -fx-background-color: #26d9a0;
+    -fx-background-insets: 0;
+    -fx-padding: 0px;
+}
+
+.progress-bar>.track {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+}
+
+/* Asegurar que el progreso se muestre */
+.progress-bar:indeterminate>.bar {
+    -fx-background-color: #26d9a0;
+}
+
+.progress-bar:determinate>.bar {
+    -fx-background-color: #26d9a0;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Instance Card */
+.instance-card {
+    -fx-background-radius: 10px;
+    -fx-padding: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 6, 0, 0, 1);
+}
+
+.instance-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(38, 217, 160, 0.15), 15, 0, 0, 3);
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-padding: 0;
+}
+
+.sidebar-button {
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+
+.sidebar-button:hover {
+    -fx-opacity: 0.8;
+}
+
+.sidebar-button-selected {
+    -fx-font-weight: bold;
+}

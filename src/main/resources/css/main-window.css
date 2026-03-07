@@ -1,0 +1,264 @@
+/* ============================================
+   Vista: MainWindow (Ventana Principal)
+   Estilos del sidebar, header panel, cards
+   ============================================ */
+
+/* ---- Borde verde redondeado de la ventana ---- */
+.root-pane {
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+/* =======================
+   SIDEBAR
+   ======================= */
+.sidebar {
+    -fx-background-color: #131d2a;
+    -fx-background-radius: 0 0 0 8;
+}
+
+.sidebar-header {
+    -fx-background-color: transparent;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+}
+
+.sidebar-body {
+    -fx-background-color: #131d2a;
+    -fx-background-radius: 0 0 0 8;
+    -fx-border-color: transparent #26d9a055 transparent transparent;
+    -fx-border-width: 0 2 0 0;
+}
+
+.launcher-title {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.launcher-subtitle {
+    -fx-text-fill: #6b8299;
+    -fx-font-size: 12px;
+}
+
+/* ---- Panel de instancia seleccionada ---- */
+.selected-instance-panel {
+    -fx-background-color: #1a2635;
+    -fx-background-radius: 6;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 6;
+}
+
+.selected-instance-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.selected-instance-version {
+    -fx-text-fill: #6b8299;
+    -fx-font-size: 11px;
+}
+
+/* ---- Botón Jugar ---- */
+.play-button {
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0f1923;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+.play-button:hover {
+    -fx-background-color: #33edb0;
+}
+
+.play-button:pressed {
+    -fx-background-color: #1fc08a;
+}
+
+.play-button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* ---- Botones del menú lateral ---- */
+.sidebar-menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 6 12;
+    -fx-alignment: center-left;
+}
+
+.sidebar-menu-button:hover {
+    -fx-background-color: #1a2940;
+    -fx-text-fill: #ffffff;
+}
+
+.sidebar-menu-button:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+
+/* ---- Botón Crear Instancia ---- */
+.create-instance-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+.create-instance-button:hover {
+    -fx-background-color: rgba(38, 217, 160, 0.1);
+}
+
+/* ---- Footer ---- */
+.sidebar-footer {
+    -fx-background-color: transparent;
+}
+
+.footer-label {
+    -fx-text-fill: #4a6070;
+    -fx-font-size: 10px;
+}
+
+/* =======================
+   CONTENIDO PRINCIPAL
+   ======================= */
+.main-content {
+    -fx-background-color: #162030;
+    -fx-background-radius: 0 0 8 0;
+}
+
+/* ---- Panel superior del encabezado ---- */
+.header-panel {
+    -fx-background-color: #131d2a;
+    -fx-border-color: transparent transparent #26d9a055 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-min-height: 56;
+    -fx-pref-height: 56;
+}
+
+.content-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.content-subtitle {
+    -fx-text-fill: #5a7a90;
+    -fx-font-size: 13px;
+}
+
+/* ---- Label de progreso ---- */
+.progress-label {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-min-width: 35;
+}
+
+/* =======================
+   TARJETAS DE INSTANCIA
+   ======================= */
+.instance-card {
+    -fx-background-color: #1a2635;
+    -fx-background-radius: 10;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-border-style: segments(8, 6) line-cap round;
+    -fx-cursor: hand;
+}
+
+.instance-card:hover {
+    -fx-background-color: #1e2e42;
+    -fx-border-color: #3a5570;
+}
+
+.instance-card-selected {
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-style: solid;
+    -fx-background-color: #1a2e3e;
+}
+
+.instance-card-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.instance-card-version {
+    -fx-text-fill: #6b8299;
+    -fx-font-size: 11px;
+}
+
+/* ---- Tarjeta Nueva Instancia ---- */
+.new-instance-card {
+    -fx-background-color: #1a2635;
+    -fx-background-radius: 10;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-border-style: segments(8, 6) line-cap round;
+    -fx-cursor: hand;
+}
+
+.new-instance-card:hover {
+    -fx-background-color: #1e2e42;
+    -fx-border-color: #26d9a0;
+}
+
+.new-instance-plus {
+    -fx-text-fill: #4a6070;
+    -fx-font-size: 36px;
+}
+
+.new-instance-label {
+    -fx-text-fill: #6b8299;
+    -fx-font-size: 12px;
+}
+
+/* ---- Indicador online ---- */
+.online-dot {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 50;
+    -fx-min-width: 10;
+    -fx-min-height: 10;
+    -fx-max-width: 10;
+    -fx-max-height: 10;
+}
+
+/* ---- Icono de instancia grande ---- */
+.instance-icon-large {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 2);
+}
+
+/* ---- Grid de instancias ---- */
+.instances-grid {
+    -fx-background-color: transparent;
+}
+
+.instances-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.instances-scroll .viewport {
+    -fx-background-color: transparent;
+}

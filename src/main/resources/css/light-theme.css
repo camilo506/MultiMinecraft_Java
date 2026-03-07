@@ -1,0 +1,107 @@
+/* Tema Claro */
+
+.root {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #212121;
+}
+
+/* Backgrounds */
+.background-primary {
+    -fx-background-color: #ffffff;
+}
+
+.background-secondary {
+    -fx-background-color: #fafafa;
+}
+
+.background-tertiary {
+    -fx-background-color: #f5f5f5;
+}
+
+/* Text Fields */
+.text-field {
+    -fx-background-color: white;
+    -fx-text-fill: #212121;
+    -fx-border-color: #cccccc;
+}
+
+.text-field:focused {
+    -fx-border-color: #4CAF50;
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: white;
+    -fx-text-fill: #212121;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #212121;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #e0e0e0;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #212121;
+}
+
+/* Instance Card */
+.instance-card {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #fafafa;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #616161;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #e0e0e0;
+    -fx-text-fill: #212121;
+}
+
+.sidebar-button-selected {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+}
+
+/* ScrollBar */
+.scroll-bar {
+    -fx-background-color: #fafafa;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #cccccc;
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #aaaaaa;
+}
+
+/* Header Panel */
+.header-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #4CAF50 transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+/* Separators */
+.separator .line {
+    -fx-border-color: #e0e0e0;
+}
