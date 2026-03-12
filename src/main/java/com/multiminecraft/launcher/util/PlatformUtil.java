@@ -52,29 +52,33 @@ public class PlatformUtil {
 
         switch (getOS()) {
             case WINDOWS:
+                // Carpeta de datos del launcher en Windows: %APPDATA%\.MultiMinecraft
                 String appData = System.getenv("APPDATA");
                 if (appData != null) {
-                    launcherDir = Paths.get(appData, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(appData, ".MultiMinecraft"); // Aquí se guardan los archivos del launcher
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft"); // Alternativa si no existe APPDATA
                 }
                 break;
 
             case MACOS:
-                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft_Java");
+                // Carpeta de datos del launcher en macOS: ~/Library/Application Support/MultiMinecraft
+                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft"); // Aquí se guardan los archivos del launcher
                 break;
 
             case LINUX:
+                // Carpeta de datos del launcher en Linux: $XDG_DATA_HOME/MultiMinecraft o ~/.MultiMinecraft
                 String xdgData = System.getenv("XDG_DATA_HOME");
                 if (xdgData != null) {
-                    launcherDir = Paths.get(xdgData, "MultiMinecraft_Java");
+                    launcherDir = Paths.get(xdgData, "MultiMinecraft"); // Aquí se guardan los archivos del launcher
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft"); // Alternativa si no existe XDG_DATA_HOME
                 }
                 break;
 
             default:
-                launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                // Carpeta por defecto si no se detecta el sistema operativo
+                launcherDir = Paths.get(userHome, ".MultiMinecraft"); // Aquí se guardan los archivos del launcher
                 break;
         }
 
