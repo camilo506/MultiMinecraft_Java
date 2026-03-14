@@ -20,7 +20,7 @@
             <padding>
                 <Insets bottom="0" left="12" right="0" top="0" />
             </padding>
-            <Label styleClass="title-bar-text" text="Monkey Studio" />
+            <Label styleClass="title-bar-text" text="MultiMinecraft" /> <!-- titulo de la ventana -->
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
             <Button fx:id="maximizeBtn" onAction="#onMaximizeClicked" styleClass="title-bar-button" text="☐" />
@@ -102,7 +102,7 @@
                     </padding>
                     <Region HBox.hgrow="ALWAYS" />
                     <VBox alignment="CENTER_RIGHT" spacing="2">
-                        <Label styleClass="content-title" text="MonkeyCraft Launcher" />
+                        <Label styleClass="content-title" text="MultiMinecraft Launcher" />
                         <Label styleClass="content-subtitle" text="Selecciona una instancia para comenzar a jugar" />
                     </VBox>
                     <Region HBox.hgrow="ALWAYS" />
