@@ -18,11 +18,11 @@
             <Image url="@/icons/art-Crafting_Table.png"/>
         </image>
     </ImageView>
-    <Label text="¡Bienvenido al MultiMinecraft!" styleClass="welcome-title"/>
-    <Label text="Monkey Studio" styleClass="welcome-subtitle"/>
+    <Label text="¡Bienvenido a MonkeyCraft!" styleClass="welcome-title"/>
+    <Label text="Ingresa tu nombre de jugador para continuar" styleClass="welcome-subtitle"/>
     
     <VBox spacing="8" alignment="CENTER" maxWidth="300">
-        <TextField fx:id="playerNameField" promptText="Ingresa un Nombre para el jugador" maxWidth="300" alignment="CENTER" styleClass="welcome-input"/>
+        <TextField fx:id="playerNameField" promptText="Nombre del jugador" maxWidth="300" alignment="CENTER" styleClass="welcome-input"/>
         <Label fx:id="errorLabel" text="" styleClass="welcome-error" visible="false" managed="false"/>
     </VBox>
     

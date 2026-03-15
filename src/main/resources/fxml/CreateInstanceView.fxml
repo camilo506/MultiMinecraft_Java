@@ -15,7 +15,7 @@
             <padding>
                 <Insets bottom="0" left="12" right="0" top="0" />
             </padding>
-            <Label styleClass="title-bar-text" text="MultiMinecraft" />
+            <Label styleClass="title-bar-text" text="MonkeyCraft" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
             <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
