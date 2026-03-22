@@ -53,7 +53,8 @@ public class LaunchService {
         String baseVersion = instance.getVersion();
 
         // Si es una instancia Forge o Fabric, buscar la versión del loader instalada
-        // IMPORTANTE: Para loaders, NO usamos el JSON de vanilla, sino el JSON del loader
+        // IMPORTANTE: Para loaders, NO usamos el JSON de vanilla, sino el JSON del
+        // loader
         // El JSON tiene inheritsFrom y mainClass propios
         String version = baseVersion;
         if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FORGE) {
@@ -98,7 +99,8 @@ public class LaunchService {
         // Verificar y descargar librerías faltantes (Auto-repair)
         verifyAndDownloadLibraries(versionData, minecraftDir);
 
-        // Descargar assets ANTES de lanzar (CRÍTICO: Sin assets, Minecraft crashea inmediatamente)
+        // Descargar assets ANTES de lanzar (CRÍTICO: Sin assets, Minecraft crashea
+        // inmediatamente)
         // Para Forge, el assetIndex está en el JSON padre (vanilla), no en el hijo
         JsonObject assetVersionData = versionData;
         if (!versionData.has("assetIndex") && versionData.has("inheritsFrom")) {
@@ -1284,8 +1286,7 @@ public class LaunchService {
                     "--add-opens=org.objectweb.asm/org.objectweb.asm.tree=ALL-UNNAMED",
                     "--add-opens=org.objectweb.asm/org.objectweb.asm.util=ALL-UNNAMED",
                     "--add-opens=org.objectweb.asm/org.objectweb.asm.tree.analysis=ALL-UNNAMED",
-                    "--add-opens=org.objectweb.asm/org.objectweb.asm.commons=ALL-UNNAMED"
-            );
+                    "--add-opens=org.objectweb.asm/org.objectweb.asm.commons=ALL-UNNAMED");
 
             if (mainClassIdx > 0) {
                 // Insertar antes del mainClass
@@ -1354,33 +1355,18 @@ public class LaunchService {
         }
 
         // Analizar qué artefactos ASM ya están presentes para evitar duplicados de
-        // versión
-        // (Ej: Si ya está asm-9.8.jar, NO agregar asm-9.2.jar)
+        // versión (Ej: Si ya está asm-9.8.jar, NO agregar asm-9.2.jar)
+        // La clave es extraer el artifactId Maven desde la RUTA completa del JAR,
+        // no desde el nombre del archivo (que incluye la versión y dificulta el
+        // parsing).
         Set<String> presentAsmArtifacts = new HashSet<>();
-        String[] existingParts = modulePathValue.split(Pattern.quote(separator)); // Use Pattern.quote for split
+        String[] existingParts = modulePathValue.split(Pattern.quote(separator));
         for (String part : existingParts) {
             if (part.isEmpty())
-                continue; // Skip empty parts from split
-            String fileName = java.nio.file.Paths.get(part).getFileName().toString();
-            // Detectar artefactos ASM estándar: asm, asm-commons, asm-tree, asm-util,
-            // asm-analysis
-            if (fileName.startsWith("asm-")) {
-                // asm-tree-9.8.jar -> asm-tree
-                // asm-commons-9.8.jar -> asm-commons
-                // asm-9.8.jar -> asm
-                int lastHyphenIndex = fileName.lastIndexOf('-');
-                if (lastHyphenIndex != -1) {
-                    String artifact = fileName.substring(0, lastHyphenIndex);
-                    // Further refine to remove version if it's like "asm-9"
-                    if (artifact.matches("asm-\\d+")) { // e.g., "asm-9"
-                        artifact = "asm";
-                    } else if (artifact.matches("asm-[a-z]+-\\d+")) { // e.g., "asm-tree-9"
-                        artifact = artifact.substring(0, artifact.lastIndexOf('-'));
-                    }
-                    presentAsmArtifacts.add(artifact);
-                }
-            } else if (fileName.matches("asm\\.jar")) { // For a simple "asm.jar"
-                presentAsmArtifacts.add("asm");
+                continue;
+            String artifactId = extractAsmArtifactId(part);
+            if (artifactId != null) {
+                presentAsmArtifacts.add(artifactId);
             }
         }
 
@@ -1409,37 +1395,18 @@ public class LaunchService {
                             .filter(p -> p.toString().endsWith(".jar"))) {
 
                         for (Path libPath : asmFiles.toList()) {
-                            String fileName = libPath.getFileName().toString();
-                            String artifact = null;
+                            String artifactId = extractAsmArtifactId(libPath.toString());
 
-                            int lastHyphenIndex = fileName.lastIndexOf('-');
-                            if (lastHyphenIndex != -1) {
-                                String potentialArtifact = fileName.substring(0, lastHyphenIndex);
-                                if (potentialArtifact.startsWith("asm")) {
-                                    if (potentialArtifact.matches("asm-\\d+")) { // e.g., "asm-9"
-                                        artifact = "asm";
-                                    } else if (potentialArtifact.matches("asm-[a-z]+-\\d+")) { // e.g., "asm-tree-9"
-                                        artifact = potentialArtifact.substring(0, potentialArtifact.lastIndexOf('-'));
-                                    } else { // e.g., "asm-tree"
-                                        artifact = potentialArtifact;
-                                    }
-                                }
-                            } else if (fileName.matches("asm\\.jar")) {
-                                artifact = "asm";
-                            }
-
-                            // Si detectamos el artefacto y YA ESTÁ en la lista, LO SALTAMOS
-                            if (artifact != null && presentAsmArtifacts.contains(artifact)) {
+                            // Si ya existe ese artefacto en el module path, saltarlo
+                            if (artifactId != null && presentAsmArtifacts.contains(artifactId)) {
                                 logger.debug("Saltando librería ASM '{}' porque el artefacto '{}' ya está presente.",
-                                        fileName, artifact);
+                                        libPath.getFileName(), artifactId);
                                 continue;
                             }
 
-                            // Si es un artefacto nuevo para nosotros (ej: asm-util que faltaba totalmente),
-                            // lo agregamos
-                            // Y lo marcamos como presente para no agregar otra versión después
-                            if (artifact != null) {
-                                presentAsmArtifacts.add(artifact);
+                            // Marcar como presente para no agregar otra versión después
+                            if (artifactId != null) {
+                                presentAsmArtifacts.add(artifactId);
                             }
 
                             addIfMissing(libPath, modulePathValue, missingLibs, separator);
@@ -1451,28 +1418,13 @@ public class LaunchService {
             }
         }
 
-        // 2. Buscar librerías Nashorn (nashorn-core) - Sin conflictos de versión
-        // usualmente
-        for (Path baseDir : searchDirs) {
-            try {
-                Path nashornBaseDir = baseDir.resolve("org").resolve("openjdk").resolve("nashorn")
-                        .resolve("nashorn-core");
-                if (Files.exists(nashornBaseDir)) {
-                    // Buscar recursivamente todas las librerías Nashorn
-                    try (java.util.stream.Stream<Path> nashornFiles = Files.walk(nashornBaseDir)
-                            .filter(Files::isRegularFile)
-                            .filter(p -> p.toString().endsWith(".jar"))) {
-
-                        for (Path libPath : nashornFiles.toList()) {
-                            addIfMissing(libPath, modulePathValue, missingLibs, separator);
-                            // logger.info("Encontrada librería Nashorn para module path: {}", libPath);
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                // Ignorar
-            }
-        }
+        // 2. Buscar librerías Nashorn (nashorn-core) - NO agregar al module path.
+        // Nashorn en el module path causa FindException porque intenta resolver
+        // sus dependencias (org.objectweb.asm) como módulos nombrados, lo cual
+        // falla cuando asm ya está registrado desde una ruta diferente.
+        // Nashorn ya está incluido en el classpath (-cp) por buildClasspath(),
+        // donde el BootstrapLauncher de Forge lo carga correctamente.
+        // Por tanto, simplemente NO lo agregamos al module path.
 
         // Si faltan librerías, agregarlas al module path
         if (!missingLibs.isEmpty()) { // Simplified condition as nashorn check is now implicit in addIfMissing
@@ -1498,6 +1450,32 @@ public class LaunchService {
             }
             logger.debug("Todas las librerías necesarias ya están en el module path");
         }
+    }
+
+    /**
+     * Extrae el artifactId Maven de un artefacto ASM a partir de su ruta completa.
+     * La ruta Maven tiene el formato:
+     * .../org/ow2/asm/{artifactId}/{version}/{artifactId}-{version}.jar
+     * Usar la ruta en lugar del nombre del archivo evita el problema de parsear
+     * "asm-util-9.8.jar" → el segmento de directorio padre de la versión es el
+     * artifactId.
+     *
+     * @param jarPath ruta completa al JAR (puede usar / o \)
+     * @return el artifactId (ej: "asm", "asm-util", "asm-tree") o null si no es ASM
+     */
+    private String extractAsmArtifactId(String jarPath) {
+        // Normalizar a forward slashes para el análisis
+        String normalized = jarPath.replace('\\', '/');
+        // Buscar el segmento /org/ow2/asm/ en la ruta
+        int asmIdx = normalized.indexOf("/org/ow2/asm/");
+        if (asmIdx == -1)
+            return null;
+        // Después de "/org/ow2/asm/" viene el artifactId como directorio
+        String afterAsm = normalized.substring(asmIdx + "/org/ow2/asm/".length());
+        int slashIdx = afterAsm.indexOf('/');
+        if (slashIdx == -1)
+            return null;
+        return afterAsm.substring(0, slashIdx); // ej: "asm-util", "asm", "asm-tree"
     }
 
     private void addIfMissing(Path libPath, String currentModulePath, List<String> missingLibs, String separator) {
