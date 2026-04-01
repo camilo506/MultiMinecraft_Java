@@ -6,6 +6,7 @@ import com.multiminecraft.launcher.util.PlatformUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,13 @@ public class RecursosController {
     
     private static final Logger logger = LoggerFactory.getLogger(RecursosController.class);
     
+    @FXML private HBox titleBar;
     @FXML private Label titleLabel;
     @FXML private Button modPackButton;
+    
+    // Variables para arrastrar la ventana
+    private double xOffset = 0;
+    private double yOffset = 0;
     
     @SuppressWarnings("unused")
     private Instance instance;
@@ -36,6 +42,26 @@ public class RecursosController {
     private void initialize() {
         logger.debug("Inicializando vista de recursos");
         configService = ConfigService.getInstance();
+        
+        // Configurar arrastre de ventana por la barra de título
+        if (titleBar != null) {
+            titleBar.setOnMousePressed(event -> {
+                Stage stage = (Stage) titleBar.getScene().getWindow();
+                xOffset = stage.getX() - event.getScreenX();
+                yOffset = stage.getY() - event.getScreenY();
+            });
+            titleBar.setOnMouseDragged(event -> {
+                Stage stage = (Stage) titleBar.getScene().getWindow();
+                stage.setX(event.getScreenX() + xOffset);
+                stage.setY(event.getScreenY() + yOffset);
+            });
+        }
+    }
+    
+    @FXML
+    private void onMinimizeClicked() {
+        Stage stage = (Stage) titleBar.getScene().getWindow();
+        stage.setIconified(true);
     }
     
     /**

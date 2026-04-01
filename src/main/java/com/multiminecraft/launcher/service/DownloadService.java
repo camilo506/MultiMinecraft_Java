@@ -21,20 +21,25 @@ import java.util.function.Consumer;
 
 /**
  * Servicio para descargar archivos con seguimiento de progreso
+ * Usa HTTP/2 para multiplexar conexiones y buffers grandes para máximo rendimiento
  */
 public class DownloadService {
     
     private static final Logger logger = LoggerFactory.getLogger(DownloadService.class);
-    private static final int TIMEOUT_SECONDS = 300; // Aumentado a 5 minutos para descargas grandes
-    private static final int BUFFER_SIZE = 8192;
+    private static final int TIMEOUT_SECONDS = 300; // 5 minutos para descargas grandes
+    private static final int BUFFER_SIZE = 131072; // 128KB — reduce syscalls significativamente
+    
+    // HttpClient compartido (singleton) — reutiliza conexiones TCP/TLS entre descargas
+    private static final HttpClient SHARED_HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .version(HttpClient.Version.HTTP_2) // HTTP/2: multiplexación de conexiones
+            .build();
     
     private final HttpClient httpClient;
     
     public DownloadService() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+        this.httpClient = SHARED_HTTP_CLIENT; // Reutilizar cliente compartido
     }
     
     /**

@@ -30,16 +30,18 @@ public class ParallelDownloader {
     
     private static final Logger logger = LoggerFactory.getLogger(ParallelDownloader.class);
     
+    // HttpClient compartido (singleton) — reutiliza conexiones TCP/TLS entre todas las instancias
+    private static final HttpClient SHARED_HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(Config.DOWNLOAD_TIMEOUT))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .version(HttpClient.Version.HTTP_2)
+            .build();
+    
     private final HttpClient httpClient;
     private final ExecutorService executorService;
     
     public ParallelDownloader() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(Config.DOWNLOAD_TIMEOUT))
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .version(HttpClient.Version.HTTP_2)
-                .build();
-        
+        this.httpClient = SHARED_HTTP_CLIENT;
         this.executorService = Executors.newFixedThreadPool(Config.MAX_CONCURRENT_DOWNLOADS);
     }
     
