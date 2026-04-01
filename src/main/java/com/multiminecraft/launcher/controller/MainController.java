@@ -513,9 +513,47 @@ public class MainController {
     private void onModifyClicked() {
         if (selectedInstance == null) return;
         logger.debug("Modificar instancia: {}", selectedInstance.getName());
-        // TODO: Abrir ventana de modificación
-        // Esta funcionalidad permitirá editar la configuración de la instancia (nombre, versión, memoria, etc.)
-        showError("Funcionalidad pendiente", "La modificación de instancias estará disponible en una futura versión.");
+        
+        try {
+            // Cargar la vista de editar instancia
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditInstanceView.fxml"));
+            Parent editInstanceView = loader.load();
+            
+            // Obtener el controlador y establecer la instancia a editar
+            EditInstanceController controller = loader.getController();
+            controller.setInstance(selectedInstance);
+            
+            // Crear una nueva ventana modal
+            Stage editStage = new Stage();
+            editStage.setTitle("Modificar Instancia");
+            editStage.initModality(Modality.WINDOW_MODAL);
+            editStage.initOwner(modifyButton.getScene().getWindow());
+            editStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+            
+            Scene scene = new Scene(editInstanceView, 540, 150);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            // Aplicar estilos
+            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/edit-instance.css").toExternalForm());
+            
+            editStage.setScene(scene);
+            editStage.setMinWidth(500);
+            editStage.setMinHeight(420);
+            
+            // Mostrar la ventana modal y esperar
+            editStage.showAndWait();
+            
+            // Si se guardaron cambios, recargar las instancias
+            if (controller.isSaved()) {
+                selectedInstance = null;
+                loadInstances();
+            }
+            
+        } catch (IOException e) {
+            logger.error("Error al abrir ventana de editar instancia", e);
+            showError("Error", "No se pudo abrir la ventana de modificación: " + e.getMessage());
+        }
     }
     
     @FXML
@@ -541,12 +579,14 @@ public class MainController {
             Stage recursosStage = new Stage();
             recursosStage.setTitle("Recursos");
             recursosStage.initModality(Modality.WINDOW_MODAL);
+            recursosStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
             
             if (recursosButton != null && recursosButton.getScene() != null) {
                 recursosStage.initOwner(recursosButton.getScene().getWindow());
             }
             
-            Scene scene = new Scene(recursosView, 400, 250);
+            Scene scene = new Scene(recursosView, 400, 150);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             // Aplicar estilos
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
@@ -554,7 +594,7 @@ public class MainController {
             
             recursosStage.setScene(scene);
             recursosStage.setMinWidth(350);
-            recursosStage.setMinHeight(250);
+            recursosStage.setMinHeight(300);
             
             // Mostrar la ventana modal
             recursosStage.showAndWait();

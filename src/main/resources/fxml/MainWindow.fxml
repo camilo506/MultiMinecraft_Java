@@ -67,7 +67,7 @@
                         <Button fx:id="modifyButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onModifyClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  ⚙  Modificar" />
                         <Button fx:id="recursosButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onRecursosClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  ⊕  Recursos" />
                         <Button fx:id="mapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onMapsClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  🗺  Mapas" />
-                        <Button fx:id="viewLocationButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onViewLocationClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  📂  Ver Ubicación" />
+                        <Button fx:id="viewLocationButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onViewLocationClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  📂  Ubicación" />
                         <Button fx:id="deleteButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onDeleteClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  🗑  Eliminar" />
                     </VBox>
                     

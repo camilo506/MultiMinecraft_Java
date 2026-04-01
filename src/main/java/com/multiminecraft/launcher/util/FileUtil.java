@@ -149,7 +149,7 @@ public class FileUtil {
             
             switch (PlatformUtil.getOS()) {
                 case WINDOWS:
-                    Runtime.getRuntime().exec("explorer.exe /select," + file.getAbsolutePath());
+                    Runtime.getRuntime().exec("explorer.exe \"" + file.getAbsolutePath() + "\"");
                     break;
                 case MACOS:
                     Runtime.getRuntime().exec(new String[]{"open", "-R", file.getAbsolutePath()});

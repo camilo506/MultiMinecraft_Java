@@ -7,10 +7,11 @@ package com.multiminecraft.launcher.config;
 public class Config {
     // Optimización de descargas
     public static final int MAX_WORKERS = 4;
-    public static final int CHUNK_SIZE = 65536; // 64KB
-    public static final int BUFFER_SIZE = 1024 * 1024; // 1MB
-    public static final int MAX_CONCURRENT_DOWNLOADS = 10;
+    public static final int CHUNK_SIZE = 131072; // 128KB — chunks más grandes = menos syscalls
+    public static final int BUFFER_SIZE = 2 * 1024 * 1024; // 2MB
+    public static final int MAX_CONCURRENT_DOWNLOADS = 20; // Más hilos para archivos pequeños (librerías, assets)
     public static final int MAX_CONCURRENT_INSTALLS = 2;
+    public static final int LIBRARY_DOWNLOAD_THREADS = 16; // Hilos específicos para librerías
     
     // Cache
     public static final int CACHE_DURATION = 5; // segundos
