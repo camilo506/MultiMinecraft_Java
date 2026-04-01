@@ -1,175 +1,267 @@
 /* ============================================
    Vista: MainWindow (Ventana Principal)
-   Estilos del sidebar, header panel, cards
+   Rediseño moderno estilo MultiMinecraft
    ============================================ */
 
-/* ---- Borde verde redondeado de la ventana ---- */
+/* ---- Borde redondeado de la ventana ---- */
 .root-pane {
     -fx-border-color: #26d9a0;
     -fx-border-width: 2;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
+    -fx-padding: 2;
+}
+
+/* =======================
+   TITLE BAR
+   ======================= */
+.title-bar-brand {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.title-bar-link {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+
+.title-bar-link:hover {
+    -fx-text-fill: #ffffff;
+}
+
+/* ---- Search Box ---- */
+.search-box {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 16;
+    -fx-border-color: #2a3f55;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-min-width: 100;
+    -fx-pref-width: 140;
+    -fx-max-width: 160;
+}
+
+.search-icon {
+    -fx-text-fill: #5a7a90;
+    -fx-font-size: 11px;
+}
+
+.search-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aabbcc;
+    -fx-prompt-text-fill: #5a7a90;
+    -fx-font-size: 12px;
+    -fx-border-width: 0;
+    -fx-padding: 2 4;
+    -fx-pref-width: 100;
+}
+
+.search-field:focused {
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
 }
 
 /* =======================
    SIDEBAR
    ======================= */
 .sidebar {
-    -fx-background-color: #131d2a;
+    -fx-background-color: #0d1520;
     -fx-background-radius: 0 0 0 8;
 }
 
-.sidebar-header {
+/* ---- Botones de navegación ---- */
+.nav-button {
     -fx-background-color: transparent;
-    -fx-min-height: 56;
-    -fx-pref-height: 56;
-}
-
-.sidebar-body {
-    -fx-background-color: #131d2a;
-    -fx-background-radius: 0 0 0 8;
-    -fx-border-color: transparent #26d9a055 transparent transparent;
-    -fx-border-width: 0 2 0 0;
-}
-
-.launcher-title {
-    -fx-text-fill: #26d9a0;
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
-}
-
-.launcher-subtitle {
-    -fx-text-fill: #6b8299;
-    -fx-font-size: 12px;
-}
-
-/* ---- Panel de instancia seleccionada ---- */
-.selected-instance-panel {
-    -fx-background-color: #1a2635;
-    -fx-background-radius: 6;
-    -fx-border-color: #26d9a0;
-    -fx-border-width: 0.5;
-    -fx-border-radius: 6;
-}
-
-.selected-instance-name {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-.selected-instance-version {
-    -fx-text-fill: #6b8299;
-    -fx-font-size: 11px;
-}
-
-/* ---- Botón Jugar ---- */
-.play-button {
-    -fx-background-color: #26d9a0;
-    -fx-text-fill: #0f1923;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-cursor: hand;
-    -fx-padding: 8 16;
-}
-
-.play-button:hover {
-    -fx-background-color: #33edb0;
-}
-
-.play-button:pressed {
-    -fx-background-color: #1fc08a;
-}
-
-.play-button:disabled {
-    -fx-opacity: 0.4;
-    -fx-cursor: default;
-}
-
-/* ---- Botones del menú lateral ---- */
-.sidebar-menu-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #8899aa;
+    -fx-text-fill: #7a8e9e;
     -fx-font-size: 13px;
-    -fx-background-radius: 6;
+    -fx-background-radius: 0;
     -fx-cursor: hand;
-    -fx-padding: 6 12;
+    -fx-padding: 10 16;
     -fx-alignment: center-left;
+    -fx-border-color: transparent transparent transparent transparent;
+    -fx-border-width: 0 0 0 3;
 }
 
-.sidebar-menu-button:hover {
-    -fx-background-color: #1a2940;
+.nav-button:hover {
+    -fx-background-color: #141f2e;
+    -fx-text-fill: #d0dde8;
+}
+
+.nav-button-active {
+    -fx-text-fill: #26d9a0;
+    -fx-border-color: transparent transparent transparent #26d9a0;
+    -fx-border-width: 0 0 0 3;
+    -fx-background-color: rgba(38, 217, 160, 0.06);
+}
+
+.nav-button-active:hover {
+    -fx-text-fill: #33edb0;
+    -fx-background-color: rgba(38, 217, 160, 0.1);
+}
+
+/* ---- Panel del jugador ---- */
+.player-panel {
+    -fx-background-color: transparent;
+}
+
+.player-avatar {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 1);
+}
+
+.player-name-label {
     -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
 
-.sidebar-menu-button:disabled {
-    -fx-opacity: 0.35;
-    -fx-cursor: default;
+.player-status-label {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
 }
 
 /* ---- Botón Crear Instancia ---- */
 .create-instance-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #26d9a0;
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0a1018;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-background-radius: 8;
-    -fx-border-color: #26d9a0;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 8;
     -fx-cursor: hand;
-    -fx-padding: 8 16;
+    -fx-padding: 10 16;
 }
 
 .create-instance-button:hover {
-    -fx-background-color: rgba(38, 217, 160, 0.1);
+    -fx-background-color: #33edb0;
 }
 
-/* ---- Footer ---- */
-.sidebar-footer {
+.create-instance-button:pressed {
+    -fx-background-color: #1fc08a;
+}
+
+/* ---- Footer del sidebar ---- */
+.sidebar-bottom {
     -fx-background-color: transparent;
-}
-
-.footer-label {
-    -fx-text-fill: #4a6070;
-    -fx-font-size: 10px;
 }
 
 /* =======================
    CONTENIDO PRINCIPAL
    ======================= */
 .main-content {
-    -fx-background-color: #162030;
+    -fx-background-color: #131c28;
     -fx-background-radius: 0 0 8 0;
 }
 
-/* ---- Panel superior del encabezado ---- */
-.header-panel {
-    -fx-background-color: #131d2a;
-    -fx-border-color: transparent transparent #26d9a055 transparent;
-    -fx-border-width: 0 0 2 0;
-    -fx-min-height: 56;
-    -fx-pref-height: 56;
+/* =======================
+   HERO BANNER (fijo arriba)
+   ======================= */
+.hero-banner {
+    -fx-min-height: 220;
+    -fx-pref-height: 240;
+    -fx-max-height: 280;
+    -fx-background-color: #0d1520;
+    -fx-background-radius: 0;
 }
 
-.content-title {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
+/* =======================
+   SECCIÓN DE INSTANCIAS
+   ======================= */
+.instances-section {
+    -fx-background-color: #131c28;
 }
 
-.content-subtitle {
-    -fx-text-fill: #5a7a90;
-    -fx-font-size: 13px;
+.instances-header {
+    -fx-background-color: #131c28;
 }
 
-/* ---- Label de progreso ---- */
-.progress-label {
+.instances-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.instances-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.hero-banner-image {
+    -fx-background-color: #0d1520;
+}
+
+.hero-banner-overlay {
+    -fx-background-color: linear-gradient(to bottom,
+        rgba(13, 21, 32, 0.0) 0%,
+        rgba(13, 21, 32, 0.3) 40%,
+        rgba(13, 21, 32, 0.85) 80%,
+        rgba(13, 21, 32, 1.0) 100%);
+}
+
+.hero-banner-content {
+    /* Contenido sobre la imagen */
+}
+
+.hero-badge {
     -fx-text-fill: #26d9a0;
-    -fx-font-size: 12px;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-min-width: 35;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 3 8;
+    -fx-background-color: rgba(38, 217, 160, 0.1);
+}
+
+.hero-time {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 12px;
+}
+
+.hero-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+}
+
+.hero-subtitle {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 14px;
+}
+
+/* =======================
+   SECCIÓN DE INSTANCIAS
+   ======================= */
+.section-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Botones de vista (grid/lista) ---- */
+.view-mode-button {
+    -fx-background-color: #1a2635;
+    -fx-text-fill: #5a7a90;
+    -fx-font-size: 14px;
+    -fx-background-radius: 6;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-cursor: hand;
+    -fx-padding: 4 10;
+    -fx-min-width: 32;
+    -fx-min-height: 28;
+}
+
+.view-mode-button:hover {
+    -fx-background-color: #243650;
+    -fx-text-fill: #ffffff;
+}
+
+.view-mode-active {
+    -fx-background-color: #243650;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #3a5570;
 }
 
 /* =======================
@@ -177,50 +269,70 @@
    ======================= */
 .instance-card {
     -fx-background-color: #1a2635;
-    -fx-background-radius: 10;
-    -fx-border-color: #2a3f55;
+    -fx-background-radius: 12;
+    -fx-border-color: #2a3850;
     -fx-border-width: 1.5;
-    -fx-border-radius: 10;
-    -fx-border-style: segments(8, 6) line-cap round;
+    -fx-border-radius: 12;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
 }
 
 .instance-card:hover {
     -fx-background-color: #1e2e42;
     -fx-border-color: #3a5570;
+    -fx-effect: dropshadow(gaussian, rgba(38,217,160,0.1), 12, 0, 0, 3);
 }
 
 .instance-card-selected {
     -fx-border-color: #26d9a0;
     -fx-border-width: 2;
-    -fx-border-style: solid;
     -fx-background-color: #1a2e3e;
+    -fx-effect: dropshadow(gaussian, rgba(38,217,160,0.2), 14, 0, 0, 3);
 }
 
+/* ---- Imagen de la tarjeta ---- */
+.instance-card-image-container {
+    -fx-background-color: #0f1923;
+    -fx-background-radius: 8;
+    -fx-min-height: 110;
+    -fx-pref-height: 110;
+    -fx-max-height: 110;
+}
+
+/* ---- Info de la tarjeta ---- */
 .instance-card-name {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 
-.instance-card-version {
-    -fx-text-fill: #6b8299;
+.instance-card-version-badge {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(38, 217, 160, 0.15);
+    -fx-background-radius: 4;
+    -fx-padding: 2 6;
+}
+
+.instance-card-lastplayed {
+    -fx-text-fill: #5a7a90;
     -fx-font-size: 11px;
 }
 
 /* ---- Tarjeta Nueva Instancia ---- */
 .new-instance-card {
-    -fx-background-color: #1a2635;
-    -fx-background-radius: 10;
-    -fx-border-color: #2a3f55;
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-border-color: #2a3850;
     -fx-border-width: 1.5;
-    -fx-border-radius: 10;
+    -fx-border-radius: 12;
     -fx-border-style: segments(8, 6) line-cap round;
     -fx-cursor: hand;
 }
 
 .new-instance-card:hover {
-    -fx-background-color: #1e2e42;
+    -fx-background-color: rgba(38, 217, 160, 0.04);
     -fx-border-color: #26d9a0;
 }
 
@@ -244,21 +356,54 @@
     -fx-max-height: 10;
 }
 
-/* ---- Icono de instancia grande ---- */
-.instance-icon-large {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 10, 0, 0, 2);
-}
-
 /* ---- Grid de instancias ---- */
 .instances-grid {
     -fx-background-color: transparent;
 }
 
-.instances-scroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
+/* ---- Label de progreso ---- */
+.progress-label {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-min-width: 35;
 }
 
-.instances-scroll .viewport {
+/* =======================
+   CONTEXT MENU
+   ======================= */
+.context-menu {
+    -fx-background-color: #1a2635;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 4);
+}
+
+.menu-item {
     -fx-background-color: transparent;
+    -fx-padding: 8 16;
+    -fx-background-radius: 6;
+}
+
+.menu-item:hover,
+.menu-item:focused {
+    -fx-background-color: #243650;
+}
+
+.menu-item .label {
+    -fx-text-fill: #c0d0e0;
+    -fx-font-size: 12px;
+}
+
+.menu-item:hover .label,
+.menu-item:focused .label {
+    -fx-text-fill: #ffffff;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 0.5 0 0 0;
 }

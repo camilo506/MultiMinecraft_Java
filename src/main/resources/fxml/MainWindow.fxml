@@ -5,124 +5,133 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1864.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.MainController">
+<BorderPane prefHeight="660.0" prefWidth="1080.0" minWidth="1080.0" maxWidth="1080.0" minHeight="660.0" maxHeight="660.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.MainController">
     
     <!-- Barra de título personalizada -->
     <top>
-        <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="0" styleClass="custom-title-bar">
+        <BorderPane fx:id="titleBar" prefHeight="42" maxWidth="1080" styleClass="custom-title-bar">
             <padding>
-                <Insets bottom="0" left="12" right="0" top="0" />
+                <Insets bottom="0" left="24" right="20" top="0" />
             </padding>
-            <Label styleClass="title-bar-text" text="Monkey Studio" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
-            <Button fx:id="maximizeBtn" onAction="#onMaximizeClicked" styleClass="title-bar-button" text="☐" />
-            <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
-        </HBox>
+            <left>
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Label styleClass="title-bar-brand" text="MultiMinecraft" />
+                    <Label styleClass="title-bar-link" text="SOPORTE" />
+                </HBox>
+            </left>
+            <right>
+                <HBox alignment="CENTER_RIGHT" spacing="12">
+                    <HBox alignment="CENTER" spacing="0" styleClass="search-box" maxWidth="120">
+                        <padding>
+                            <Insets bottom="4" left="8" right="8" top="4" />
+                        </padding>
+                        <Label styleClass="search-icon" text="🔍" />
+                        <TextField fx:id="searchField" promptText="Search..." styleClass="search-field" maxWidth="70" />
+                    </HBox>
+                    <HBox alignment="CENTER_RIGHT" spacing="0">
+                        <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
+                        <Button fx:id="maximizeBtn" onAction="#onMaximizeClicked" styleClass="title-bar-button" text="☐" />
+                        <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
+                    </HBox>
+                </HBox>
+            </right>
+        </BorderPane>
     </top>
     
-    <!-- Contenido principal -->
     <center>
-        <HBox spacing="0">
-            <!-- ==================== SIDEBAR IZQUIERDO ==================== -->
-            <VBox maxWidth="230" minWidth="230" prefWidth="230" spacing="0" styleClass="sidebar">
-                
-                <!-- Título del launcher (sin borde derecho) -->
-                <VBox alignment="CENTER" spacing="2" styleClass="sidebar-header">
+        <HBox alignment="CENTER" spacing="0">
+            <!-- Sidebar Compacto (150px) -->
+            <VBox maxWidth="150" minWidth="150" prefWidth="150" spacing="0" styleClass="sidebar">
+                <VBox spacing="2" styleClass="sidebar-nav" VBox.vgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="14" left="18" right="18" top="14" />
+                        <Insets bottom="8" left="0" right="0" top="16" />
                     </padding>
-                    <Label styleClass="launcher-title" text="Instancia" />
+                    <Button fx:id="navPlayButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavPlayClicked" prefHeight="40" styleClass="nav-button, nav-button-active" text="  ▶  Jugar" />
+                    <Button fx:id="navModpacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="  📦  Modpacks" />
+                    <Button fx:id="navResourcePacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="  ✦  Res. Packs" />
+                    <Button fx:id="navMapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="  🗺  Maps" />
+                    <Button fx:id="navConfigButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="  ⚙  Config" />
                 </VBox>
-                
-                <!-- Contenido del sidebar con borde derecho -->
-                <VBox spacing="0" styleClass="sidebar-body" VBox.vgrow="ALWAYS">
-                    
-                    <!-- Panel de instancia seleccionada -->
-                    <VBox fx:id="selectedInstancePanel" alignment="CENTER" spacing="4" styleClass="selected-instance-panel">
-                        <VBox.margin>
-                            <Insets left="18" right="18" />
-                        </VBox.margin>
-                        <padding>
-                            <Insets bottom="10" left="14" right="14" top="10" />
-                        </padding>
-                        <ImageView fx:id="selectedInstanceIcon" fitHeight="48.0" fitWidth="48.0" preserveRatio="true" styleClass="instance-icon-large" />
-                        <Label fx:id="selectedInstanceName" styleClass="selected-instance-name" text="Selecciona una instancia" />
-                        <Label fx:id="selectedInstanceVersion" styleClass="selected-instance-version" text="" />
-                        <Button fx:id="playButton" maxWidth="160" onAction="#onPlayClicked" prefHeight="34" prefWidth="140" styleClass="play-button" text="▶  Jugar" />
+                <Region VBox.vgrow="ALWAYS" />
+                <HBox alignment="CENTER_LEFT" spacing="8" styleClass="player-panel">
+                    <padding>
+                        <Insets bottom="10" left="12" right="12" top="10" />
+                    </padding>
+                    <ImageView fx:id="playerAvatar" fitHeight="32" fitWidth="32" preserveRatio="true" styleClass="player-avatar" />
+                    <VBox spacing="1">
+                        <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
+                        <Label styleClass="player-status-label" text="ACTIVA" />
                     </VBox>
-                    
-                    <!-- Menú de acciones -->
-                    <VBox spacing="2" styleClass="sidebar-menu" VBox.vgrow="ALWAYS">
-                        <padding>
-                            <Insets bottom="8" left="10" right="10" top="8" />
-                        </padding>
-                        <Button fx:id="modifyButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onModifyClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  ⚙  Modificar" />
-                        <Button fx:id="recursosButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onRecursosClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  ⊕  Recursos" />
-                        <Button fx:id="mapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onMapsClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  🗺  Mapas" />
-                        <Button fx:id="viewLocationButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onViewLocationClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  📂  Ver Ubicación" />
-                        <Button fx:id="deleteButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onDeleteClicked" prefHeight="34" styleClass="sidebar-menu-button" text="  🗑  Eliminar" />
-                    </VBox>
-                    
-                    <!-- Espaciador -->
-                    <Region VBox.vgrow="ALWAYS" />
-                    
-                    <!-- Botón crear instancia en la parte inferior -->
-                    <VBox styleClass="sidebar-bottom">
-                        <padding>
-                            <Insets bottom="8" left="14" right="14" top="8" />
-                        </padding>
-                        <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="38" styleClass="create-instance-button" text="+  Crear Instancia" />
-                    </VBox>
-                    
-                    <!-- Footer info -->
-                    <HBox alignment="CENTER" spacing="8" styleClass="sidebar-footer">
-                        <padding>
-                            <Insets bottom="8" left="18" right="18" top="6" />
-                        </padding>
-                        <Label styleClass="footer-label" text="Monkey Studio" />
-                    </HBox>
+                </HBox>
+                <VBox styleClass="sidebar-bottom">
+                    <padding>
+                        <Insets bottom="12" left="10" right="10" top="6" />
+                    </padding>
+                    <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="38" styleClass="create-instance-button" text="+ Instancia" />
                 </VBox>
             </VBox>
             
-            <!-- ==================== PANEL PRINCIPAL ==================== -->
-            <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
+            <!-- Panel Principal Muy Compacto (500px) -->
+            <VBox maxWidth="500" minWidth="500" spacing="0" styleClass="main-content" HBox.hgrow="NEVER">
+                <padding>
+                    <Insets bottom="0" left="0" right="5" top="0" />
+                </padding>
                 
-                <!-- Panel superior del encabezado (sin padding lateral, borde a borde) -->
-                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="header-panel">
+                <VBox alignment="TOP_CENTER" spacing="0">
                     <padding>
-                        <Insets bottom="14" left="24" right="24" top="14" />
+                        <Insets bottom="0" left="20" right="20" top="10" />
                     </padding>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <VBox alignment="CENTER_RIGHT" spacing="2">
-                        <Label styleClass="content-title" text="MonkeyCraft Launcher" />
-                        <Label styleClass="content-subtitle" text="Selecciona una instancia para comenzar a jugar" />
-                    </VBox>
-                    <Region HBox.hgrow="ALWAYS" />
-                </HBox>
+                    <StackPane fx:id="heroBanner" styleClass="hero-banner" maxHeight="200">
+                        <ImageView fx:id="heroBannerImage" preserveRatio="true" styleClass="hero-banner-image" StackPane.alignment="CENTER">
+                            <Image url="@../icons/banner-hero.png" />
+                        </ImageView>
+                        <Region styleClass="hero-banner-overlay" />
+                        <VBox alignment="BOTTOM_LEFT" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
+                            <padding>
+                                <Insets bottom="16" left="20" right="20" top="10" />
+                            </padding>
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label styleClass="hero-badge" text="ÚLTIMA" />
+                                <Label fx:id="lastPlayedLabel" styleClass="hero-time" text="hace 2 horas" />
+                            </HBox>
+                            <Label styleClass="hero-title" text="Biblioteca" style="-fx-font-size: 24px;" />
+                            <Label fx:id="heroSubtitle" styleClass="hero-subtitle" text="Vuelve a tu aventura." style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" />
+                        </VBox>
+                    </StackPane>
+                </VBox>
                 
-                <Region prefHeight="16" />
-                
-                <!-- Grid de instancias -->
-                <ScrollPane fitToWidth="true" styleClass="instances-scroll" VBox.vgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="20" left="20" right="20" top="0" />
-                    </padding>
-                    <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="15" prefWrapLength="1500" styleClass="instances-grid" vgap="15">
+                <VBox spacing="0" styleClass="instances-section" VBox.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="instances-header">
                         <padding>
-                            <Insets bottom="10" left="5" right="5" top="10" />
+                            <Insets bottom="8" left="20" right="20" top="12" />
                         </padding>
-                    </FlowPane>
-                </ScrollPane>
+                        <Label styleClass="section-title" text="Instancias" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
+                    </HBox>
+                    
+                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" styleClass="instances-scroll" VBox.vgrow="ALWAYS">
+                        <padding>
+                            <Insets bottom="16" left="20" right="20" top="4" />
+                        </padding>
+                        <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="12" prefWrapLength="460" styleClass="instances-grid" vgap="12">
+                            <padding>
+                                <Insets bottom="10" left="0" right="0" top="4" />
+                            </padding>
+                        </FlowPane>
+                    </ScrollPane>
+                </VBox>
                 
-                <!-- Barra de progreso inferior -->
                 <HBox fx:id="progressContainer" alignment="CENTER_LEFT" spacing="10" visible="false">
                     <VBox.margin>
                         <Insets bottom="12" left="20" right="20" top="8" />
@@ -133,5 +142,4 @@
             </VBox>
         </HBox>
     </center>
-    
 </BorderPane>
