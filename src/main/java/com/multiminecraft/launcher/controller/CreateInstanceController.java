@@ -61,6 +61,10 @@ public class CreateInstanceController {
     private InstanceService instanceService;
     private List<MinecraftVersion> availableVersions;
     
+    // Modo edición
+    private boolean isEditMode = false;
+    private Instance currentInstance;
+    
     @FXML
     public void initialize() {
         logger.info("Inicializando vista de crear instancia");
@@ -103,6 +107,37 @@ public class CreateInstanceController {
         
         // Cargar versiones
         loadVersions();
+    }
+
+    /**
+     * Configura el controlador para editar una instancia existente
+     */
+    public void setInstanceToEdit(Instance instance) {
+        this.isEditMode = true;
+        this.currentInstance = instance;
+        
+        Platform.runLater(() -> {
+            nameField.setText(instance.getName());
+            nameField.setDisable(true); // No permitir cambiar el nombre (id del directorio)
+            playerNameField.setText(instance.getPlayerName());
+            
+            if (instance.getMemory() != null) {
+                try {
+                    String memStr = instance.getMemory().replaceAll("[^0-9]", "");
+                    memorySlider.setValue(Double.parseDouble(memStr));
+                } catch (Exception e) {
+                    memorySlider.setValue(2);
+                }
+            }
+            
+            loaderTypeComboBox.setValue(instance.getLoader());
+            versionComboBox.setValue(instance.getVersion());
+            
+            selectedIconName = instance.getIcon();
+            loadIconPreview(selectedIconName);
+            
+            createButton.setText("Guardar");
+        });
     }
     
     /**
@@ -227,17 +262,24 @@ public class CreateInstanceController {
             logger.warn("LoaderType es null, usando VANILLA por defecto");
         }
         
-        logger.info("Creando instancia - Nombre: {}, Versión: {}, Loader: {}", name, version, loaderType);
+        logger.info("{} instancia - Nombre: {}, Versión: {}, Loader: {}", 
+                     isEditMode ? "Editando" : "Creando", name, version, loaderType);
         
-        // Verificar si ya existe
-        if (instanceService.instanceExists(name)) {
+        // Si no es edición, verificar si ya existe
+        if (!isEditMode && instanceService.instanceExists(name)) {
             showError("Ya existe una instancia con ese nombre");
             return;
         }
         
-        // Crear instancia
-        Instance instance = new Instance(name, version, loaderType);
-        logger.debug("Instancia creada con loader: {}", instance.getLoader());
+        // Crear o actualizar instancia
+        Instance instance = isEditMode ? currentInstance : new Instance(name, version, loaderType);
+        if (!isEditMode) {
+            // Valores iniciales solo si es nueva
+            instance.setName(name);
+            instance.setVersion(version);
+            instance.setLoader(loaderType);
+        }
+
         instance.setMemory(((int) memorySlider.getValue()) + "G");
         
         // Establecer nombre del jugador
@@ -261,20 +303,25 @@ public class CreateInstanceController {
         // Crear en thread separado
         new Thread(() -> {
             try {
-                instanceService.createInstance(instance, status -> {
-                    Platform.runLater(() -> progressLabel.setText(status));
-                }, progress -> {
-                    Platform.runLater(() -> {
-                        int percent = (int) Math.round(progress * 100);
-                        progressPercentLabel.setText(percent + "%");
+                if (isEditMode) {
+                    instanceService.updateInstance(instance);
+                    Platform.runLater(() -> progressLabel.setText("¡Guardado!"));
+                } else {
+                    instanceService.createInstance(instance, status -> {
+                        Platform.runLater(() -> progressLabel.setText(status));
+                    }, progress -> {
+                        Platform.runLater(() -> {
+                            int percent = (int) Math.round(progress * 100);
+                            progressPercentLabel.setText(percent + "%");
+                        });
                     });
-                });
+                }
                 
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Instancia creada");
+                    alert.setTitle(isEditMode ? "Instancia actualizada" : "Instancia creada");
                     alert.setHeaderText(null);
-                    alert.setContentText("La instancia \"" + name + "\" ha sido creada exitosamente");
+                    alert.setContentText("La instancia \"" + name + "\" ha sido " + (isEditMode ? "actualizada" : "creada") + " exitosamente");
                     AlertUtil.styleAlert(alert);
                     alert.showAndWait();
                     

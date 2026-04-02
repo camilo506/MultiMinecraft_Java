@@ -1,5 +1,6 @@
 package com.multiminecraft.launcher.controller;
 
+import com.multiminecraft.launcher.App;
 import com.multiminecraft.launcher.model.Instance;
 import com.multiminecraft.launcher.service.ConfigService;
 import com.multiminecraft.launcher.service.InstanceService;
@@ -79,8 +80,6 @@ public class MainController {
 
     // Sidebar - Navegación
     @FXML
-    private Button navPlayButton;
-    @FXML
     private Button navModpacksButton;
     @FXML
     private Button navResourcePacksButton;
@@ -96,6 +95,18 @@ public class MainController {
     private Label playerNameLabel;
     @FXML
     private Button createInstanceButton;
+
+    // Sidebar - Instancia Seleccionada
+    @FXML
+    private VBox selectedInstanceCard;
+    @FXML
+    private ImageView selectedInstanceSidebarIcon;
+    @FXML
+    private Label selectedInstanceSidebarName;
+    @FXML
+    private Label selectedInstanceSidebarVersion;
+    @FXML
+    private Button sidebarPlayButton;
 
     // Panel principal - Hero Banner
     @FXML
@@ -126,10 +137,8 @@ public class MainController {
 
     // Tamaño de tarjetas
     private static final double CARD_WIDTH = 110;
-    private static final double CARD_HEIGHT = 120;
+    private static final double CARD_HEIGHT = 125; // Aumentar un poco el alto para evitar cortes verticales
 
-    // Límite máximo de instancias
-    private static final int MAX_INSTANCES = 7;
 
     public MainController() {
         this.instanceService = new InstanceService();
@@ -405,28 +414,32 @@ public class MainController {
         // Sección de información debajo de la imagen
         VBox infoBox = new VBox(2);
         infoBox.setPadding(new Insets(5, 8, 5, 8));
-        infoBox.setAlignment(Pos.TOP_LEFT);
+        infoBox.setAlignment(Pos.CENTER);
 
         // Nombre de la instancia
         Label nameLabel = new Label(instance.getName());
         nameLabel.getStyleClass().add("instance-card-name");
         nameLabel.setWrapText(true);
-        nameLabel.setMaxWidth(CARD_WIDTH - 24);
+        nameLabel.setAlignment(Pos.CENTER);
+        nameLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        nameLabel.setMaxWidth(CARD_WIDTH - 12);
 
         // Fila con versión badge y última vez
         HBox metaRow = new HBox(6);
-        metaRow.setAlignment(Pos.CENTER_LEFT);
+        metaRow.setAlignment(Pos.CENTER);
 
-        Label versionBadge = new Label(instance.getVersion());
-        versionBadge.getStyleClass().add("instance-card-version-badge");
+        String combinedInfo = instance.getVersion() + "-" + instance.getLoader().getDisplayName();
+        Label combinedBadge = new Label(combinedInfo);
+        combinedBadge.getStyleClass().add("instance-card-version-badge");
+        combinedBadge.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
 
-        Label lastPlayedLabel = new Label("");
-        lastPlayedLabel.getStyleClass().add("instance-card-lastplayed");
-        if (instance.getLastPlayed() != null) {
-            lastPlayedLabel.setText("Última vez: " + formatRelativeTime(instance.getLastPlayed()));
+        if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FORGE) {
+            combinedBadge.setStyle("-fx-text-fill: #e67e22; -fx-background-color: rgba(230, 126, 34, 0.15);");
+        } else if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FABRIC) {
+            combinedBadge.setStyle("-fx-text-fill: #f1c40f; -fx-background-color: rgba(241, 196, 15, 0.15);");
         }
 
-        metaRow.getChildren().addAll(versionBadge, lastPlayedLabel);
+        metaRow.getChildren().add(combinedBadge);
 
         infoBox.getChildren().addAll(nameLabel, metaRow);
 
@@ -550,8 +563,73 @@ public class MainController {
         this.selectedInstance = instance;
         logger.info("Instancia seleccionada: {}", instance.getName());
 
+        // Actualizar la tarjeta del sidebar
+        updateSidebarCard(instance);
+
         // Resaltar la tarjeta seleccionada en el grid
         updateInstanceCardsSelection();
+    }
+
+    /**
+     * Actualiza la tarjeta de previsualización en el sidebar
+     */
+    private void updateSidebarCard(Instance instance) {
+        if (instance == null) {
+            selectedInstanceSidebarName.setText("Ninguna");
+            selectedInstanceSidebarVersion.setText("Selecciona una instancia");
+            return;
+        }
+
+        selectedInstanceSidebarName.setText(instance.getName());
+        
+        // Formato: Minecraft 1.21.1 Fabric
+        String versionText = "Minecraft " + instance.getVersion() + " " + instance.getLoader().getDisplayName();
+        selectedInstanceSidebarVersion.setText(versionText);
+
+        // Cargar icono
+        String iconName = instance.getIcon();
+        if (iconName != null && !iconName.isEmpty()) {
+            Image iconImage = loadInstanceIcon(iconName);
+            if (iconImage != null) {
+                selectedInstanceSidebarIcon.setImage(iconImage);
+            }
+        }
+    }
+
+    /**
+     * Acción cuando se hace clic en Jugar desde el sidebar
+     */
+    @FXML
+    private void onSidebarPlayClicked() {
+        if (selectedInstance == null) {
+            showError("Error", "Por favor selecciona una instancia primero.");
+            return;
+        }
+
+        logger.info("Iniciando instancia desde el sidebar: {}", selectedInstance.getName());
+        
+        try {
+            // Aquí llamaríamos a la lógica de lanzamiento.
+            // Para simplificar y dado que ya existe la lógica de LaunchService:
+            launchService.launchInstance(selectedInstance);
+            
+            // Opcional: mostrar algún feedback visual en el botón
+            sidebarPlayButton.setText("¡Lanzando!");
+            sidebarPlayButton.setDisable(true);
+            
+            // Rehabilitar después de un tiempo
+            new Thread(() -> {
+                try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                Platform.runLater(() -> {
+                    sidebarPlayButton.setText("▶ Jugar");
+                    sidebarPlayButton.setDisable(false);
+                });
+            }).start();
+
+        } catch (Exception e) {
+            logger.error("Error al lanzar la instancia desde el sidebar", e);
+            showError("Error de Lanzamiento", "No se pudo iniciar el juego: " + e.getMessage());
+        }
     }
 
     /**
@@ -613,7 +691,7 @@ public class MainController {
     // ==================== NAVEGACIÓN DEL SIDEBAR ====================
 
     private void setActiveNavButton(Button active) {
-        Button[] navButtons = { navPlayButton, navModpacksButton, navResourcePacksButton, navMapsButton,
+        Button[] navButtons = { navModpacksButton, navResourcePacksButton, navMapsButton,
                 navConfigButton };
         for (Button btn : navButtons) {
             btn.getStyleClass().remove("nav-button-active");
@@ -623,28 +701,82 @@ public class MainController {
         }
     }
 
-    @FXML
-    private void onNavPlayClicked() {
-        setActiveNavButton(navPlayButton);
-        // Ya estamos en la vista principal
-    }
 
     @FXML
     private void onNavModpacksClicked() {
-        setActiveNavButton(navModpacksButton);
-        showComingSoon("Modpacks");
+        if (selectedInstance == null) {
+            AlertUtil.showWarning("No hay instancia seleccionada", "Por favor, selecciona una instancia primero.");
+            return;
+        }
+
+        try {
+            logger.info("Abriendo ventana de edición para: {}", selectedInstance.getName());
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CreateInstanceView.fxml"));
+            Parent root = loader.load();
+            
+            CreateInstanceController controller = loader.getController();
+            controller.setInstanceToEdit(selectedInstance);
+            
+            Stage stage = new Stage();
+            stage.setTitle("Editar Instancia - " + selectedInstance.getName());
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initOwner(App.getPrimaryStage());
+            
+            Scene scene = new Scene(root);
+            // El controlador de CreateInstanceView ya aplica sus propios temas,
+            // pero nos aseguramos de que herede el estilo oscuro si es necesario.
+            stage.setScene(scene);
+            stage.setResizable(false);
+            
+            stage.showAndWait();
+            
+            // Refrescar UI después de editar
+            loadInstances();
+            updateSidebarCard(selectedInstance);
+            
+        } catch (Exception e) {
+            logger.error("Error al abrir ventana de edición", e);
+            AlertUtil.showError("Error", "No se pudo abrir la ventana de edición: " + e.getMessage());
+        }
     }
 
     @FXML
     private void onNavResourcePacksClicked() {
-        setActiveNavButton(navResourcePacksButton);
-        showComingSoon("Resource Packs");
+        if (selectedInstance == null) {
+            AlertUtil.showWarning("No hay instancia seleccionada", "Selecciona una instancia para abrir su carpeta.");
+            return;
+        }
+        
+        logger.info("Abriendo carpeta de la instancia: {}", selectedInstance.getName());
+        instanceService.openInstanceFolder(selectedInstance.getName());
     }
 
     @FXML
     private void onNavMapsClicked() {
-        setActiveNavButton(navMapsButton);
-        showComingSoon("Maps");
+        if (selectedInstance == null) {
+            AlertUtil.showWarning("No hay instancia seleccionada", "Selecciona una instancia para eliminarla.");
+            return;
+        }
+        
+        boolean confirmed = AlertUtil.showConfirmation("Eliminar Instancia", 
+            "¿Estás seguro de que deseas eliminar la instancia \"" + selectedInstance.getName() + "\"?\n\n" +
+            "Esta acción eliminará todos tus mundos, mods y configuraciones de forma permanente.");
+            
+        if (confirmed) {
+            try {
+                logger.warn("Eliminando instancia: {}", selectedInstance.getName());
+                instanceService.deleteInstance(selectedInstance.getName());
+                
+                selectedInstance = null;
+                updateSidebarCard(null);
+                loadInstances();
+                
+                AlertUtil.showInfo("Instancia eliminada", "La instancia se ha eliminado correctamente.");
+            } catch (Exception e) {
+                logger.error("Error al eliminar instancia", e);
+                AlertUtil.showError("Error", "No se pudo eliminar la instancia: " + e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -917,17 +1049,6 @@ public class MainController {
     private void onCreateInstanceClicked() {
         logger.debug("Crear nueva instancia");
 
-        // Verificar límite de instancias
-        List<Instance> currentInstances = instanceService.listInstances();
-        if (currentInstances.size() >= MAX_INSTANCES) {
-            Alert limitAlert = new Alert(Alert.AlertType.WARNING);
-            limitAlert.setTitle("Límite alcanzado");
-            limitAlert.setHeaderText("Máximo de instancias alcanzado");
-            limitAlert.setContentText("Solo puedes tener hasta " + MAX_INSTANCES + " instancias. Elimina una instancia existente para poder crear una nueva.");
-            AlertUtil.styleAlert(limitAlert);
-            limitAlert.showAndWait();
-            return;
-        }
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CreateInstanceView.fxml"));

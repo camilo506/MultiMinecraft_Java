@@ -71,6 +71,56 @@
     -fx-background-radius: 0 0 0 8;
 }
 
+/* ---- Header de la Sidebar (Branding + Card) ---- */
+.sidebar-header {
+    -fx-background-color: transparent;
+}
+
+.sidebar-brand {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.selected-instance-card {
+    -fx-background-color: rgba(30, 41, 59, 0.4);
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(38, 217, 160, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+.selected-instance-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.selected-instance-version {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 11px;
+}
+
+.sidebar-play-button {
+    -fx-background-color: linear-gradient(to bottom right, #26d9a0, #1ab085);
+    -fx-text-fill: #0d1520;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 8 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(38, 217, 160, 0.2), 5, 0, 0, 0);
+}
+
+.sidebar-play-button:hover {
+    -fx-background-color: linear-gradient(to bottom right, #33edb0, #26d9a0);
+}
+
+.sidebar-play-button:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
 /* ---- Botones de navegación ---- */
 .nav-button {
     -fx-background-color: transparent;
@@ -79,21 +129,20 @@
     -fx-background-radius: 0;
     -fx-cursor: hand;
     -fx-padding: 10 16;
-    -fx-alignment: center-left;
-    -fx-border-color: transparent transparent transparent transparent;
-    -fx-border-width: 0 0 0 3;
+    -fx-alignment: center;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
 .nav-button:hover {
-    -fx-background-color: #141f2e;
-    -fx-text-fill: #d0dde8;
+    -fx-background-color: rgba(38, 217, 160, 0.12);
+    -fx-text-fill: #26d9a0;
 }
 
 .nav-button-active {
     -fx-text-fill: #26d9a0;
-    -fx-border-color: transparent transparent transparent #26d9a0;
-    -fx-border-width: 0 0 0 3;
-    -fx-background-color: rgba(38, 217, 160, 0.06);
+    -fx-border-width: 0;
+    -fx-background-color: rgba(38, 217, 160, 0.08);
 }
 
 .nav-button-active:hover {
@@ -107,19 +156,21 @@
 }
 
 .player-avatar {
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 1);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 2);
+    -fx-background-radius: 6;
 }
 
 .player-name-label {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 12px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
 
 .player-status-label {
     -fx-text-fill: #26d9a0;
-    -fx-font-size: 9px;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
+    -fx-opacity: 0.8;
 }
 
 /* ---- Botón Crear Instancia ---- */
@@ -185,11 +236,14 @@
     -fx-background-color: transparent;
 }
 
-.instances-scroll .scroll-bar:vertical,
-.instances-scroll .scroll-bar:horizontal {
+#instancesScrollPane .scroll-bar:vertical,
+#instancesScrollPane .scroll-bar:horizontal {
     -fx-opacity: 0;
     -fx-pref-width: 0;
     -fx-pref-height: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-visible: false;
 }
 
 .hero-banner-image {
@@ -309,22 +363,22 @@
 /* ---- Info de la tarjeta ---- */
 .instance-card-name {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
 }
 
 .instance-card-version-badge {
     -fx-text-fill: #26d9a0;
-    -fx-font-size: 10px;
+    -fx-font-size: 9px;
     -fx-font-weight: bold;
     -fx-background-color: rgba(38, 217, 160, 0.15);
     -fx-background-radius: 4;
-    -fx-padding: 2 6;
+    -fx-padding: 1 5;
 }
 
 .instance-card-lastplayed {
     -fx-text-fill: #5a7a90;
-    -fx-font-size: 11px;
+    -fx-font-size: 8px;
 }
 
 /* ---- Tarjeta Nueva Instancia ---- */

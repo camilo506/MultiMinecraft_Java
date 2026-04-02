@@ -25,7 +25,7 @@
             </padding>
             <left>
                 <HBox alignment="CENTER_LEFT" spacing="16">
-                    <Label styleClass="title-bar-brand" text="MultiMinecraft" />
+                    <Label styleClass="title-bar-brand" text="Monkey Studio" />
                     <Label styleClass="title-bar-link" text="SOPORTE" />
                 </HBox>
             </left>
@@ -46,37 +46,59 @@
         <!-- PANEL LATERAL IZQUIERDO (SIDEBAR)              -->
         <!-- ============================================== -->
         <VBox maxWidth="200" minWidth="200" prefWidth="200" spacing="0" styleClass="sidebar" BorderPane.alignment="CENTER">
-            
-            <!-- 1. Botones de Navegación del menú (Jugar, Modpacks, etc) -->
-            <VBox spacing="2" styleClass="sidebar-nav" VBox.vgrow="ALWAYS">
+            <!-- 0. Branding y Tarjeta de Instancia Seleccionada -->
+            <VBox spacing="10" styleClass="sidebar-header">
                 <padding>
-                    <Insets bottom="8" left="0" right="0" top="150" />  <!-- botones del panel lateral   -->
+                    <Insets bottom="10" left="20" right="20" top="20" />
                 </padding>
-                <Button fx:id="navPlayButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavPlayClicked" prefHeight="40" styleClass="nav-button, nav-button-active" text="  ▶  Jugar" />
-                <Button fx:id="navModpacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="  📦  Modpacks" />
-                <Button fx:id="navResourcePacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="  ✦  Res. Packs" />
-                <Button fx:id="navMapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="  🗺  Maps" />
-                <Button fx:id="navConfigButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="  ⚙  Config" />
+                <Label styleClass="sidebar-brand" text="Monkey Studio" />
+                
+                <VBox fx:id="selectedInstanceCard" alignment="CENTER" spacing="8" styleClass="selected-instance-card">
+                    <padding>
+                        <Insets bottom="12" left="12" right="12" top="12" />
+                    </padding>
+                    <ImageView fx:id="selectedInstanceSidebarIcon" fitHeight="56" fitWidth="56" preserveRatio="true">
+                        <image>
+                            <Image url="@../icons/art-Crafting_Table.png" />
+                        </image>
+                    </ImageView>
+                    <Label fx:id="selectedInstanceSidebarName" styleClass="selected-instance-name" text="Instancia" />
+                    <Label fx:id="selectedInstanceSidebarVersion" styleClass="selected-instance-version" text="Selecciona para jugar" />
+                    <Button fx:id="sidebarPlayButton" maxWidth="Infinity" onAction="#onSidebarPlayClicked" prefHeight="36" styleClass="sidebar-play-button" text="▶ Jugar" />
+                </VBox>
             </VBox>
-            <Region prefHeight="268.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+
+            <!-- 1. Botones de Navegación del menú (Jugar, Modpacks, etc) -->
+            <VBox spacing="2" styleClass="sidebar-nav">
+                <padding>
+                    <Insets bottom="8" left="0" right="0" top="10" />  <!-- Reducido de 150 a 10 -->
+                </padding>
+                <Button fx:id="navModpacksButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="✏️ Editar" />
+                <Button fx:id="navResourcePacksButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="📦 Recursos" />
+                <Button fx:id="navMapsButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="🗑️ Eliminar" />
+                <Button fx:id="navConfigButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="⚙️ Configuracion" />
+            </VBox>
             
-            <!-- 2. Perfil del Jugador (Avatar y nombre en la parte inferior) -->
-            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="player-panel">
+            <Region VBox.vgrow="ALWAYS" />
+
+            <!-- Perfil del Jugador (Horizontal y posicionado más abajo) -->
+            <HBox alignment="CENTER" spacing="12" styleClass="player-panel">
                 <padding>
                     <Insets bottom="10" left="12" right="12" top="10" />
                 </padding>
-                <ImageView fx:id="playerAvatar" fitHeight="32" fitWidth="32" preserveRatio="true" styleClass="player-avatar" />
-                <VBox spacing="1">
+                <ImageView fx:id="playerAvatar" fitHeight="36" fitWidth="36" preserveRatio="true" styleClass="player-avatar" />
+                <VBox alignment="CENTER_LEFT" spacing="1">
                     <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
                     <Label styleClass="player-status-label" text="ACTIVA" />
                 </VBox>
             </HBox>
+            
             <!-- 3. Botón para crear nueva instancia -->
             <VBox styleClass="sidebar-bottom">
                 <padding>
-                    <Insets bottom="12" left="10" right="10" top="6" />
+                    <Insets bottom="15" left="15" right="15" top="10" />
                 </padding>
-                <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="38" styleClass="create-instance-button" text="+ Instancia" />
+                <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="42" styleClass="create-instance-button" text="+ Instancia" />
             </VBox>
         </VBox>
     </left>
@@ -130,11 +152,11 @@
                         <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
                     </HBox>
                     
-                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="200" styleClass="instances-scroll" VBox.vgrow="ALWAYS">
+                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="230" styleClass="instances-scroll" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="16" left="20" right="20" top="4" />
+                            <Insets bottom="16" left="18" right="18" top="4" />
                         </padding>
-                        <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="12" prefWrapLength="460" styleClass="instances-grid" vgap="12">
+                        <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="8" prefWrapLength="840" styleClass="instances-grid" vgap="8">
                             <padding>
                                 <Insets bottom="10" left="0" right="0" top="4" />
                             </padding>

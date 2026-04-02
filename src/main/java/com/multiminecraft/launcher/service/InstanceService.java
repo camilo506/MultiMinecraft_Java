@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -198,6 +199,15 @@ public class InstanceService {
 
         try (Stream<Path> paths = Files.list(instancesDir)) {
             paths.filter(Files::isDirectory)
+                    .sorted((p1, p2) -> {
+                        try {
+                            BasicFileAttributes attr1 = Files.readAttributes(p1, BasicFileAttributes.class);
+                            BasicFileAttributes attr2 = Files.readAttributes(p2, BasicFileAttributes.class);
+                            return attr1.creationTime().compareTo(attr2.creationTime());
+                        } catch (IOException e) {
+                            return 0;
+                        }
+                    })
                     .forEach(instanceDir -> {
                         try {
                             String instanceName = instanceDir.getFileName().toString();
