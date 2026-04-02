@@ -158,9 +158,9 @@
    HERO BANNER (fijo arriba)
    ======================= */
 .hero-banner {
-    -fx-min-height: 220;
-    -fx-pref-height: 240;
-    -fx-max-height: 280;
+    -fx-min-height: 370;
+    -fx-pref-height: 400;
+    -fx-max-height: 420;
     -fx-background-color: #0d1520;
     -fx-background-radius: 0;
 }
@@ -183,6 +183,13 @@
 
 .instances-scroll .viewport {
     -fx-background-color: transparent;
+}
+
+.instances-scroll .scroll-bar:vertical,
+.instances-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
 }
 
 .hero-banner-image {
@@ -294,9 +301,9 @@
 .instance-card-image-container {
     -fx-background-color: #0f1923;
     -fx-background-radius: 8;
-    -fx-min-height: 110;
-    -fx-pref-height: 110;
-    -fx-max-height: 110;
+    -fx-min-height: 55;
+    -fx-pref-height: 55;
+    -fx-max-height: 55;
 }
 
 /* ---- Info de la tarjeta ---- */

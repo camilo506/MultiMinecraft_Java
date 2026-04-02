@@ -15,11 +15,11 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="660.0" prefWidth="1080.0" minWidth="1080.0" maxWidth="1080.0" minHeight="660.0" maxHeight="660.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.MainController">
+<BorderPane maxHeight="660.0" maxWidth="1080.0" minHeight="660.0" minWidth="1080.0" prefHeight="660.0" prefWidth="1080.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.MainController">
     
     <!-- Barra de título personalizada -->
     <top>
-        <BorderPane fx:id="titleBar" prefHeight="42" maxWidth="1080" styleClass="custom-title-bar">
+        <BorderPane fx:id="titleBar" maxWidth="1080" prefHeight="42" styleClass="custom-title-bar">
             <padding>
                 <Insets bottom="0" left="24" right="20" top="0" />
             </padding>
@@ -31,13 +31,7 @@
             </left>
             <right>
                 <HBox alignment="CENTER_RIGHT" spacing="12">
-                    <HBox alignment="CENTER" spacing="0" styleClass="search-box" maxWidth="120">
-                        <padding>
-                            <Insets bottom="4" left="8" right="8" top="4" />
-                        </padding>
-                        <Label styleClass="search-icon" text="🔍" />
-                        <TextField fx:id="searchField" promptText="Search..." styleClass="search-field" maxWidth="70" />
-                    </HBox>
+                    <!-- Controles de la ventana (Minimizar, Maximizar, Cerrar) -->
                     <HBox alignment="CENTER_RIGHT" spacing="0">
                         <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
                         <Button fx:id="maximizeBtn" onAction="#onMaximizeClicked" styleClass="title-bar-button" text="☐" />
@@ -47,56 +41,70 @@
             </right>
         </BorderPane>
     </top>
-    
-    <center>
-        <HBox alignment="CENTER" spacing="0">
-            <!-- Sidebar Compacto (150px) -->
-            <VBox maxWidth="150" minWidth="150" prefWidth="150" spacing="0" styleClass="sidebar">
-                <VBox spacing="2" styleClass="sidebar-nav" VBox.vgrow="ALWAYS">
-                    <padding>
-                        <Insets bottom="8" left="0" right="0" top="16" />
-                    </padding>
-                    <Button fx:id="navPlayButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavPlayClicked" prefHeight="40" styleClass="nav-button, nav-button-active" text="  ▶  Jugar" />
-                    <Button fx:id="navModpacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="  📦  Modpacks" />
-                    <Button fx:id="navResourcePacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="  ✦  Res. Packs" />
-                    <Button fx:id="navMapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="  🗺  Maps" />
-                    <Button fx:id="navConfigButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="  ⚙  Config" />
-                </VBox>
-                <Region VBox.vgrow="ALWAYS" />
-                <HBox alignment="CENTER_LEFT" spacing="8" styleClass="player-panel">
-                    <padding>
-                        <Insets bottom="10" left="12" right="12" top="10" />
-                    </padding>
-                    <ImageView fx:id="playerAvatar" fitHeight="32" fitWidth="32" preserveRatio="true" styleClass="player-avatar" />
-                    <VBox spacing="1">
-                        <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
-                        <Label styleClass="player-status-label" text="ACTIVA" />
-                    </VBox>
-                </HBox>
-                <VBox styleClass="sidebar-bottom">
-                    <padding>
-                        <Insets bottom="12" left="10" right="10" top="6" />
-                    </padding>
-                    <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="38" styleClass="create-instance-button" text="+ Instancia" />
-                </VBox>
-            </VBox>
+    <left>
+        <!-- ============================================== -->
+        <!-- PANEL LATERAL IZQUIERDO (SIDEBAR)              -->
+        <!-- ============================================== -->
+        <VBox maxWidth="200" minWidth="200" prefWidth="200" spacing="0" styleClass="sidebar" BorderPane.alignment="CENTER">
             
-            <!-- Panel Principal Muy Compacto (500px) -->
-            <VBox maxWidth="500" minWidth="500" spacing="0" styleClass="main-content" HBox.hgrow="NEVER">
+            <!-- 1. Botones de Navegación del menú (Jugar, Modpacks, etc) -->
+            <VBox spacing="2" styleClass="sidebar-nav" VBox.vgrow="ALWAYS">
                 <padding>
-                    <Insets bottom="0" left="0" right="5" top="0" />
+                    <Insets bottom="8" left="0" right="0" top="150" />  <!-- botones del panel lateral   -->
+                </padding>
+                <Button fx:id="navPlayButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavPlayClicked" prefHeight="40" styleClass="nav-button, nav-button-active" text="  ▶  Jugar" />
+                <Button fx:id="navModpacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="  📦  Modpacks" />
+                <Button fx:id="navResourcePacksButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="  ✦  Res. Packs" />
+                <Button fx:id="navMapsButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="  🗺  Maps" />
+                <Button fx:id="navConfigButton" alignment="CENTER_LEFT" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="  ⚙  Config" />
+            </VBox>
+            <Region prefHeight="268.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+            
+            <!-- 2. Perfil del Jugador (Avatar y nombre en la parte inferior) -->
+            <HBox alignment="CENTER_LEFT" spacing="8" styleClass="player-panel">
+                <padding>
+                    <Insets bottom="10" left="12" right="12" top="10" />
+                </padding>
+                <ImageView fx:id="playerAvatar" fitHeight="32" fitWidth="32" preserveRatio="true" styleClass="player-avatar" />
+                <VBox spacing="1">
+                    <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
+                    <Label styleClass="player-status-label" text="ACTIVA" />
+                </VBox>
+            </HBox>
+            <!-- 3. Botón para crear nueva instancia -->
+            <VBox styleClass="sidebar-bottom">
+                <padding>
+                    <Insets bottom="12" left="10" right="10" top="6" />
+                </padding>
+                <Button fx:id="createInstanceButton" maxWidth="Infinity" onAction="#onCreateInstanceClicked" prefHeight="38" styleClass="create-instance-button" text="+ Instancia" />
+            </VBox>
+        </VBox>
+    </left>
+   <center>
+        <!-- ============================================== -->
+        <!-- ÁREA CENTRAL (CONTENIDO PRINCIPAL)             -->
+        <!-- ============================================== -->
+        <HBox alignment="TOP_LEFT" prefHeight="970.0" prefWidth="1024.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
+            
+            <!-- Contenedor del panel principal -->
+            <VBox maxWidth="900" minWidth="800" spacing="0" styleClass="main-content" HBox.hgrow="ALWAYS">
+                <padding>
+                    <!-- Aquí puedes cambiar 'top' para empujar TODO el contenido hacia abajo -->
+                    <Insets bottom="0" left="0" right="0" top="0" />
                 </padding>
                 
+                <!-- A. Sección del Banner (Imagen superior destacada) -->
                 <VBox alignment="TOP_CENTER" spacing="0">
                     <padding>
-                        <Insets bottom="0" left="20" right="20" top="10" />
+                        <Insets bottom="0" left="0" right="0" top="0" />
                     </padding>
-                    <StackPane fx:id="heroBanner" styleClass="hero-banner" maxHeight="200">
-                        <ImageView fx:id="heroBannerImage" preserveRatio="true" styleClass="hero-banner-image" StackPane.alignment="CENTER">
-                            <Image url="@../icons/banner-hero.png" />
+                    <StackPane fx:id="heroBanner" maxHeight="400" maxWidth="873" styleClass="hero-banner">  <!-- espesie de panel donde esta la imagen -->
+                        <!-- Aquí puedes cambiar fitWidth (ancho), fitHeight (alto), translateX (mover izq/der) y translateY (mover arriba/abajo) -->
+                        <ImageView fx:id="heroBannerImage" fitWidth="873" fitHeight="400" translateX="0" translateY="0" preserveRatio="false" styleClass="hero-banner-image" StackPane.alignment="CENTER">
+                            <Image url="@../recursos2/banner-hero.png" />
                         </ImageView>
-                        <Region styleClass="hero-banner-overlay" />
-                        <VBox alignment="BOTTOM_LEFT" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
+                        <Region styleClass="hero-banner-overlay" maxWidth="873" translateX="0" />
+                        <VBox alignment="BOTTOM_LEFT" prefHeight="850.0" prefWidth="1024.0" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
                             <padding>
                                 <Insets bottom="16" left="20" right="20" top="10" />
                             </padding>
@@ -104,23 +112,25 @@
                                 <Label styleClass="hero-badge" text="ÚLTIMA" />
                                 <Label fx:id="lastPlayedLabel" styleClass="hero-time" text="hace 2 horas" />
                             </HBox>
-                            <Label styleClass="hero-title" text="Biblioteca" style="-fx-font-size: 24px;" />
-                            <Label fx:id="heroSubtitle" styleClass="hero-subtitle" text="Vuelve a tu aventura." style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" />
+                            <Label style="-fx-font-size: 24px;" styleClass="hero-title" text="Biblioteca" />
+                            <Label fx:id="heroSubtitle" style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" styleClass="hero-subtitle" text="Vuelve a tu aventura." />
                         </VBox>
                     </StackPane>
                 </VBox>
                 
-                <VBox spacing="0" styleClass="instances-section" VBox.vgrow="ALWAYS">
+                <!-- B. Sección de la Lista de Instancias (Cuadrícula del medio) -->
+                <!-- Puedes cambiar 'translateY' para mover el panel hacia abajo, o 'maxHeight' para hacer que sea más corto -->
+                <VBox spacing="0" styleClass="instances-section" VBox.vgrow="ALWAYS" translateY="0" maxHeight="Infinity">
                     <HBox alignment="CENTER_LEFT" spacing="10" styleClass="instances-header">
                         <padding>
-                            <Insets bottom="8" left="20" right="20" top="12" />
+                            <Insets bottom="4" left="20" right="20" top="4" />
                         </padding>
                         <Label styleClass="section-title" text="Instancias" />
                         <Region HBox.hgrow="ALWAYS" />
                         <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
                     </HBox>
                     
-                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" styleClass="instances-scroll" VBox.vgrow="ALWAYS">
+                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" maxHeight="200" styleClass="instances-scroll" VBox.vgrow="ALWAYS">
                         <padding>
                             <Insets bottom="16" left="20" right="20" top="4" />
                         </padding>
@@ -132,6 +142,7 @@
                     </ScrollPane>
                 </VBox>
                 
+                <!-- C. Barra de Progreso (Visible solo cuando se lanza/descarga algo) -->
                 <HBox fx:id="progressContainer" alignment="CENTER_LEFT" spacing="10" visible="false">
                     <VBox.margin>
                         <Insets bottom="12" left="20" right="20" top="8" />
@@ -141,5 +152,5 @@
                 </HBox>
             </VBox>
         </HBox>
-    </center>
+   </center>
 </BorderPane>

@@ -54,66 +54,92 @@ import java.util.List;
  * Controlador de la ventana principal - Diseño MultiMinecraft
  */
 public class MainController {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
-    
+
     private final InstanceService instanceService;
     private final LaunchService launchService;
     private Instance selectedInstance;
-    
+
     // Variables para arrastrar la ventana
     private double xOffset = 0;
     private double yOffset = 0;
-    
+
     // Barra de título personalizada
-    @FXML private BorderPane titleBar;
-    @FXML private Button minimizeBtn;
-    @FXML private Button maximizeBtn;
-    @FXML private Button closeBtn;
-    @FXML private TextField searchField;
-    
+    @FXML
+    private BorderPane titleBar;
+    @FXML
+    private Button minimizeBtn;
+    @FXML
+    private Button maximizeBtn;
+    @FXML
+    private Button closeBtn;
+    @FXML
+    private TextField searchField;
+
     // Sidebar - Navegación
-    @FXML private Button navPlayButton;
-    @FXML private Button navModpacksButton;
-    @FXML private Button navResourcePacksButton;
-    @FXML private Button navMapsButton;
-    @FXML private Button navConfigButton;
-    
+    @FXML
+    private Button navPlayButton;
+    @FXML
+    private Button navModpacksButton;
+    @FXML
+    private Button navResourcePacksButton;
+    @FXML
+    private Button navMapsButton;
+    @FXML
+    private Button navConfigButton;
+
     // Sidebar - Jugador
-    @FXML private ImageView playerAvatar;
-    @FXML private Label playerNameLabel;
-    @FXML private Button createInstanceButton;
-    
+    @FXML
+    private ImageView playerAvatar;
+    @FXML
+    private Label playerNameLabel;
+    @FXML
+    private Button createInstanceButton;
+
     // Panel principal - Hero Banner
-    @FXML private StackPane heroBanner;
-    @FXML private ImageView heroBannerImage;
-    @FXML private Label lastPlayedLabel;
-    @FXML private Label heroSubtitle;
-    
+    @FXML
+    private StackPane heroBanner;
+    @FXML
+    private ImageView heroBannerImage;
+    @FXML
+    private Label lastPlayedLabel;
+    @FXML
+    private Label heroSubtitle;
+
     // Panel principal - Instancias
-    @FXML private FlowPane instancesGrid;
-    @FXML private Button viewGridButton;
-    
+    @FXML
+    private FlowPane instancesGrid;
+    @FXML
+    private Button viewGridButton;
+
     // Footer / Progress
-    @FXML private ProgressBar progressBar;
-    @FXML private HBox progressContainer;
-    @FXML private Label progressLabel;
-    
-    @FXML private ScrollPane instancesScrollPane;
-    
+    @FXML
+    private ProgressBar progressBar;
+    @FXML
+    private HBox progressContainer;
+    @FXML
+    private Label progressLabel;
+
+    @FXML
+    private ScrollPane instancesScrollPane;
+
     // Tamaño de tarjetas
-    private static final double CARD_WIDTH = 180;
-    private static final double CARD_HEIGHT = 200;
-    
+    private static final double CARD_WIDTH = 110;
+    private static final double CARD_HEIGHT = 120;
+
+    // Límite máximo de instancias
+    private static final int MAX_INSTANCES = 7;
+
     public MainController() {
         this.instanceService = new InstanceService();
         this.launchService = new LaunchService();
     }
-    
+
     @FXML
     public void initialize() {
         logger.info("Inicializando ventana principal - Diseño MultiMinecraft");
-        
+
         // Configurar arrastre de ventana por la barra de título
         if (titleBar != null) {
             titleBar.setOnMousePressed(event -> {
@@ -127,52 +153,57 @@ public class MainController {
                 stage.setY(event.getScreenY() + yOffset);
             });
         }
-        
+
         // Configurar el banner hero con efecto "Cover" (Center-Crop)
         if (heroBannerImage != null && heroBanner != null) {
             // Escuchar cambios de tamaño en el contenedor del banner
             heroBanner.widthProperty().addListener((obs, oldVal, newVal) -> updateBannerViewport());
             heroBanner.heightProperty().addListener((obs, oldVal, newVal) -> updateBannerViewport());
-            
+
             // También cuando la imagen termine de cargar
             heroBannerImage.imageProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal != null) updateBannerViewport();
+                if (newVal != null)
+                    updateBannerViewport();
             });
-            
+
             // Llamada inicial
             Platform.runLater(this::updateBannerViewport);
         }
-        
+
         // Configurar nombre del jugador
         setupPlayerInfo();
-        
+
         // Cargar instancias disponibles
         loadInstances();
-        
+
         // Actualizar info del banner
         updateBannerInfo();
     }
-    
+
     /**
-     * Ajusta el viewport de la imagen del banner para lograr un efecto "Cover" (Center-Crop).
-     * Esto asegura que la imagen siempre llene el espacio sin estirarse y bien centrada.
+     * Ajusta el viewport de la imagen del banner para lograr un efecto "Cover"
+     * (Center-Crop).
+     * Esto asegura que la imagen siempre llene el espacio sin estirarse y bien
+     * centrada.
      */
     private void updateBannerViewport() {
         Image img = heroBannerImage.getImage();
-        if (img == null || heroBanner == null) return;
-        
+        if (img == null || heroBanner == null)
+            return;
+
         double viewWidth = heroBanner.getWidth();
         double viewHeight = heroBanner.getHeight();
-        if (viewWidth <= 0 || viewHeight <= 0) return;
-        
+        if (viewWidth <= 0 || viewHeight <= 0)
+            return;
+
         double imgWidth = img.getWidth();
         double imgHeight = img.getHeight();
-        
+
         double viewAspect = viewWidth / viewHeight;
         double imgAspect = imgWidth / imgHeight;
-        
+
         double x, y, w, h;
-        
+
         if (imgAspect > viewAspect) {
             // La imagen es más ancha que la vista
             h = imgHeight;
@@ -186,12 +217,12 @@ public class MainController {
             x = 0;
             y = (imgHeight - h) / 2;
         }
-        
+
         heroBannerImage.setViewport(new Rectangle2D(x, y, w, h));
         heroBannerImage.setFitWidth(viewWidth);
         heroBannerImage.setFitHeight(viewHeight);
     }
-    
+
     /**
      * Configura la información del jugador en el sidebar
      */
@@ -208,7 +239,7 @@ public class MainController {
             logger.warn("No se pudo cargar el nombre del jugador", e);
             playerNameLabel.setText("Jugador");
         }
-        
+
         // Intentar crear un avatar por defecto
         if (playerAvatar != null) {
             try {
@@ -221,7 +252,7 @@ public class MainController {
             }
         }
     }
-    
+
     /**
      * Crea un avatar por defecto
      */
@@ -236,19 +267,19 @@ public class MainController {
         canvas.snapshot(null, image);
         playerAvatar.setImage(image);
     }
-    
+
     /**
      * Actualiza la información del banner hero
      */
     private void updateBannerInfo() {
         List<Instance> instances = instanceService.listInstances();
-        
+
         if (instances.isEmpty()) {
             lastPlayedLabel.setText("Sin instancias aún");
             heroSubtitle.setText("Crea tu primera instancia para comenzar a jugar.");
             return;
         }
-        
+
         // Encontrar la instancia jugada más recientemente
         Instance lastPlayed = null;
         for (Instance inst : instances) {
@@ -258,64 +289,71 @@ public class MainController {
                 }
             }
         }
-        
+
         if (lastPlayed != null) {
             lastPlayedLabel.setText("Jugado " + formatRelativeTime(lastPlayed.getLastPlayed()));
-            heroSubtitle.setText("Continuar tu aventura en " + lastPlayed.getName() + ". Todos los mods están actualizados y listos.");
+            heroSubtitle.setText("Continuar tu aventura en " + lastPlayed.getName()
+                    + ". Todos los mods están actualizados y listos.");
         } else {
             lastPlayedLabel.setText("¡Listo para jugar!");
             heroSubtitle.setText("Selecciona una instancia para comenzar tu aventura.");
         }
     }
-    
+
     /**
      * Formatea un LocalDateTime como tiempo relativo (ej: "hace 2 horas")
      */
     private String formatRelativeTime(LocalDateTime dateTime) {
-        if (dateTime == null) return "";
-        
+        if (dateTime == null)
+            return "";
+
         LocalDateTime now = LocalDateTime.now();
         long minutes = ChronoUnit.MINUTES.between(dateTime, now);
         long hours = ChronoUnit.HOURS.between(dateTime, now);
         long days = ChronoUnit.DAYS.between(dateTime, now);
         long weeks = days / 7;
-        
-        if (minutes < 1) return "hace un momento";
-        if (minutes < 60) return "hace " + minutes + " min";
-        if (hours < 24) return "hace " + hours + (hours == 1 ? " hora" : " horas");
-        if (days < 7) return "hace " + days + (days == 1 ? " día" : " días");
-        if (weeks < 4) return "hace " + weeks + (weeks == 1 ? " semana" : " semanas");
+
+        if (minutes < 1)
+            return "hace un momento";
+        if (minutes < 60)
+            return "hace " + minutes + " min";
+        if (hours < 24)
+            return "hace " + hours + (hours == 1 ? " hora" : " horas");
+        if (days < 7)
+            return "hace " + days + (days == 1 ? " día" : " días");
+        if (weeks < 4)
+            return "hace " + weeks + (weeks == 1 ? " semana" : " semanas");
         return "hace más de un mes";
     }
-    
+
     /**
      * Carga todas las instancias disponibles y las muestra en el grid
      */
     private void loadInstances() {
         instancesGrid.getChildren().clear();
-        
+
         List<Instance> instances = instanceService.listInstances();
         logger.info("Cargando {} instancias", instances.size());
-        
+
         for (Instance instance : instances) {
             StackPane instanceCard = createInstanceCard(instance);
             instancesGrid.getChildren().add(instanceCard);
         }
-        
+
         // Agregar tarjeta "Nueva Instancia" al final
         instancesGrid.getChildren().add(createNewInstanceCard());
-        
+
         // Si hay instancias, seleccionar la primera por defecto
         if (!instances.isEmpty() && selectedInstance == null) {
             selectInstance(instances.get(0));
         }
-        
+
         // Actualizar selección visual si ya había una seleccionada
         if (selectedInstance != null) {
             updateInstanceCardsSelection();
         }
     }
-    
+
     /**
      * Crea una tarjeta visual moderna para una instancia
      */
@@ -323,27 +361,27 @@ public class MainController {
         StackPane cardWrapper = new StackPane();
         cardWrapper.setPrefWidth(CARD_WIDTH);
         cardWrapper.setPrefHeight(CARD_HEIGHT);
-        
+
         VBox card = new VBox(0);
         card.setAlignment(Pos.TOP_CENTER);
         card.setPrefWidth(CARD_WIDTH);
         card.setPrefHeight(CARD_HEIGHT);
         card.getStyleClass().add("instance-card");
-        
+
         // Contenedor de imagen con fondo oscuro y bordes redondeados
         StackPane imageContainer = new StackPane();
         imageContainer.getStyleClass().add("instance-card-image-container");
-        imageContainer.setPrefHeight(110);
-        imageContainer.setMaxHeight(110);
-        imageContainer.setMinHeight(110);
-        imageContainer.setPadding(new Insets(12));
+        imageContainer.setPrefHeight(55);
+        imageContainer.setMaxHeight(55);
+        imageContainer.setMinHeight(55);
+        imageContainer.setPadding(new Insets(6));
         imageContainer.setAlignment(Pos.CENTER);
-        
+
         ImageView iconView = new ImageView();
-        iconView.setFitWidth(72);
-        iconView.setFitHeight(72);
+        iconView.setFitWidth(38);
+        iconView.setFitHeight(38);
         iconView.setPreserveRatio(true);
-        
+
         // Cargar icono de la instancia
         try {
             String iconName = instance.getIcon();
@@ -361,49 +399,49 @@ public class MainController {
             logger.warn("No se pudo cargar el icono de la instancia: {}", instance.getName(), e);
             createDefaultIconForCard(iconView);
         }
-        
+
         imageContainer.getChildren().add(iconView);
-        
+
         // Sección de información debajo de la imagen
-        VBox infoBox = new VBox(3);
-        infoBox.setPadding(new Insets(10, 12, 10, 12));
+        VBox infoBox = new VBox(2);
+        infoBox.setPadding(new Insets(5, 8, 5, 8));
         infoBox.setAlignment(Pos.TOP_LEFT);
-        
+
         // Nombre de la instancia
         Label nameLabel = new Label(instance.getName());
         nameLabel.getStyleClass().add("instance-card-name");
         nameLabel.setWrapText(true);
         nameLabel.setMaxWidth(CARD_WIDTH - 24);
-        
+
         // Fila con versión badge y última vez
         HBox metaRow = new HBox(6);
         metaRow.setAlignment(Pos.CENTER_LEFT);
-        
+
         Label versionBadge = new Label(instance.getVersion());
         versionBadge.getStyleClass().add("instance-card-version-badge");
-        
+
         Label lastPlayedLabel = new Label("");
         lastPlayedLabel.getStyleClass().add("instance-card-lastplayed");
         if (instance.getLastPlayed() != null) {
             lastPlayedLabel.setText("Última vez: " + formatRelativeTime(instance.getLastPlayed()));
         }
-        
+
         metaRow.getChildren().addAll(versionBadge, lastPlayedLabel);
-        
+
         infoBox.getChildren().addAll(nameLabel, metaRow);
-        
+
         card.getChildren().addAll(imageContainer, infoBox);
-        
+
         // Indicador verde para la tarjeta seleccionada
         Circle onlineDot = new Circle(5);
         onlineDot.setFill(Color.web("#26d9a0"));
         onlineDot.setVisible(false);
         StackPane.setAlignment(onlineDot, Pos.TOP_RIGHT);
         StackPane.setMargin(onlineDot, new Insets(8, 8, 0, 0));
-        
+
         cardWrapper.getChildren().addAll(card, onlineDot);
         cardWrapper.setUserData(instance.getName());
-        
+
         // Evento de clic izquierdo para seleccionar + doble clic para jugar
         cardWrapper.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
             if (e.getButton() == MouseButton.PRIMARY) {
@@ -413,66 +451,67 @@ public class MainController {
                 }
             }
         });
-        
+
         // Menú contextual (clic derecho)
         ContextMenu contextMenu = createInstanceContextMenu(instance);
         cardWrapper.setOnContextMenuRequested(e -> {
             contextMenu.show(cardWrapper, e.getScreenX(), e.getScreenY());
             e.consume();
         });
-        
+
         return cardWrapper;
     }
-    
+
     /**
      * Crea el menú contextual para una instancia
      */
     private ContextMenu createInstanceContextMenu(Instance instance) {
         ContextMenu menu = new ContextMenu();
-        
+
         MenuItem playItem = new MenuItem("▶  Jugar");
         playItem.setOnAction(e -> {
             selectInstance(instance);
             onPlayClicked();
         });
-        
+
         MenuItem modifyItem = new MenuItem("⚙  Modificar");
         modifyItem.setOnAction(e -> {
             selectInstance(instance);
             onModifyAction();
         });
-        
+
         MenuItem resourcesItem = new MenuItem("⊕  Recursos");
         resourcesItem.setOnAction(e -> {
             selectInstance(instance);
             onRecursosAction();
         });
-        
+
         MenuItem mapsItem = new MenuItem("🗺  Mapas");
         mapsItem.setOnAction(e -> {
             selectInstance(instance);
             onMapsAction();
         });
-        
+
         MenuItem locationItem = new MenuItem("📂  Ver Ubicación");
         locationItem.setOnAction(e -> {
             selectInstance(instance);
             onViewLocationAction();
         });
-        
+
         SeparatorMenuItem separator = new SeparatorMenuItem();
-        
+
         MenuItem deleteItem = new MenuItem("🗑  Eliminar");
         deleteItem.setOnAction(e -> {
             selectInstance(instance);
             onDeleteAction();
         });
-        
-        menu.getItems().addAll(playItem, new SeparatorMenuItem(), modifyItem, resourcesItem, mapsItem, locationItem, separator, deleteItem);
-        
+
+        menu.getItems().addAll(playItem, new SeparatorMenuItem(), modifyItem, resourcesItem, mapsItem, locationItem,
+                separator, deleteItem);
+
         return menu;
     }
-    
+
     /**
      * Crea la tarjeta "Nueva Instancia" para el grid
      */
@@ -480,41 +519,41 @@ public class MainController {
         StackPane cardWrapper = new StackPane();
         cardWrapper.setPrefWidth(CARD_WIDTH);
         cardWrapper.setPrefHeight(CARD_HEIGHT);
-        
+
         VBox card = new VBox(8);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(10, 6, 8, 6));
         card.setPrefWidth(CARD_WIDTH);
         card.setPrefHeight(CARD_HEIGHT);
         card.getStyleClass().add("new-instance-card");
-        
+
         Label plusLabel = new Label("+");
         plusLabel.getStyleClass().add("new-instance-plus");
-        
+
         Label textLabel = new Label("Nueva Instancia");
         textLabel.getStyleClass().add("new-instance-label");
-        
+
         card.getChildren().addAll(plusLabel, textLabel);
         cardWrapper.getChildren().add(card);
-        
+
         cardWrapper.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
             onCreateInstanceClicked();
         });
-        
+
         return cardWrapper;
     }
-    
+
     /**
      * Selecciona una instancia y actualiza la vista
      */
     private void selectInstance(Instance instance) {
         this.selectedInstance = instance;
         logger.info("Instancia seleccionada: {}", instance.getName());
-        
+
         // Resaltar la tarjeta seleccionada en el grid
         updateInstanceCardsSelection();
     }
-    
+
     /**
      * Actualiza la selección visual de las tarjetas de instancias
      */
@@ -523,54 +562,59 @@ public class MainController {
             if (node instanceof StackPane) {
                 StackPane wrapper = (StackPane) node;
                 String instanceName = (String) wrapper.getUserData();
-                
+
                 VBox card = null;
                 Circle dot = null;
                 for (var child : wrapper.getChildren()) {
-                    if (child instanceof VBox) card = (VBox) child;
-                    if (child instanceof Circle) dot = (Circle) child;
+                    if (child instanceof VBox)
+                        card = (VBox) child;
+                    if (child instanceof Circle)
+                        dot = (Circle) child;
                 }
-                
+
                 if (card != null && instanceName != null) {
                     boolean isSelected = selectedInstance != null && instanceName.equals(selectedInstance.getName());
                     if (isSelected) {
                         if (!card.getStyleClass().contains("instance-card-selected")) {
                             card.getStyleClass().add("instance-card-selected");
                         }
-                        if (dot != null) dot.setVisible(true);
+                        if (dot != null)
+                            dot.setVisible(true);
                     } else {
                         card.getStyleClass().remove("instance-card-selected");
-                        if (dot != null) dot.setVisible(false);
+                        if (dot != null)
+                            dot.setVisible(false);
                     }
                 }
             }
         }
     }
-    
+
     // ==================== ACCIONES DE LA BARRA DE TÍTULO ====================
-    
+
     @FXML
     private void onMinimizeClicked() {
         Stage stage = (Stage) titleBar.getScene().getWindow();
         stage.setIconified(true);
     }
-    
+
     @FXML
     private void onMaximizeClicked() {
         Stage stage = (Stage) titleBar.getScene().getWindow();
         stage.setMaximized(!stage.isMaximized());
     }
-    
+
     @FXML
     private void onCloseClicked() {
         Stage stage = (Stage) titleBar.getScene().getWindow();
         stage.close();
     }
-    
+
     // ==================== NAVEGACIÓN DEL SIDEBAR ====================
-    
+
     private void setActiveNavButton(Button active) {
-        Button[] navButtons = {navPlayButton, navModpacksButton, navResourcePacksButton, navMapsButton, navConfigButton};
+        Button[] navButtons = { navPlayButton, navModpacksButton, navResourcePacksButton, navMapsButton,
+                navConfigButton };
         for (Button btn : navButtons) {
             btn.getStyleClass().remove("nav-button-active");
         }
@@ -578,37 +622,37 @@ public class MainController {
             active.getStyleClass().add("nav-button-active");
         }
     }
-    
+
     @FXML
     private void onNavPlayClicked() {
         setActiveNavButton(navPlayButton);
         // Ya estamos en la vista principal
     }
-    
+
     @FXML
     private void onNavModpacksClicked() {
         setActiveNavButton(navModpacksButton);
         showComingSoon("Modpacks");
     }
-    
+
     @FXML
     private void onNavResourcePacksClicked() {
         setActiveNavButton(navResourcePacksButton);
         showComingSoon("Resource Packs");
     }
-    
+
     @FXML
     private void onNavMapsClicked() {
         setActiveNavButton(navMapsButton);
         showComingSoon("Maps");
     }
-    
+
     @FXML
     private void onNavConfigClicked() {
         setActiveNavButton(navConfigButton);
         showComingSoon("Configuración");
     }
-    
+
     private void showComingSoon(String sectionName) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(sectionName);
@@ -617,9 +661,9 @@ public class MainController {
         AlertUtil.styleAlert(alert);
         alert.showAndWait();
     }
-    
+
     // ==================== VISTA GRID / LISTA ====================
-    
+
     @FXML
     private void onViewGridClicked() {
         // Solo mantenemos la cuadrícula en este diseño compacto
@@ -627,99 +671,103 @@ public class MainController {
             viewGridButton.getStyleClass().add("view-mode-active");
         }
     }
-    
+
     // ==================== ACCIONES DE INSTANCIAS ====================
-    
+
     @FXML
     private void onPlayClicked() {
-        if (selectedInstance == null) return;
-        
+        if (selectedInstance == null)
+            return;
+
         logger.info("Iniciando juego para instancia: {}", selectedInstance.getName());
-        
+
         // Deshabilitar botones mientras se lanza
         createInstanceButton.setDisable(true);
-        
+
         // Mostrar y configurar barra de progreso
         if (progressBar != null) {
             progressContainer.setVisible(true);
             progressBar.setProgress(0.01);
             progressBar.setStyle("-fx-accent: #4CAF50; -fx-control-inner-background: #2d2d2d;");
-            if (progressLabel != null) progressLabel.setText("1%");
+            if (progressLabel != null)
+                progressLabel.setText("1%");
         }
-        
+
         // Lanzar en un hilo separado para no bloquear la UI
         new Thread(() -> {
             try {
                 Thread.sleep(50);
-                
+
                 updateProgress(0.1);
                 Thread.sleep(100);
-                
+
                 updateProgress(0.2);
                 Thread.sleep(100);
-                
+
                 logger.debug("Lanzando proceso de Minecraft...");
                 Process process = launchService.launchInstance(selectedInstance);
-                
+
                 updateProgress(0.4);
                 Thread.sleep(200);
-                
+
                 int maxWaitTime = 30000;
                 long startTime = System.currentTimeMillis();
                 double baseProgress = 0.4;
-                
+
                 while (process.isAlive() && (System.currentTimeMillis() - startTime) < maxWaitTime) {
                     long elapsed = System.currentTimeMillis() - startTime;
-                    double timeProgress = Math.min(0.95, baseProgress + (elapsed / (double)maxWaitTime) * 0.55);
-                    
+                    double timeProgress = Math.min(0.95, baseProgress + (elapsed / (double) maxWaitTime) * 0.55);
+
                     updateProgress(timeProgress);
-                    
+
                     Thread.sleep(200);
-                    
+
                     if (!process.isAlive()) {
                         int exitCode = process.exitValue();
                         if (exitCode != 0) {
                             Platform.runLater(() -> {
-                                if (progressContainer != null) progressContainer.setVisible(false);
+                                if (progressContainer != null)
+                                    progressContainer.setVisible(false);
                                 createInstanceButton.setDisable(false);
-                                showError("Error al iniciar el juego", "Minecraft se cerró con código de error: " + exitCode);
+                                showError("Error al iniciar el juego",
+                                        "Minecraft se cerró con código de error: " + exitCode);
                             });
                             return;
                         }
                         break;
                     }
                 }
-                
+
                 updateProgress(1.0);
-                
+
                 logger.debug("Esperando a que aparezca la ventana de Minecraft...");
                 int maxWindowWaitTime = 15000;
                 long windowStartTime = System.currentTimeMillis();
                 boolean windowDetected = false;
-                
-                while (!windowDetected && process.isAlive() && 
-                       (System.currentTimeMillis() - windowStartTime) < maxWindowWaitTime) {
-                    
+
+                while (!windowDetected && process.isAlive() &&
+                        (System.currentTimeMillis() - windowStartTime) < maxWindowWaitTime) {
+
                     if (PlatformUtil.hasVisibleWindow(process)) {
                         windowDetected = true;
                         logger.info("Ventana de Minecraft detectada (método 1) - cerrando launcher");
                         break;
                     }
-                    
+
                     if (PlatformUtil.findMinecraftWindow()) {
                         windowDetected = true;
                         logger.info("Ventana de Minecraft detectada (método 2) - cerrando launcher");
                         break;
                     }
-                    
+
                     Thread.sleep(200);
                 }
-                
+
                 if (!windowDetected && process.isAlive()) {
                     logger.debug("Ventana no detectada automáticamente, esperando tiempo adicional...");
                     Thread.sleep(2000);
                 }
-                
+
                 Platform.runLater(() -> {
                     try {
                         Stage mainStage = (Stage) createInstanceButton.getScene().getWindow();
@@ -731,7 +779,7 @@ public class MainController {
                         logger.error("Error al cerrar la ventana principal", e);
                     }
                 });
-                
+
             } catch (Exception e) {
                 logger.error("Error al iniciar el juego", e);
                 Platform.runLater(() -> {
@@ -744,7 +792,7 @@ public class MainController {
             }
         }).start();
     }
-    
+
     /**
      * Actualiza el progreso de la barra de forma segura
      */
@@ -755,94 +803,100 @@ public class MainController {
                 progressBar.setProgress(clampedProgress);
                 progressBar.setStyle("-fx-accent: #4CAF50; -fx-control-inner-background: #2d2d2d;");
                 if (progressLabel != null) {
-                    progressLabel.setText((int)(clampedProgress * 100) + "%");
+                    progressLabel.setText((int) (clampedProgress * 100) + "%");
                 }
-                logger.debug("Progreso actualizado: {}% (valor: {})", (int)(clampedProgress * 100), clampedProgress);
+                logger.debug("Progreso actualizado: {}% (valor: {})", (int) (clampedProgress * 100), clampedProgress);
             }
         });
     }
-    
+
     private void onModifyAction() {
-        if (selectedInstance == null) return;
+        if (selectedInstance == null)
+            return;
         logger.debug("Modificar instancia: {}", selectedInstance.getName());
         showError("Funcionalidad pendiente", "La modificación de instancias estará disponible en una futura versión.");
     }
-    
+
     private void onRecursosAction() {
-        if (selectedInstance == null) return;
+        if (selectedInstance == null)
+            return;
         logger.debug("Recursos de instancia: {}", selectedInstance.getName());
-        
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RecursosView.fxml"));
             Parent recursosView = loader.load();
-            
+
             RecursosController controller = loader.getController();
             if (controller != null) {
                 controller.setInstance(selectedInstance);
             }
-            
+
             Stage recursosStage = new Stage();
             recursosStage.setTitle("Recursos");
             recursosStage.initModality(Modality.WINDOW_MODAL);
-            
+
             if (createInstanceButton != null && createInstanceButton.getScene() != null) {
                 recursosStage.initOwner(createInstanceButton.getScene().getWindow());
             }
-            
+
             Scene scene = new Scene(recursosView, 400, 250);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/recursos-view.css").toExternalForm());
-            
+
             recursosStage.setScene(scene);
             recursosStage.setMinWidth(350);
             recursosStage.setMinHeight(250);
             recursosStage.showAndWait();
-            
+
         } catch (Exception e) {
             logger.error("Error al abrir ventana de recursos", e);
             showError("Error", "No se pudo abrir la ventana de recursos: " + e.getMessage());
         }
     }
-    
+
     private void onMapsAction() {
-        if (selectedInstance == null) return;
+        if (selectedInstance == null)
+            return;
         logger.debug("Abrir mapas de instancia: {}", selectedInstance.getName());
-        
+
         try {
             ConfigService configService = ConfigService.getInstance();
             Path minecraftDir = configService.getInstanceMinecraftDirectory(selectedInstance.getName());
             Path savesDir = minecraftDir.resolve("saves");
-            
+
             File dir = savesDir.toFile();
             if (!dir.exists()) {
                 dir.mkdirs();
                 logger.info("Carpeta saves creada: {}", savesDir);
             }
-            
+
             openFolderInExplorer(savesDir);
-            
+
         } catch (Exception e) {
             logger.error("Error al abrir carpeta de mapas", e);
             showError("Error", "No se pudo abrir la carpeta de mapas: " + e.getMessage());
         }
     }
-    
+
     private void onViewLocationAction() {
-        if (selectedInstance == null) return;
+        if (selectedInstance == null)
+            return;
         logger.debug("Ver ubicación de instancia: {}", selectedInstance.getName());
         instanceService.openInstanceFolder(selectedInstance.getName());
     }
-    
+
     private void onDeleteAction() {
-        if (selectedInstance == null) return;
-        
+        if (selectedInstance == null)
+            return;
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmar eliminación");
         alert.setHeaderText("¿Eliminar instancia?");
-        alert.setContentText("¿Estás seguro de que deseas eliminar la instancia \"" + selectedInstance.getName() + "\"?\nEsta acción no se puede deshacer.");
+        alert.setContentText("¿Estás seguro de que deseas eliminar la instancia \"" + selectedInstance.getName()
+                + "\"?\nEsta acción no se puede deshacer.");
         AlertUtil.styleAlert(alert);
-        
+
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
@@ -858,42 +912,55 @@ public class MainController {
             }
         });
     }
-    
+
     @FXML
     private void onCreateInstanceClicked() {
         logger.debug("Crear nueva instancia");
+
+        // Verificar límite de instancias
+        List<Instance> currentInstances = instanceService.listInstances();
+        if (currentInstances.size() >= MAX_INSTANCES) {
+            Alert limitAlert = new Alert(Alert.AlertType.WARNING);
+            limitAlert.setTitle("Límite alcanzado");
+            limitAlert.setHeaderText("Máximo de instancias alcanzado");
+            limitAlert.setContentText("Solo puedes tener hasta " + MAX_INSTANCES + " instancias. Elimina una instancia existente para poder crear una nueva.");
+            AlertUtil.styleAlert(limitAlert);
+            limitAlert.showAndWait();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CreateInstanceView.fxml"));
             Parent createInstanceView = loader.load();
-            
+
             Stage createInstanceStage = new Stage();
             createInstanceStage.setTitle("Crear Nueva Instancia");
             createInstanceStage.initModality(Modality.WINDOW_MODAL);
             createInstanceStage.initOwner(createInstanceButton.getScene().getWindow());
             createInstanceStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
-            
+
             Scene scene = new Scene(createInstanceView, 540, 150);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
-            
+
             createInstanceStage.setScene(scene);
             createInstanceStage.setMinWidth(500);
             createInstanceStage.setMinHeight(480);
-            
+
             createInstanceStage.showAndWait();
-            
+
             // Recargar instancias después de cerrar la ventana
             loadInstances();
             updateBannerInfo();
-            
+
         } catch (IOException e) {
             logger.error("Error al abrir ventana de crear instancia", e);
             showError("Error", "No se pudo abrir la ventana de crear instancia: " + e.getMessage());
         }
     }
-    
+
     /**
      * Carga un icono de instancia desde la carpeta de recursos o ruta absoluta
      */
@@ -905,13 +972,13 @@ public class MainController {
                 logger.debug("Icono cargado desde recursos: {}", resourcePath);
                 return new Image(resourceStream);
             }
-            
+
             File iconFile = new File(iconName);
             if (iconFile.exists()) {
                 logger.debug("Icono cargado desde ruta absoluta: {}", iconName);
                 return new Image(iconFile.toURI().toString());
             }
-            
+
             logger.debug("No se encontró el icono: {}", iconName);
             return null;
         } catch (Exception e) {
@@ -919,7 +986,7 @@ public class MainController {
             return null;
         }
     }
-    
+
     /**
      * Crea un icono por defecto simple para una tarjeta
      */
@@ -927,10 +994,10 @@ public class MainController {
         double size = iconView.getFitWidth() > 0 ? iconView.getFitWidth() : 72;
         Canvas canvas = new Canvas(size, size);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        
+
         gc.setFill(Color.web("#1a3a4a"));
         gc.fillRoundRect(0, 0, size, size, 12, 12);
-        
+
         gc.setFill(Color.web("#2a5a6a"));
         double gridSize = size / 4.0;
         for (int i = 0; i < 4; i++) {
@@ -938,12 +1005,12 @@ public class MainController {
                 gc.fillRoundRect(4 + i * gridSize, 4 + j * gridSize, gridSize - 4, gridSize - 4, 3, 3);
             }
         }
-        
+
         WritableImage image = new WritableImage((int) size, (int) size);
         canvas.snapshot(null, image);
         iconView.setImage(image);
     }
-    
+
     /**
      * Abre una carpeta en el explorador de archivos del sistema
      */
@@ -954,28 +1021,28 @@ public class MainController {
                 logger.warn("La carpeta no existe: {}", folderPath);
                 return;
             }
-            
+
             switch (PlatformUtil.getOS()) {
                 case WINDOWS:
                     Runtime.getRuntime().exec("explorer.exe \"" + folder.getAbsolutePath() + "\"");
                     break;
                 case MACOS:
-                    Runtime.getRuntime().exec(new String[]{"open", folder.getAbsolutePath()});
+                    Runtime.getRuntime().exec(new String[] { "open", folder.getAbsolutePath() });
                     break;
                 case LINUX:
-                    Runtime.getRuntime().exec(new String[]{"xdg-open", folder.getAbsolutePath()});
+                    Runtime.getRuntime().exec(new String[] { "xdg-open", folder.getAbsolutePath() });
                     break;
                 default:
                     logger.warn("Sistema operativo no soportado para abrir explorador");
             }
-            
+
             logger.info("Carpeta abierta en explorador: {}", folderPath);
-            
+
         } catch (IOException e) {
             logger.error("Error al abrir carpeta en explorador", e);
         }
     }
-    
+
     /**
      * Muestra un diálogo de error
      */
