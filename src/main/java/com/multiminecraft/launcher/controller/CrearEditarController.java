@@ -19,7 +19,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -30,9 +29,9 @@ import java.util.List;
 /**
  * Controlador para crear nuevas instancias
  */
-public class CreateInstanceController {
+public class CrearEditarController {
     
-    private static final Logger logger = LoggerFactory.getLogger(CreateInstanceController.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrearEditarController.class);
     
     @FXML private TextField nameField;
     @FXML private TextField playerNameField;
@@ -198,7 +197,7 @@ public class CreateInstanceController {
             logger.debug("Abriendo ventana de selección de iconos");
             
             // Cargar la vista de selección de iconos
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/SelectIconView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Icono.fxml"));
             Parent selectIconView = loader.load();
             
             // Crear una nueva ventana modal
@@ -329,13 +328,6 @@ public class CreateInstanceController {
                     Stage stage = (Stage) createButton.getScene().getWindow();
                     if (stage != null) {
                         stage.close();
-                    } else {
-                        // Si no es una ventana modal, volver a la vista de instancias
-                        try {
-                            App.setRoot("InstancesView");
-                        } catch (Exception e) {
-                            logger.error("Error al cambiar vista", e);
-                        }
                     }
                 });
                 
@@ -376,13 +368,6 @@ public class CreateInstanceController {
         Stage stage = (Stage) createButton.getScene().getWindow();
         if (stage != null) {
             stage.close();
-        } else {
-            // Si no es una ventana modal, volver a la vista de instancias
-            try {
-                App.setRoot("InstancesView");
-            } catch (Exception e) {
-                logger.error("Error al cambiar vista", e);
-            }
         }
     }
     

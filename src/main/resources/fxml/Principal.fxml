@@ -15,18 +15,17 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="660.0" maxWidth="1080.0" minHeight="660.0" minWidth="1080.0" prefHeight="660.0" prefWidth="1080.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.MainController">
+<BorderPane maxHeight="660.0" maxWidth="1080.0" minHeight="660.0" minWidth="1080.0" prefHeight="660.0" prefWidth="1080.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.PrincipalController">
     
     <!-- Barra de título personalizada -->
     <top>
         <BorderPane fx:id="titleBar" maxWidth="1080" prefHeight="42" styleClass="custom-title-bar">
             <padding>
-                <Insets bottom="0" left="24" right="20" top="0" />
+                <Insets bottom="0" left="0" right="20" top="0" />
             </padding>
             <left>
-                <HBox alignment="CENTER_LEFT" spacing="16">
-                    <Label styleClass="title-bar-brand" text="Monkey Studio" />
-                    <Label styleClass="title-bar-link" text="SOPORTE" />
+                <HBox alignment="CENTER" prefWidth="200" spacing="16">
+                    <Label styleClass="title-bar-brand" text="MultiMinecraft" />
                 </HBox>
             </left>
             <right>
@@ -47,11 +46,11 @@
         <!-- ============================================== -->
         <VBox maxWidth="200" minWidth="200" prefWidth="200" spacing="0" styleClass="sidebar" BorderPane.alignment="CENTER">
             <!-- 0. Branding y Tarjeta de Instancia Seleccionada -->
-            <VBox spacing="10" styleClass="sidebar-header">
+            <VBox alignment="CENTER" spacing="10" styleClass="sidebar-header">
                 <padding>
                     <Insets bottom="10" left="20" right="20" top="20" />
                 </padding>
-                <Label styleClass="sidebar-brand" text="Monkey Studio" />
+                <Label styleClass="sidebar-brand" text="Instancia" />
                 
                 <VBox fx:id="selectedInstanceCard" alignment="CENTER" spacing="8" styleClass="selected-instance-card">
                     <padding>
@@ -103,76 +102,81 @@
         </VBox>
     </left>
    <center>
-        <!-- ============================================== -->
-        <!-- ÁREA CENTRAL (CONTENIDO PRINCIPAL)             -->
-        <!-- ============================================== -->
-        <HBox alignment="TOP_LEFT" prefHeight="970.0" prefWidth="1024.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
-            
-            <!-- Contenedor del panel principal -->
-            <VBox maxWidth="900" minWidth="800" spacing="0" styleClass="main-content" HBox.hgrow="ALWAYS">
-                <padding>
-                    <!-- Aquí puedes cambiar 'top' para empujar TODO el contenido hacia abajo -->
-                    <Insets bottom="0" left="0" right="0" top="0" />
-                </padding>
+        <StackPane>
+            <!-- ÁREA CENTRAL (CONTENIDO PRINCIPAL) -->
+            <HBox alignment="TOP_LEFT" prefHeight="970.0" prefWidth="1024.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
                 
-                <!-- A. Sección del Banner (Imagen superior destacada) -->
-                <VBox alignment="TOP_CENTER" spacing="0">
+                <!-- Contenedor del panel principal -->
+                <VBox maxWidth="900" minWidth="800" spacing="0" styleClass="main-content" HBox.hgrow="ALWAYS">
                     <padding>
                         <Insets bottom="0" left="0" right="0" top="0" />
                     </padding>
-                    <StackPane fx:id="heroBanner" maxHeight="400" maxWidth="873" styleClass="hero-banner">  <!-- espesie de panel donde esta la imagen -->
-                        <!-- Aquí puedes cambiar fitWidth (ancho), fitHeight (alto), translateX (mover izq/der) y translateY (mover arriba/abajo) -->
-                        <ImageView fx:id="heroBannerImage" fitWidth="873" fitHeight="400" translateX="0" translateY="0" preserveRatio="false" styleClass="hero-banner-image" StackPane.alignment="CENTER">
-                            <Image url="@../recursos2/banner-hero.png" />
-                        </ImageView>
-                        <Region styleClass="hero-banner-overlay" maxWidth="873" translateX="0" />
-                        <VBox alignment="BOTTOM_LEFT" prefHeight="850.0" prefWidth="1024.0" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
-                            <padding>
-                                <Insets bottom="16" left="20" right="20" top="10" />
-                            </padding>
-                            <HBox alignment="CENTER_LEFT" spacing="8">
-                                <Label styleClass="hero-badge" text="ÚLTIMA" />
-                                <Label fx:id="lastPlayedLabel" styleClass="hero-time" text="hace 2 horas" />
-                            </HBox>
-                            <Label style="-fx-font-size: 24px;" styleClass="hero-title" text="Biblioteca" />
-                            <Label fx:id="heroSubtitle" style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" styleClass="hero-subtitle" text="Vuelve a tu aventura." />
-                        </VBox>
-                    </StackPane>
-                </VBox>
-                
-                <!-- B. Sección de la Lista de Instancias (Cuadrícula del medio) -->
-                <!-- Puedes cambiar 'translateY' para mover el panel hacia abajo, o 'maxHeight' para hacer que sea más corto -->
-                <VBox spacing="0" styleClass="instances-section" VBox.vgrow="ALWAYS" translateY="0" maxHeight="Infinity">
-                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="instances-header">
-                        <padding>
-                            <Insets bottom="4" left="20" right="20" top="4" />
-                        </padding>
-                        <Label styleClass="section-title" text="Instancias" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
-                    </HBox>
                     
-                    <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="230" styleClass="instances-scroll" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                    <!-- A. Sección del Banner -->
+                    <VBox alignment="TOP_CENTER" spacing="0">
                         <padding>
-                            <Insets bottom="16" left="18" right="18" top="4" />
+                            <Insets bottom="0" left="0" right="0" top="0" />
                         </padding>
-                        <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="8" prefWrapLength="840" styleClass="instances-grid" vgap="8">
+                        <StackPane fx:id="heroBanner" maxHeight="400" maxWidth="873" styleClass="hero-banner">
+                            <ImageView fx:id="heroBannerImage" fitWidth="873" fitHeight="400" translateX="0" translateY="0" preserveRatio="false" styleClass="hero-banner-image" StackPane.alignment="CENTER">
+                                <Image url="@../recursos2/banner-hero.png" />
+                            </ImageView>
+                            <Region styleClass="hero-banner-overlay" maxWidth="873" translateX="0" />
+                            <VBox alignment="BOTTOM_LEFT" prefHeight="850.0" prefWidth="1024.0" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
+                                <padding>
+                                    <Insets bottom="16" left="20" right="20" top="10" />
+                                </padding>
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label fx:id="heroBadge" styleClass="hero-badge" text="ÚLTIMA" />
+                                    <Label fx:id="lastPlayedLabel" styleClass="hero-time" text="hace 2 horas" />
+                                </HBox>
+                                <Label fx:id="heroTitle" style="-fx-font-size: 28px;" styleClass="hero-title" text="Biblioteca" />
+                                <Label fx:id="heroSubtitle" style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" styleClass="hero-subtitle" text="Vuelve a tu aventura." />
+                            </VBox>
+                        </StackPane>
+                    </VBox>
+                    
+                    <!-- B. Sección de la Lista de Instancias -->
+                    <VBox spacing="0" styleClass="instances-section" VBox.vgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="instances-header">
                             <padding>
-                                <Insets bottom="10" left="0" right="0" top="4" />
+                                <Insets bottom="4" left="20" right="20" top="4" />
                             </padding>
-                        </FlowPane>
-                    </ScrollPane>
+                            <Label styleClass="section-title" text="Instancias" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
+                        </HBox>
+                        
+                        <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="230" styleClass="instances-scroll" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                            <padding>
+                                <Insets bottom="16" left="18" right="18" top="4" />
+                            </padding>
+                            <FlowPane fx:id="instancesGrid" alignment="TOP_LEFT" hgap="8" prefWrapLength="840" styleClass="instances-grid" vgap="8">
+                                <padding>
+                                    <Insets bottom="10" left="0" right="0" top="4" />
+                                </padding>
+                            </FlowPane>
+                        </ScrollPane>
+                    </VBox>
+                    
+                    <!-- C. Barra de Progreso -->
+                    <HBox fx:id="progressContainer" alignment="CENTER_LEFT" spacing="10" visible="false">
+                        <VBox.margin>
+                            <Insets bottom="12" left="20" right="20" top="8" />
+                        </VBox.margin>
+                        <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="8" styleClass="progress-bar" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="progressLabel" styleClass="progress-label" text="0%" />
+                    </HBox>
                 </VBox>
-                
-                <!-- C. Barra de Progreso (Visible solo cuando se lanza/descarga algo) -->
-                <HBox fx:id="progressContainer" alignment="CENTER_LEFT" spacing="10" visible="false">
-                    <VBox.margin>
-                        <Insets bottom="12" left="20" right="20" top="8" />
-                    </VBox.margin>
-                    <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="8" styleClass="progress-bar" HBox.hgrow="ALWAYS" />
-                    <Label fx:id="progressLabel" styleClass="progress-label" text="0%" />
-                </HBox>
-            </VBox>
-        </HBox>
+            </HBox>
+
+            <!-- Enlace de Soporte en la esquina inferior derecha -->
+            <HBox alignment="BOTTOM_RIGHT" mouseTransparent="false" pickOnBounds="false">
+                <padding>
+                    <Insets bottom="15" right="20" />
+                </padding>
+                <Label onMouseClicked="#onSupportLinkClicked" styleClass="title-bar-link" text="www.monkeystudio.com" style="-fx-font-size: 11px; -fx-opacity: 0.7;" />
+            </HBox>
+        </StackPane>
    </center>
 </BorderPane>

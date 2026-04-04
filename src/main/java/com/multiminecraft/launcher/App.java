@@ -27,6 +27,20 @@ public class App extends Application {
 
     private static Scene scene;
     private static Stage primaryStage;
+    private static App instance;
+
+    public App() {
+        instance = this;
+    }
+
+    /**
+     * Abre una página web en el navegador predeterminado
+     */
+    public static void openWebPage(String url) {
+        if (instance != null && url != null) {
+            instance.getHostServices().showDocument(url);
+        }
+    }
 
     @Override
     public void init() throws Exception {
@@ -65,10 +79,10 @@ public class App extends Application {
             ConfigService configService = ConfigService.getInstance();
             String playerName = configService.getLauncherConfig().getPlayerName();
             if (playerName == null || playerName.trim().isEmpty()) {
-                initialView = "WelcomeView";
+                initialView = "Bienvenida";
                 logger.info("No hay nombre de jugador configurado, mostrando pantalla de bienvenida");
             } else {
-                initialView = "MainWindow";
+                initialView = "Principal";
                 logger.info("Jugador: {}", playerName);
             }
 
@@ -83,8 +97,8 @@ public class App extends Application {
             // Aplicar tema por defecto
             applyTheme("dark");
 
-            // Cargar CSS de welcome si es la vista inicial
-            if ("WelcomeView".equals(initialView)) {
+            // Cargar CSS de bienvenida si es la vista inicial
+            if ("Bienvenida".equals(initialView)) {
                 var welcomeCss = App.class.getResource("/css/welcome.css");
                 if (welcomeCss != null) {
                     scene.getStylesheets().add(welcomeCss.toExternalForm());

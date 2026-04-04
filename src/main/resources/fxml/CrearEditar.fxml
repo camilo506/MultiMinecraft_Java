@@ -7,7 +7,7 @@
 
 <BorderPane styleClass="root-pane" xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.multiminecraft.launcher.controller.CreateInstanceController">
+            fx:controller="com.multiminecraft.launcher.controller.CrearEditarController">
     
     <!-- Barra de título personalizada -->
     <top>

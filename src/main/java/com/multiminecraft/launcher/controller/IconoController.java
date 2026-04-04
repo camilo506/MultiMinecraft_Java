@@ -29,9 +29,9 @@ import java.util.stream.Stream;
 /**
  * Controlador para la ventana de selección de iconos
  */
-public class SelectIconController {
+public class IconoController {
     
-    private static final Logger logger = LoggerFactory.getLogger(SelectIconController.class);
+    private static final Logger logger = LoggerFactory.getLogger(IconoController.class);
     
     @FXML private FlowPane iconsContainer;
     @FXML private ImageView previewImageView;

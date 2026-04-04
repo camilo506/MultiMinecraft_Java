@@ -8,7 +8,7 @@
 
 <VBox alignment="CENTER" spacing="20" styleClass="welcome-container" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.multiminecraft.launcher.controller.WelcomeController">
+      fx:controller="com.multiminecraft.launcher.controller.BienvenidaController">
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>
     </padding>

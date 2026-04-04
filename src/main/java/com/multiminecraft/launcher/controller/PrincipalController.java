@@ -54,9 +54,9 @@ import java.util.List;
 /**
  * Controlador de la ventana principal - Diseño MultiMinecraft
  */
-public class MainController {
+public class PrincipalController {
 
-    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+    private static final Logger logger = LoggerFactory.getLogger(PrincipalController.class);
 
     private final InstanceService instanceService;
     private final LaunchService launchService;
@@ -117,6 +117,10 @@ public class MainController {
     private Label lastPlayedLabel;
     @FXML
     private Label heroSubtitle;
+    @FXML
+    private Label heroTitle;
+    @FXML
+    private Label heroBadge;
 
     // Panel principal - Instancias
     @FXML
@@ -140,7 +144,7 @@ public class MainController {
     private static final double CARD_HEIGHT = 125; // Aumentar un poco el alto para evitar cortes verticales
 
 
-    public MainController() {
+    public PrincipalController() {
         this.instanceService = new InstanceService();
         this.launchService = new LaunchService();
     }
@@ -185,8 +189,8 @@ public class MainController {
         // Cargar instancias disponibles
         loadInstances();
 
-        // Actualizar info del banner
-        updateBannerInfo();
+        // Actualizar info del banner con la instancia más reciente por defecto
+        updateBannerInfo(null);
     }
 
     /**
@@ -278,34 +282,53 @@ public class MainController {
     }
 
     /**
-     * Actualiza la información del banner hero
+     * Actualiza la información del banner hero.
+     * Si instance es null, busca la más reciente.
      */
-    private void updateBannerInfo() {
+    private void updateBannerInfo(Instance instance) {
+        Instance toDisplay = instance;
         List<Instance> instances = instanceService.listInstances();
 
-        if (instances.isEmpty()) {
+        if (instances.isEmpty() && toDisplay == null) {
+            heroTitle.setText("Biblioteca");
+            heroBadge.setText("MULTIMINECRAFT");
             lastPlayedLabel.setText("Sin instancias aún");
             heroSubtitle.setText("Crea tu primera instancia para comenzar a jugar.");
             return;
         }
 
-        // Encontrar la instancia jugada más recientemente
-        Instance lastPlayed = null;
-        for (Instance inst : instances) {
-            if (inst.getLastPlayed() != null) {
-                if (lastPlayed == null || inst.getLastPlayed().isAfter(lastPlayed.getLastPlayed())) {
-                    lastPlayed = inst;
+        // Si no se pasó instancia, buscar la última jugada
+        if (toDisplay == null) {
+            for (Instance inst : instances) {
+                if (inst.getLastPlayed() != null) {
+                    if (toDisplay == null || inst.getLastPlayed().isAfter(toDisplay.getLastPlayed())) {
+                        toDisplay = inst;
+                    }
                 }
+            }
+            // Si nadie ha jugado, mostrar la primera de la lista
+            if (toDisplay == null && !instances.isEmpty()) {
+                toDisplay = instances.get(0);
             }
         }
 
-        if (lastPlayed != null) {
-            lastPlayedLabel.setText("Jugado " + formatRelativeTime(lastPlayed.getLastPlayed()));
-            heroSubtitle.setText("Continuar tu aventura en " + lastPlayed.getName()
-                    + ". Todos los mods están actualizados y listos.");
-        } else {
-            lastPlayedLabel.setText("¡Listo para jugar!");
-            heroSubtitle.setText("Selecciona una instancia para comenzar tu aventura.");
+        if (toDisplay != null) {
+            heroTitle.setText(toDisplay.getName());
+            
+            // Si es la instancia que acabamos de seleccionar manualmente
+            if (selectedInstance != null && toDisplay.getName().equals(selectedInstance.getName())) {
+                heroBadge.setText("SELECCIONADA");
+            } else {
+                heroBadge.setText("ÚLTIMA");
+            }
+
+            if (toDisplay.getLastPlayed() != null) {
+                lastPlayedLabel.setText("Jugaste por última vez hace " + formatRelativeTime(toDisplay.getLastPlayed()));
+            } else {
+                lastPlayedLabel.setText("¡Listo para jugar!");
+            }
+            
+            heroSubtitle.setText("Minecraft " + toDisplay.getVersion() + " " + toDisplay.getLoader().getDisplayName());
         }
     }
 
@@ -357,9 +380,11 @@ public class MainController {
             selectInstance(instances.get(0));
         }
 
-        // Actualizar selección visual si ya había una seleccionada
+        // Actualizar selección visual si ya había una seleccionada o mostrar estado por defecto
         if (selectedInstance != null) {
             updateInstanceCardsSelection();
+        } else {
+            updateSidebarCard(null);
         }
     }
 
@@ -563,6 +588,9 @@ public class MainController {
         this.selectedInstance = instance;
         logger.info("Instancia seleccionada: {}", instance.getName());
 
+        // Actualizar el banner superior
+        updateBannerInfo(instance);
+
         // Actualizar la tarjeta del sidebar
         updateSidebarCard(instance);
 
@@ -575,10 +603,53 @@ public class MainController {
      */
     private void updateSidebarCard(Instance instance) {
         if (instance == null) {
-            selectedInstanceSidebarName.setText("Ninguna");
-            selectedInstanceSidebarVersion.setText("Selecciona una instancia");
+            // Ocultar elementos y quitar del layout para permitir centrado real
+            selectedInstanceSidebarName.setVisible(false);
+            selectedInstanceSidebarName.setManaged(false);
+            selectedInstanceSidebarVersion.setVisible(false);
+            selectedInstanceSidebarVersion.setManaged(false);
+            sidebarPlayButton.setVisible(false);
+            sidebarPlayButton.setManaged(false);
+
+            // Deshabilitar botones de navegación si no hay selección
+            navModpacksButton.setDisable(true);
+            navResourcePacksButton.setDisable(true);
+            navMapsButton.setDisable(true);
+            
+            // Mantener el tamaño original de la tarjeta mediante minHeight
+            selectedInstanceCard.setMinHeight(160);
+            
+            // Cargar logo de Monkey Studio más grande y centrado
+            try {
+                Image logo = new Image(getClass().getResourceAsStream("/recursos2/Monkey-Logo.png"));
+                selectedInstanceSidebarIcon.setImage(logo);
+                selectedInstanceSidebarIcon.setFitHeight(100);
+                selectedInstanceSidebarIcon.setFitWidth(100);
+            } catch (Exception e) {
+                logger.warn("No se pudo cargar el logo Monkey-Logo.png", e);
+            }
             return;
         }
+
+        // Mostrar elementos si hay una instancia seleccionada
+        selectedInstanceSidebarName.setVisible(true);
+        selectedInstanceSidebarName.setManaged(true);
+        selectedInstanceSidebarVersion.setVisible(true);
+        selectedInstanceSidebarVersion.setManaged(true);
+        sidebarPlayButton.setVisible(true);
+        sidebarPlayButton.setManaged(true);
+
+        // Habilitar botones de navegación
+        navModpacksButton.setDisable(false);
+        navResourcePacksButton.setDisable(false);
+        navMapsButton.setDisable(false);
+
+        // Quitar restricción de altura mínima
+        selectedInstanceCard.setMinHeight(javafx.scene.layout.Region.USE_COMPUTED_SIZE);
+
+        // Restaurar tamaño estándar del icono
+        selectedInstanceSidebarIcon.setFitHeight(56);
+        selectedInstanceSidebarIcon.setFitWidth(56);
 
         selectedInstanceSidebarName.setText(instance.getName());
         
@@ -696,11 +767,16 @@ public class MainController {
         for (Button btn : navButtons) {
             btn.getStyleClass().remove("nav-button-active");
         }
-        if (!active.getStyleClass().contains("nav-button-active")) {
+        if (active != null && !active.getStyleClass().contains("nav-button-active")) {
             active.getStyleClass().add("nav-button-active");
         }
     }
 
+    @FXML
+    private void onSupportLinkClicked() {
+        logger.info("Abriendo enlace de soporte: https://monkeystudio.netlify.app/");
+        App.openWebPage("https://monkeystudio.netlify.app/");
+    }
 
     @FXML
     private void onNavModpacksClicked() {
@@ -711,10 +787,10 @@ public class MainController {
 
         try {
             logger.info("Abriendo ventana de edición para: {}", selectedInstance.getName());
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CreateInstanceView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearEditar.fxml"));
             Parent root = loader.load();
             
-            CreateInstanceController controller = loader.getController();
+            CrearEditarController controller = loader.getController();
             controller.setInstanceToEdit(selectedInstance);
             
             Stage stage = new Stage();
@@ -723,7 +799,7 @@ public class MainController {
             stage.initOwner(App.getPrimaryStage());
             
             Scene scene = new Scene(root);
-            // El controlador de CreateInstanceView ya aplica sus propios temas,
+            // El controlador de CrearEditar ya aplica sus propios temas,
             // pero nos aseguramos de que herede el estilo oscuro si es necesario.
             stage.setScene(scene);
             stage.setResizable(false);
@@ -1036,7 +1112,7 @@ public class MainController {
                     logger.info("Instancia eliminada: {}", selectedInstance.getName());
                     selectedInstance = null;
                     loadInstances();
-                    updateBannerInfo();
+                    updateBannerInfo(null);
                 } catch (Exception e) {
                     logger.error("Error al eliminar instancia", e);
                     showError("Error al eliminar", "No se pudo eliminar la instancia: " + e.getMessage());
@@ -1074,7 +1150,7 @@ public class MainController {
 
             // Recargar instancias después de cerrar la ventana
             loadInstances();
-            updateBannerInfo();
+            updateBannerInfo(null);
 
         } catch (IOException e) {
             logger.error("Error al abrir ventana de crear instancia", e);
