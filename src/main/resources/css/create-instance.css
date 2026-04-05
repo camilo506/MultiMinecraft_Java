@@ -1,19 +1,221 @@
 /* ============================================
-   Vista: CreateInstanceView (Crear Instancia)
-   Estilos del formulario de creación
+   Vista: CrearEditar (Crear / Editar Instancia)
+   Estilos del formulario — Modern Dark Theme
    ============================================ */
 
 /* ---- Borde verde de la ventana ---- */
-.root-pane {
+.crear-editar-root {
     -fx-border-color: #26d9a0;
     -fx-border-width: 2;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
+    -fx-background-color: #141e2b;
+}
+
+/* ---- Contenedor central del formulario ---- */
+.crear-editar-content {
+    -fx-background-color: transparent;
+}
+
+/* ---- Título principal ---- */
+.crear-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Subtítulo ---- */
+.crear-subtitle {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 11.5px;
+    -fx-wrap-text: true;
+}
+
+/* ---- Etiquetas de campo (mayúsculas, gris claro) ---- */
+.field-label {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Sección del Ícono ---- */
+.icon-section {
+    -fx-min-width: 100;
+    -fx-max-width: 100;
+}
+
+/* ---- Contenedor del preview del ícono ---- */
+.icon-preview-container {
+    -fx-background-color: #1c2d40;
+    -fx-background-radius: 10;
+    -fx-border-color: #2a3f5f;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-border-style: dashed;
+}
+
+.icon-placeholder-label {
+    -fx-font-size: 28px;
+    -fx-text-fill: #3a5070;
+}
+
+/* ---- Botón Seleccionar (estilo outline verde) ---- */
+.btn-select-icon {
+    -fx-background-color: transparent;
+    -fx-text-fill: #26d9a0;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+    -fx-pref-width: 90;
+}
+
+.btn-select-icon:hover {
+    -fx-background-color: #26d9a018;
+}
+
+/* ---- Campos de texto de entrada ---- */
+.input-field {
+    -fx-background-color: #1c2d40;
+    -fx-text-fill: #d0dce8;
+    -fx-prompt-text-fill: #4a6070;
+    -fx-border-color: #2a3f5f;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+}
+
+.input-field:focused {
+    -fx-border-color: #26d9a0;
+    -fx-effect: dropshadow(gaussian, #26d9a040, 8, 0, 0, 0);
+}
+
+/* ---- ComboBox de selección ---- */
+.input-combo {
+    -fx-background-color: #1c2d40;
+    -fx-text-fill: #d0dce8;
+    -fx-prompt-text-fill: #4a6070;
+    -fx-border-color: #2a3f5f;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 8 4 8;
+    -fx-font-size: 13px;
+}
+
+.input-combo .list-cell {
+    -fx-background-color: #1c2d40;
+    -fx-text-fill: #d0dce8;
+}
+
+.input-combo:focused {
+    -fx-border-color: #26d9a0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #1c2d40;
+    -fx-border-color: #2a3f5f;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #243650;
+    -fx-text-fill: #ffffff;
+}
+
+/* ---- RAM: valor en verde ---- */
+.ram-value-label {
+    -fx-text-fill: #26d9a0;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.ram-asignados-label {
+    -fx-text-fill: #8899aa;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 0 0 2;
+}
+
+/* ---- Slider de RAM ---- */
+.ram-slider .track {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 5;
+    -fx-pref-height: 5;
+}
+
+.ram-slider .thumb {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 50;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+    -fx-effect: dropshadow(gaussian, #26d9a060, 6, 0, 0, 0);
+}
+
+.ram-slider .thumb:hover {
+    -fx-background-color: #33edb0;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.ram-slider .colored-track {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 5;
+}
+
+.ram-slider .tick-label {
+    -fx-fill: #4a6070;
+    -fx-font-size: 9px;
+}
+
+/* ---- Botón Cancelar ---- */
+.btn-cancel {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8899aa;
+    -fx-border-color: transparent;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 8 20 8 20;
+    -fx-background-radius: 8;
+}
+
+.btn-cancel:hover {
+    -fx-text-fill: #d0dce8;
+    -fx-background-color: #1c2d40;
+}
+
+/* ---- Botón Crear Instancia (verde sólido) ---- */
+.btn-create {
+    -fx-background-color: linear-gradient(to right, #26d9a0, #1fb887);
+    -fx-text-fill: #0a1018;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 22 9 22;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #26d9a050, 10, 0, 0, 2);
+}
+
+.btn-create:hover {
+    -fx-background-color: linear-gradient(to right, #33edb0, #26d9a0);
+    -fx-effect: dropshadow(gaussian, #26d9a070, 14, 0, 0, 3);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.btn-create:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
 }
 
 /* ---- Contenedor de progreso (parte inferior) ---- */
 .creation-progress-container {
-    -fx-background-color: #131d2a;
+    -fx-background-color: #111922;
     -fx-border-color: #26d9a055 transparent transparent transparent;
     -fx-border-width: 2 0 0 0;
 }
@@ -37,23 +239,4 @@
     -fx-text-fill: #e0e8f0;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-}
-
-/* ---- Slider de RAM en verde ---- */
-.slider .track {
-    -fx-background-color: #1a2940;
-    -fx-background-radius: 5;
-}
-
-.slider .thumb {
-    -fx-background-color: #26d9a0;
-    -fx-background-radius: 50;
-}
-
-.slider .thumb:hover {
-    -fx-background-color: #33edb0;
-}
-
-.slider .colored-track {
-    -fx-background-color: #26d9a0;
 }

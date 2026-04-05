@@ -4,11 +4,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Rectangle?>
 
-<BorderPane styleClass="root-pane" xmlns="http://javafx.com/javafx"
+<BorderPane styleClass="root-pane, crear-editar-root"
+            xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.multiminecraft.launcher.controller.CrearEditarController">
-    
+            fx:controller="com.multiminecraft.launcher.controller.CrearEditarController"
+            prefWidth="460" prefHeight="520">
+
     <!-- Barra de título personalizada -->
     <top>
         <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="0" styleClass="custom-title-bar">
@@ -21,77 +24,101 @@
             <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
         </HBox>
     </top>
-    
+
     <center>
-        <ScrollPane fitToWidth="true">
-            <VBox spacing="12">
-                <padding>
-                    <Insets top="15" right="20" bottom="0" left="20"/>
-                </padding>
-                
-                <!-- Header -->
-                <Label alignment="CENTER" maxWidth="Infinity" text="Crear Nueva Instancia" styleClass="label-title"/>
-                <Separator/>
-                
-                <!-- Formulario -->
-                <GridPane hgap="12" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints minWidth="120" prefWidth="120"/>
-                        <ColumnConstraints minWidth="200" prefWidth="280" hgrow="SOMETIMES"/>
-                    </columnConstraints>
-                    
-                    <!-- Nombre de la instancia -->
-                    <Label text="Nombre de Instancia:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="nameField" maxWidth="200" prefWidth="200" promptText="Nombre" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    
-                    <!-- Nombre del Jugador -->
-                    <Label text="Nombre del Jugador:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="playerNameField" maxWidth="200" prefWidth="200" promptText="Nombre" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                    
-                    <!-- Versión -->
-                    <Label text="Versión de Minecraft:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                        <ComboBox fx:id="versionComboBox" prefWidth="200"/>
-                        <Button text="🔄 Actualizar" onAction="#onRefreshVersions"/>
-                        <ProgressIndicator fx:id="loadingIndicator" prefWidth="20" prefHeight="20" visible="false"/>
-                    </HBox>
-                    
-                    <!-- Tipo de Loader -->
-                    <Label text="Tipo:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <ComboBox fx:id="loaderTypeComboBox" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                    
-                    <!-- Memoria RAM -->
-                    <Label text="Memoria RAM:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                        <Slider fx:id="memorySlider" min="1" max="16" value="4" showTickLabels="false" 
-                                showTickMarks="true" majorTickUnit="4" minorTickCount="3" prefWidth="300"/>
-                        <Label fx:id="memoryLabel" text="4 GB"/>
-                    </HBox>
-                    
-                    <!-- Icono de Instancia -->
-                    <Label text="Icono:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
-                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="5">
-                        <ImageView fx:id="iconPreview" fitWidth="40" fitHeight="40" preserveRatio="true" 
-                                   style="-fx-border-color: white; -fx-border-width: 1px; -fx-border-radius: 3px;"/>
-                        <Button text="Seleccionar" onAction="#onBrowseIcon"/>
-                    </HBox>
-                </GridPane>
-                
-                <Separator/>
-                
-                <!-- Botones -->
-                <HBox spacing="12" alignment="CENTER">
-                    <Button text="Cancelar" onAction="#onCancel"/>
-                    <Button fx:id="createButton" text="Crear Instancia" styleClass="button-primary" onAction="#onCreate"/>
-                </HBox>
-                
+        <VBox styleClass="crear-editar-content">
+            <padding>
+                <Insets top="24" right="28" bottom="20" left="28"/>
+            </padding>
+
+            <!-- Header: Título -->
+            <VBox spacing="4">
+                <Label fx:id="titleLabel" text="Crear Nueva Instancia" styleClass="crear-title"/>
+                <Label text="Configura tu entorno de juego personalizado para MultiMinecraft Launcher." styleClass="crear-subtitle"/>
             </VBox>
-        </ScrollPane>
+
+            <!-- Separador visual -->
+            <Region prefHeight="16"/>
+
+            <!-- Sección: Icono + Nombre de instancia / Jugador -->
+            <HBox spacing="20" alignment="TOP_LEFT">
+
+                <!-- Columna izquierda: Icono -->
+                <VBox spacing="10" alignment="CENTER" styleClass="icon-section">
+                    <Label text="ICONO" styleClass="field-label"/>
+                    <StackPane styleClass="icon-preview-container" prefWidth="90" prefHeight="90">
+                        <ImageView fx:id="iconPreview" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+                        <Label fx:id="iconPlaceholder" text="🖼" styleClass="icon-placeholder-label"/>
+                    </StackPane>
+                    <Button text="SELECCIONAR" onAction="#onBrowseIcon" styleClass="btn-select-icon"/>
+                </VBox>
+
+                <!-- Columna derecha: Campos de texto -->
+                <VBox spacing="12" HBox.hgrow="ALWAYS">
+                    <!-- Nombre de instancia -->
+                    <VBox spacing="5">
+                        <Label text="NOMBRE DE INSTANCIA" styleClass="field-label"/>
+                        <TextField fx:id="nameField" promptText="Mi Aventura Survival" styleClass="input-field" maxWidth="Infinity"/>
+                    </VBox>
+
+                    <!-- Nombre del jugador -->
+                    <VBox spacing="5">
+                        <Label text="NOMBRE DEL JUGADOR" styleClass="field-label"/>
+                        <TextField fx:id="playerNameField" promptText="Steve_Player" styleClass="input-field" maxWidth="Infinity"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <Region prefHeight="16"/>
+
+            <!-- Fila: Versión de Minecraft + Tipo -->
+            <HBox spacing="16" alignment="CENTER_LEFT">
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="VERSIÓN DE MINECRAFT" styleClass="field-label"/>
+                    <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="versionComboBox" promptText="Release 1.20.4" styleClass="input-combo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="TIPO" styleClass="field-label"/>
+                    <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="loaderTypeComboBox" promptText="Vanilla" styleClass="input-combo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+
+            <Region prefHeight="16"/>
+
+            <!-- Memoria RAM -->
+            <VBox spacing="8">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="MEMORIA RAM" styleClass="field-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <HBox alignment="CENTER_RIGHT" spacing="4">
+                        <Label fx:id="memoryLabel" text="4GB" styleClass="ram-value-label"/>
+                        <Label text="ASIGNADOS" styleClass="ram-asignados-label"/>
+                    </HBox>
+                </HBox>
+                <Slider fx:id="memorySlider" min="1" max="16" value="4"
+                        showTickLabels="true" showTickMarks="false"
+                        majorTickUnit="4" minorTickCount="3"
+                        styleClass="ram-slider" maxWidth="Infinity"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- Botones de acción -->
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Cancelar" onAction="#onCancel" styleClass="btn-cancel"/>
+                <Button fx:id="createButton" text="Crear Instancia" styleClass="btn-create" onAction="#onCreate"/>
+            </HBox>
+        </VBox>
     </center>
-    
-    <!-- Indicador de progreso circular fijo en la parte inferior -->
+
+    <!-- Indicador de progreso -->
     <bottom>
-        <VBox fx:id="progressContainer" styleClass="creation-progress-container" spacing="8" visible="false" managed="false" alignment="CENTER">
+        <VBox fx:id="progressContainer" styleClass="creation-progress-container" spacing="8"
+              visible="false" managed="false" alignment="CENTER">
             <padding>
                 <Insets top="12" right="20" bottom="12" left="20"/>
             </padding>
@@ -102,5 +129,5 @@
             <Label fx:id="progressLabel" text="Creando instancia..." styleClass="progress-status-label"/>
         </VBox>
     </bottom>
-    
+
 </BorderPane>

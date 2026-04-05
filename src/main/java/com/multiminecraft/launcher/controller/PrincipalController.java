@@ -61,6 +61,13 @@ public class PrincipalController {
     private final InstanceService instanceService;
     private final LaunchService launchService;
     private Instance selectedInstance;
+    
+    // Referencia estática para refrescar desde otros controladores
+    private static PrincipalController instance;
+    
+    public static PrincipalController getInstance() {
+        return instance;
+    }
 
     // Variables para arrastrar la ventana
     private double xOffset = 0;
@@ -152,6 +159,7 @@ public class PrincipalController {
     @FXML
     public void initialize() {
         logger.info("Inicializando ventana principal - Diseño MultiMinecraft");
+        instance = this;
 
         // Configurar arrastre de ventana por la barra de título
         if (titleBar != null) {
@@ -356,6 +364,13 @@ public class PrincipalController {
         if (weeks < 4)
             return "hace " + weeks + (weeks == 1 ? " semana" : " semanas");
         return "hace más de un mes";
+    }
+
+    /**
+     * Refresca la lista de instancias desde el disco - Uso público
+     */
+    public void refreshInstances() {
+        Platform.runLater(this::loadInstances);
     }
 
     /**
@@ -797,10 +812,13 @@ public class PrincipalController {
             stage.setTitle("Editar Instancia - " + selectedInstance.getName());
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initOwner(App.getPrimaryStage());
+            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
             
             Scene scene = new Scene(root);
-            // El controlador de CrearEditar ya aplica sus propios temas,
-            // pero nos aseguramos de que herede el estilo oscuro si es necesario.
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
             stage.setScene(scene);
             stage.setResizable(false);
             
@@ -1125,9 +1143,8 @@ public class PrincipalController {
     private void onCreateInstanceClicked() {
         logger.debug("Crear nueva instancia");
 
-
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CreateInstanceView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearEditar.fxml"));
             Parent createInstanceView = loader.load();
 
             Stage createInstanceStage = new Stage();
@@ -1136,15 +1153,14 @@ public class PrincipalController {
             createInstanceStage.initOwner(createInstanceButton.getScene().getWindow());
             createInstanceStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
 
-            Scene scene = new Scene(createInstanceView, 540, 150);
+            Scene scene = new Scene(createInstanceView);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
             scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
 
             createInstanceStage.setScene(scene);
-            createInstanceStage.setMinWidth(500);
-            createInstanceStage.setMinHeight(480);
+            createInstanceStage.setResizable(false);
 
             createInstanceStage.showAndWait();
 

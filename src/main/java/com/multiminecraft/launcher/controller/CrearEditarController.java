@@ -38,11 +38,13 @@ public class CrearEditarController {
     @FXML private ComboBox<String> versionComboBox;
     @FXML private ComboBox<LoaderType> loaderTypeComboBox;
     @FXML private Slider memorySlider;
+    @FXML private Label titleLabel;
     @FXML private Label memoryLabel;
     @FXML private ImageView iconPreview;
+    @FXML private Label iconPlaceholder;
     
     private String selectedIconName;
-    @FXML private ProgressIndicator loadingIndicator;
+    // Campos del progreso inline (en desuso, se usa DescargaProgresoController)
     @FXML private VBox progressContainer;
     @FXML private Label progressLabel;
     @FXML private Label progressPercentLabel;
@@ -92,7 +94,7 @@ public class CrearEditarController {
         // Configurar slider de memoria
         memorySlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             int memory = newVal.intValue();
-            memoryLabel.setText(memory + " GB");
+            memoryLabel.setText(memory + "GB");
         });
         
         // Inicializar icono por defecto
@@ -116,6 +118,7 @@ public class CrearEditarController {
         this.currentInstance = instance;
         
         Platform.runLater(() -> {
+            if (titleLabel != null) titleLabel.setText("Editar Instancia");
             nameField.setText(instance.getName());
             nameField.setDisable(true); // No permitir cambiar el nombre (id del directorio)
             playerNameField.setText(instance.getPlayerName());
@@ -143,7 +146,6 @@ public class CrearEditarController {
      * Carga las versiones de Minecraft disponibles
      */
     private void loadVersions() {
-        loadingIndicator.setVisible(true);
         versionComboBox.setDisable(true);
         
         new Thread(() -> {
@@ -161,7 +163,6 @@ public class CrearEditarController {
                         versionComboBox.setValue(versionIds.get(0)); // Seleccionar la más reciente
                     }
                     
-                    loadingIndicator.setVisible(false);
                     versionComboBox.setDisable(false);
                     
                     logger.info("Cargadas {} versiones de Minecraft", versionIds.size());
@@ -171,7 +172,6 @@ public class CrearEditarController {
                 logger.error("Error al cargar versiones", e);
                 
                 Platform.runLater(() -> {
-                    loadingIndicator.setVisible(false);
                     versionComboBox.setDisable(false);
                     
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -239,13 +239,15 @@ public class CrearEditarController {
             alert.showAndWait();
         }
     }
-    
+
     @FXML
     private void onCreate() {
+        System.out.println("[DEBUG] Boton Crear presionado...");
+        
         // Validar campos
         String name = nameField.getText().trim();
         if (name.isEmpty()) {
-            showError("El nombre de la instancia no puede estar vacío");
+            showError("El nombre de la instancia no puede estar vacio");
             return;
         }
         
@@ -258,11 +260,7 @@ public class CrearEditarController {
         LoaderType loaderType = loaderTypeComboBox.getValue();
         if (loaderType == null) {
             loaderType = LoaderType.VANILLA;
-            logger.warn("LoaderType es null, usando VANILLA por defecto");
         }
-        
-        logger.info("{} instancia - Nombre: {}, Versión: {}, Loader: {}", 
-                     isEditMode ? "Editando" : "Creando", name, version, loaderType);
         
         // Si no es edición, verificar si ya existe
         if (!isEditMode && instanceService.instanceExists(name)) {
@@ -273,7 +271,6 @@ public class CrearEditarController {
         // Crear o actualizar instancia
         Instance instance = isEditMode ? currentInstance : new Instance(name, version, loaderType);
         if (!isEditMode) {
-            // Valores iniciales solo si es nueva
             instance.setName(name);
             instance.setVersion(version);
             instance.setLoader(loaderType);
@@ -281,64 +278,129 @@ public class CrearEditarController {
 
         instance.setMemory(((int) memorySlider.getValue()) + "G");
         
-        // Establecer nombre del jugador
         String playerName = playerNameField.getText() != null ? playerNameField.getText().trim() : "";
         if (!playerName.isEmpty()) {
             instance.setPlayerName(playerName);
         }
         
-        // Establecer icono si se seleccionó uno
         if (selectedIconName != null && !selectedIconName.isEmpty()) {
             instance.setIcon(selectedIconName);
         }
         
-        // Deshabilitar formulario
+        // Deshabilitar formulario y abrir modal
         setFormEnabled(false);
-        progressContainer.setVisible(true);
-        progressContainer.setManaged(true);
-        progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
-        progressPercentLabel.setText("0%");
         
+        System.out.println("[DEBUG] Intentando llamar a DescargaProgresoController.show()...");
+        DescargaProgresoController progresoCtrl = DescargaProgresoController.show(App.getPrimaryStage());
+        System.out.println("[DEBUG] PROGRESO_CTRL: " + (progresoCtrl != null ? "CREADO" : "FALLÓ (NULL)"));
+
+        // Cerrar esta ventana inmediatamente
+        Stage currentStage = (Stage) createButton.getScene().getWindow();
+        if (currentStage != null) {
+            currentStage.close();
+        }
+
+        // Callback de cancelación
+        final boolean[] cancelado = {false};
+        if (progresoCtrl != null) {
+            progresoCtrl.setOnCancelCallback(() -> {
+                cancelado[0] = true;
+                logger.info("Descarga cancelada por el usuario");
+            });
+        }
+
+
+        // Variables para cálculo de velocidad
+        final long[] lastProgressTime = {System.currentTimeMillis()};
+        final double[] lastProgressValue = {0.0};
+        final long ESTIMATED_TOTAL_BYTES = 80 * 1024 * 1024L; // ~80 MB estimado
+
         // Crear en thread separado
         new Thread(() -> {
             try {
                 if (isEditMode) {
                     instanceService.updateInstance(instance);
-                    Platform.runLater(() -> progressLabel.setText("¡Guardado!"));
+                    if (progresoCtrl != null) {
+                        progresoCtrl.setProgress(1.0, "¡Guardado!", "La instancia ha sido actualizada correctamente.");
+                        Thread.sleep(800);
+                        progresoCtrl.close();
+                    }
                 } else {
                     instanceService.createInstance(instance, status -> {
-                        Platform.runLater(() -> progressLabel.setText(status));
+                        if (progresoCtrl != null) {
+                            // Mapear el mensaje de estado al detalle apropiado
+                            String detail = getDetailForStatus(status);
+                            Platform.runLater(() -> {
+                                progresoCtrl.setProgress(
+                                    progresoCtrl.getCurrentProgress(),
+                                    status, detail);
+                            });
+                        }
                     }, progress -> {
-                        Platform.runLater(() -> {
-                            int percent = (int) Math.round(progress * 100);
-                            progressPercentLabel.setText(percent + "%");
-                        });
+                        if (cancelado[0]) return;
+                        if (progresoCtrl != null) {
+                            long now = System.currentTimeMillis();
+                            long deltaMs = now - lastProgressTime[0];
+                            double deltaProgress = progress - lastProgressValue[0];
+
+                            // Calcular velocidad y tiempo restante
+                            if (deltaMs > 500 && deltaProgress > 0) {
+                                long deltaBytes = (long) (deltaProgress * ESTIMATED_TOTAL_BYTES);
+                                double mbps = (deltaBytes / 1_048_576.0) / (deltaMs / 1000.0);
+                                double remaining = 1.0 - progress;
+                                long remainingSeconds = mbps > 0
+                                    ? (long) ((remaining * ESTIMATED_TOTAL_BYTES / 1_048_576.0) / mbps)
+                                    : -1;
+
+                                progresoCtrl.setSpeed(mbps);
+                                progresoCtrl.setTimeRemaining(remainingSeconds);
+
+                                lastProgressTime[0] = now;
+                                lastProgressValue[0] = progress;
+                            }
+
+                            progresoCtrl.setProgress(progress);
+                        }
                     });
                 }
-                
+
                 Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle(isEditMode ? "Instancia actualizada" : "Instancia creada");
-                    alert.setHeaderText(null);
-                    alert.setContentText("La instancia \"" + name + "\" ha sido " + (isEditMode ? "actualizada" : "creada") + " exitosamente");
-                    AlertUtil.styleAlert(alert);
-                    alert.showAndWait();
-                    
-                    // Cerrar la ventana modal
-                    Stage stage = (Stage) createButton.getScene().getWindow();
-                    if (stage != null) {
-                        stage.close();
+                    if (progresoCtrl != null) {
+                        progresoCtrl.setProgress(1.0, "¡Instancia lista!", "La instancia se ha creado correctamente.");
+                        progresoCtrl.setSpeed(0);
+                        progresoCtrl.setTimeRemaining(0);
+                        progresoCtrl.disableCancel();
                     }
+
+                    // Refrescar el grid de la ventana principal
+                    if (PrincipalController.getInstance() != null) {
+                        PrincipalController.getInstance().refreshInstances();
+                    }
+
+                    // Pequeña pausa para que el usuario vea el 100%
+                    new Thread(() -> {
+                        try { Thread.sleep(1200); } catch (InterruptedException ignored) {}
+                        Platform.runLater(() -> {
+                            if (progresoCtrl != null) progresoCtrl.close();
+
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle(isEditMode ? "Instancia actualizada" : "Instancia creada");
+                            alert.setHeaderText(null);
+                            alert.setContentText("La instancia \"" + name + "\" ha sido "
+                                + (isEditMode ? "actualizada" : "creada") + " exitosamente");
+                            AlertUtil.styleAlert(alert);
+                            alert.showAndWait();
+                        });
+                    }).start();
+
                 });
-                
             } catch (Exception e) {
-                logger.error("Error al crear instancia", e);
-                
+                System.out.println("[ERROR CRITICO] Error en el hilo de descarga: " + e.getMessage());
+                e.printStackTrace();
                 Platform.runLater(() -> {
+                    if (progresoCtrl != null) progresoCtrl.close();
                     setFormEnabled(true);
-                    progressContainer.setVisible(false);
-                    progressContainer.setManaged(false);
-                    
+
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
                     alert.setHeaderText("No se pudo crear la instancia");
@@ -382,6 +444,24 @@ public class CrearEditarController {
         AlertUtil.styleAlert(alert);
         alert.showAndWait();
     }
+
+    /**
+     * Devuelve un texto de detalle legible para cada mensaje de estado del servicio.
+     */
+    private String getDetailForStatus(String status) {
+        if (status == null) return "";
+        if (status.contains("directorios")) return "Preparando la estructura de carpetas de la instancia.";
+        if (status.contains("Descargando Minecraft")) return "Obteniendo el archivo JAR principal y sus dependencias del servidor de Mojang.";
+        if (status.contains("client.jar")) return "Descargando el cliente de Minecraft...";
+        if (status.contains("librer")) return "Obteniendo librerías del núcleo y binarios nativos necesarios para la ejecución.";
+        if (status.contains("assets")) return "Descargando texturas, sonidos e índices de recursos del juego.";
+        if (status.contains("Fabric")) return "Instalando el mod loader Fabric para esta versión.";
+        if (status.contains("Forge")) return "Instalando Forge y verificando las librerías necesarias.";
+        if (status.contains("configuraci")) return "Guardando los ajustes de la instancia en disco.";
+        if (status.contains("Guardado") || status.contains("lista") || status.contains("exitosa"))
+            return "La instància se ha configurado correctamente y ya está lista para usar.";
+        return status;
+    }
     
     /**
      * Habilita/deshabilita el formulario
@@ -406,6 +486,7 @@ public class CrearEditarController {
             if (iconStream != null) {
                 Image defaultImage = new Image(iconStream);
                 iconPreview.setImage(defaultImage);
+                if (iconPlaceholder != null) iconPlaceholder.setVisible(false);
                 selectedIconName = defaultIcon;
             } else {
                 // Si no hay icono por defecto, crear uno simple
@@ -427,11 +508,13 @@ public class CrearEditarController {
             if (iconStream != null) {
                 Image iconImage = new Image(iconStream);
                 iconPreview.setImage(iconImage);
+                if (iconPlaceholder != null) iconPlaceholder.setVisible(false);
             } else {
                 // Si no se encuentra, intentar como ruta absoluta
                 java.io.File iconFile = new java.io.File(iconName);
                 if (iconFile.exists()) {
                     iconPreview.setImage(new Image(iconFile.toURI().toString()));
+                    if (iconPlaceholder != null) iconPlaceholder.setVisible(false);
                 } else {
                     loadDefaultIcon();
                 }

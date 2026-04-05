@@ -1,0 +1,145 @@
+/* ============================================
+   Vista: DescargaProgreso — Download Progress Modal
+   Dark modal con ProgressIndicator circular verde
+   ============================================ */
+
+/* ---- Root transparente ---- */
+.descarga-root {
+    -fx-background-color: transparent;
+}
+
+/* ---- Card principal del modal ---- */
+.descarga-card {
+    -fx-background-color: #111821;
+    -fx-background-radius: 24;
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 40, 0, 0, 20);
+}
+
+/* ---- Wrapper del anillo de progreso ---- */
+.progress-ring-wrapper {
+    -fx-background-color: transparent;
+}
+
+/* ---- Pane de track (aro de fondo oscuro sutil) ---- */
+.progress-track-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-width: 8;
+    -fx-border-radius: 80;
+}
+
+/* ---- ProgressIndicator: arco verde con NEON GLOW ---- */
+.descarga-progress-indicator {
+    -fx-progress-color: #26d9a0;
+    -fx-background-color: transparent;
+    -fx-effect: dropshadow(three-pass-box, rgba(38, 217, 160, 0.5), 15, 0.4, 0, 0);
+}
+
+.descarga-progress-indicator .indicator {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.descarga-progress-indicator .progress {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 80;
+    -fx-padding: 0;
+}
+
+.descarga-progress-indicator .percentage {
+    -fx-fill: transparent;
+    visibility: hidden;
+}
+
+.descarga-progress-indicator .tick {
+    visibility: hidden;
+}
+
+/* ---- Número del porcentaje ---- */
+.percent-number {
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI Bold", "SansSerif";
+    -fx-font-size: 44px;
+}
+
+.percent-symbol {
+    -fx-text-fill: #26d9a0;
+    -fx-font-family: "Segoe UI Semibold", "SansSerif";
+    -fx-font-size: 20px;
+    -fx-translate-y: 8;
+}
+
+/* ---- Etiqueta "PROGRESS" ---- */
+.progress-word-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.4);
+    -fx-font-family: "Segoe UI Semibold", "SansSerif";
+    -fx-font-size: 10px;
+    /* -fx-letter-spacing no existe en JavaFX — eliminado */
+}
+
+/* ---- Títulos y Detalles ---- */
+.descarga-status-title {
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI Semibold", "SansSerif";
+    -fx-font-size: 19px;
+}
+
+.descarga-status-detail {
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-family: "Segoe UI", "SansSerif";
+    -fx-font-size: 12px;
+    /* -fx-line-spacing no es válido en Label — eliminado */
+}
+
+/* ---- Cajas de estadísticas (MB/s, Tiempo) ---- */
+.stat-box {
+    -fx-background-color: #1a222d;
+    -fx-background-radius: 12;
+    -fx-padding: 12 16 12 16;
+    -fx-spacing: 2;
+}
+
+.stat-label {
+    -fx-text-fill: #26d9a0;
+    -fx-font-family: "Segoe UI Semibold", "SansSerif";
+    -fx-font-size: 9px;
+    -fx-opacity: 0.8;
+}
+
+.stat-value {
+    -fx-text-fill: white;
+    -fx-font-family: "Segoe UI Bold", "SansSerif";
+    -fx-font-size: 15px;
+}
+
+/* ---- Botón de Cancelar ---- */
+.btn-cancel-download {
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #121517;
+    -fx-font-family: "Segoe UI Bold", "SansSerif";
+    -fx-font-size: 14px;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-padding: 14 0 14 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(38, 217, 160, 0.3), 10, 0, 0, 0);
+}
+
+.btn-cancel-download:hover {
+    -fx-background-color: #1fc18d;
+    -fx-effect: dropshadow(three-pass-box, rgba(38, 217, 160, 0.5), 15, 0, 0, 0);
+}
+
+.btn-cancel-download:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+.btn-cancel-download:disabled {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-text-fill: rgba(255, 255, 255, 0.3);
+    -fx-cursor: default;
+    -fx-effect: none;
+}
