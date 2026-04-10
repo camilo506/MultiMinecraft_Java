@@ -11,9 +11,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -22,6 +26,9 @@ import java.util.stream.Stream;
 public class InstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
+
+    /** Si existe una instancia con este nombre (sin distinguir mayúsculas), va siempre en la primera posición del grid. */
+    private static final String PINNED_FIRST_INSTANCE_NAME = "pajaland";
 
     private final ConfigService configService;
     private final MojangService mojangService;
@@ -52,6 +59,10 @@ public class InstanceService {
         // Verificar que no exista ya
         if (instanceExists(instance.getName())) {
             throw new IllegalArgumentException("Ya existe una instancia con ese nombre");
+        }
+
+        if (instance.getCreatedAt() == null) {
+            instance.setCreatedAt(LocalDateTime.now());
         }
 
         Path instanceDir = configService.getInstanceDirectory(instance.getName());
@@ -197,31 +208,52 @@ public class InstanceService {
             return instances;
         }
 
+        List<Path> dirs;
         try (Stream<Path> paths = Files.list(instancesDir)) {
-            paths.filter(Files::isDirectory)
-                    .sorted((p1, p2) -> {
-                        try {
-                            BasicFileAttributes attr1 = Files.readAttributes(p1, BasicFileAttributes.class);
-                            BasicFileAttributes attr2 = Files.readAttributes(p2, BasicFileAttributes.class);
-                            return attr1.creationTime().compareTo(attr2.creationTime());
-                        } catch (IOException e) {
-                            return 0;
-                        }
-                    })
-                    .forEach(instanceDir -> {
-                        try {
-                            String instanceName = instanceDir.getFileName().toString();
-                            Instance instance = configService.loadInstanceConfig(instanceName);
-                            instances.add(instance);
-                        } catch (IOException e) {
-                            logger.warn("No se pudo cargar instancia: {}", instanceDir, e);
-                        }
-                    });
+            dirs = paths.filter(Files::isDirectory).collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Error al listar instancias", e);
+            return instances;
         }
 
+        for (Path instanceDir : dirs) {
+            try {
+                String instanceName = instanceDir.getFileName().toString();
+                Instance instance = configService.loadInstanceConfig(instanceName);
+                instances.add(instance);
+            } catch (IOException e) {
+                logger.warn("No se pudo cargar instancia: {}", instanceDir, e);
+            }
+        }
+
+        // Orden: primero la instancia "pajaland" (sin importar mayúsculas); el resto por antigüedad (más vieja primero).
+        instances.sort(Comparator
+                .comparing((Instance i) -> isPinnedPajalandFirst(i) ? 0 : 1)
+                .thenComparingLong(i -> creationOrderMillis(i, instancesDir)));
+
         return instances;
+    }
+
+    private static boolean isPinnedPajalandFirst(Instance instance) {
+        if (instance.getName() == null) {
+            return false;
+        }
+        return PINNED_FIRST_INSTANCE_NAME.equalsIgnoreCase(instance.getName().trim());
+    }
+
+    /**
+     * Marca de tiempo para ordenar: preferir {@code createdAt} guardado; si no existe, fecha de creación del directorio.
+     */
+    private static long creationOrderMillis(Instance instance, Path instancesDir) {
+        if (instance.getCreatedAt() != null) {
+            return instance.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        try {
+            Path dir = instancesDir.resolve(instance.getName());
+            return Files.readAttributes(dir, BasicFileAttributes.class).creationTime().toMillis();
+        } catch (IOException e) {
+            return Long.MAX_VALUE;
+        }
     }
 
     /**

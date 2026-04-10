@@ -2,6 +2,7 @@ package com.multiminecraft.launcher.controller;
 
 import com.multiminecraft.launcher.App;
 import com.multiminecraft.launcher.model.Instance;
+import com.multiminecraft.launcher.model.LoaderType;
 import com.multiminecraft.launcher.service.ConfigService;
 import com.multiminecraft.launcher.service.InstanceService;
 import com.multiminecraft.launcher.service.LaunchService;
@@ -125,6 +126,8 @@ public class PrincipalController {
     @FXML
     private Label heroSubtitle;
     @FXML
+    private Label heroLoaderLabel;
+    @FXML
     private Label heroTitle;
     @FXML
     private Label heroBadge;
@@ -132,8 +135,6 @@ public class PrincipalController {
     // Panel principal - Instancias
     @FXML
     private FlowPane instancesGrid;
-    @FXML
-    private Button viewGridButton;
 
     // Footer / Progress
     @FXML
@@ -300,8 +301,13 @@ public class PrincipalController {
         if (instances.isEmpty() && toDisplay == null) {
             heroTitle.setText("Biblioteca");
             heroBadge.setText("MULTIMINECRAFT");
+            heroBadge.setStyle("");
             lastPlayedLabel.setText("Sin instancias aún");
             heroSubtitle.setText("Crea tu primera instancia para comenzar a jugar.");
+            if (heroLoaderLabel != null) {
+                heroLoaderLabel.setText("");
+                heroLoaderLabel.setStyle("");
+            }
             return;
         }
 
@@ -322,21 +328,28 @@ public class PrincipalController {
 
         if (toDisplay != null) {
             heroTitle.setText(toDisplay.getName());
-            
-            // Si es la instancia que acabamos de seleccionar manualmente
-            if (selectedInstance != null && toDisplay.getName().equals(selectedInstance.getName())) {
-                heroBadge.setText("SELECCIONADA");
+
+            boolean isSelected = selectedInstance != null
+                    && toDisplay.getName().equals(selectedInstance.getName());
+            if (isSelected) {
+                heroBadge.setText("Instancias");
+                applyHeroLoaderBadgeStyle(heroBadge, toDisplay.getLoader());
             } else {
                 heroBadge.setText("ÚLTIMA");
+                heroBadge.setStyle("");
             }
 
             if (toDisplay.getLastPlayed() != null) {
-                lastPlayedLabel.setText("Jugaste por última vez hace " + formatRelativeTime(toDisplay.getLastPlayed()));
+                lastPlayedLabel.setText("Jugaste por última vez " + formatRelativeTime(toDisplay.getLastPlayed()));
             } else {
                 lastPlayedLabel.setText("¡Listo para jugar!");
             }
-            
-            heroSubtitle.setText("Minecraft " + toDisplay.getVersion() + " " + toDisplay.getLoader().getDisplayName());
+
+            heroSubtitle.setText("Minecraft " + toDisplay.getVersion());
+            if (heroLoaderLabel != null) {
+                heroLoaderLabel.setText("· " + toDisplay.getLoader().getDisplayName());
+                applyHeroLoaderTypeStyle(heroLoaderLabel, toDisplay.getLoader());
+            }
         }
     }
 
@@ -389,6 +402,15 @@ public class PrincipalController {
 
         // Agregar tarjeta "Nueva Instancia" al final
         instancesGrid.getChildren().add(createNewInstanceCard());
+
+        // Misma instancia seleccionada pero con datos recargados desde disco (p. ej. tras editar)
+        if (selectedInstance != null) {
+            String selName = selectedInstance.getName();
+            instances.stream()
+                    .filter(i -> selName.equals(i.getName()))
+                    .findFirst()
+                    .ifPresent(this::selectInstance);
+        }
 
         // Si hay instancias, seleccionar la primera por defecto
         if (!instances.isEmpty() && selectedInstance == null) {
@@ -472,12 +494,7 @@ public class PrincipalController {
         Label combinedBadge = new Label(combinedInfo);
         combinedBadge.getStyleClass().add("instance-card-version-badge");
         combinedBadge.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
-
-        if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FORGE) {
-            combinedBadge.setStyle("-fx-text-fill: #e67e22; -fx-background-color: rgba(230, 126, 34, 0.15);");
-        } else if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FABRIC) {
-            combinedBadge.setStyle("-fx-text-fill: #f1c40f; -fx-background-color: rgba(241, 196, 15, 0.15);");
-        }
+        applyLoaderBadgeStyle(combinedBadge, instance.getLoader());
 
         metaRow.getChildren().add(combinedBadge);
 
@@ -513,6 +530,50 @@ public class PrincipalController {
         });
 
         return cardWrapper;
+    }
+
+    /** Badge verde del banner al seleccionar: borde/texto según Forge (verde), Fabric (azul), Vanilla (amarillo) */
+    private static void applyHeroLoaderBadgeStyle(Label badge, LoaderType loader) {
+        if (loader == null) {
+            loader = LoaderType.VANILLA;
+        }
+        String base = "-fx-font-size: 10px; -fx-font-weight: bold; -fx-border-width: 1; -fx-border-radius: 3; "
+                + "-fx-background-radius: 3; -fx-padding: 3 8;";
+        switch (loader) {
+            case FORGE -> badge.setStyle(base
+                    + " -fx-text-fill: #22c55e; -fx-border-color: #22c55e; -fx-background-color: rgba(34, 197, 94, 0.1);");
+            case FABRIC -> badge.setStyle(base
+                    + " -fx-text-fill: #3b82f6; -fx-border-color: #3b82f6; -fx-background-color: rgba(59, 130, 246, 0.1);");
+            case VANILLA -> badge.setStyle(base
+                    + " -fx-text-fill: #eab308; -fx-border-color: #eab308; -fx-background-color: rgba(234, 179, 8, 0.12);");
+        }
+    }
+
+    /** Color del nombre del tipo (Forge/Fabric/Vanilla) en la línea de detalle */
+    private static void applyHeroLoaderTypeStyle(Label label, LoaderType loader) {
+        if (loader == null) {
+            loader = LoaderType.VANILLA;
+        }
+        switch (loader) {
+            case FORGE -> label.setStyle("-fx-text-fill: #22c55e; -fx-font-size: 14px; -fx-font-weight: bold;");
+            case FABRIC -> label.setStyle("-fx-text-fill: #3b82f6; -fx-font-size: 14px; -fx-font-weight: bold;");
+            case VANILLA -> label.setStyle("-fx-text-fill: #eab308; -fx-font-size: 14px; -fx-font-weight: bold;");
+        }
+    }
+
+    /** Colores del badge de versión: Forge verde, Fabric azul, Vanilla amarillo */
+    private static void applyLoaderBadgeStyle(Label badge, LoaderType loader) {
+        if (loader == null) {
+            loader = LoaderType.VANILLA;
+        }
+        switch (loader) {
+            case FORGE -> badge.setStyle(
+                    "-fx-text-fill: #22c55e; -fx-background-color: rgba(34, 197, 94, 0.18);");
+            case FABRIC -> badge.setStyle(
+                    "-fx-text-fill: #3b82f6; -fx-background-color: rgba(59, 130, 246, 0.18);");
+            case VANILLA -> badge.setStyle(
+                    "-fx-text-fill: #eab308; -fx-background-color: rgba(234, 179, 8, 0.2);");
+        }
     }
 
     /**
@@ -824,10 +885,9 @@ public class PrincipalController {
             
             stage.showAndWait();
             
-            // Refrescar UI después de editar
+            // Refrescar UI después de editar (loadInstances re-sincroniza la instancia seleccionada desde disco)
             loadInstances();
-            updateSidebarCard(selectedInstance);
-            
+
         } catch (Exception e) {
             logger.error("Error al abrir ventana de edición", e);
             AlertUtil.showError("Error", "No se pudo abrir la ventana de edición: " + e.getMessage());
@@ -886,16 +946,6 @@ public class PrincipalController {
         alert.setContentText("La sección \"" + sectionName + "\" estará disponible próximamente.");
         AlertUtil.styleAlert(alert);
         alert.showAndWait();
-    }
-
-    // ==================== VISTA GRID / LISTA ====================
-
-    @FXML
-    private void onViewGridClicked() {
-        // Solo mantenemos la cuadrícula en este diseño compacto
-        if (!viewGridButton.getStyleClass().contains("view-mode-active")) {
-            viewGridButton.getStyleClass().add("view-mode-active");
-        }
     }
 
     // ==================== ACCIONES DE INSTANCIAS ====================

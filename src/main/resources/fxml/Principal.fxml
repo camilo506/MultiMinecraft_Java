@@ -131,7 +131,10 @@
                                     <Label fx:id="lastPlayedLabel" styleClass="hero-time" text="hace 2 horas" />
                                 </HBox>
                                 <Label fx:id="heroTitle" style="-fx-font-size: 28px;" styleClass="hero-title" text="Biblioteca" />
-                                <Label fx:id="heroSubtitle" style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" styleClass="hero-subtitle" text="Vuelve a tu aventura." />
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label fx:id="heroSubtitle" style="-fx-font-size: 11px; -fx-text-fill: #8899aa;" styleClass="hero-subtitle" text="Vuelve a tu aventura." />
+                                    <Label fx:id="heroLoaderLabel" styleClass="hero-loader-type" text="" />
+                                </HBox>
                             </VBox>
                         </StackPane>
                     </VBox>
@@ -144,7 +147,6 @@
                             </padding>
                             <Label styleClass="section-title" text="Instancias" />
                             <Region HBox.hgrow="ALWAYS" />
-                            <Button fx:id="viewGridButton" onAction="#onViewGridClicked" styleClass="view-mode-button, view-mode-active" text="⊞" />
                         </HBox>
                         
                         <ScrollPane fx:id="instancesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" maxHeight="230" styleClass="instances-scroll" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">

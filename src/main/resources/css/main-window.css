@@ -290,6 +290,12 @@
     -fx-font-size: 14px;
 }
 
+/* Tipo de loader junto a la versión (color vía código en selección) */
+.hero-loader-type {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
 /* =======================
    SECCIÓN DE INSTANCIAS
    ======================= */
@@ -297,32 +303,6 @@
     -fx-text-fill: #ffffff;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-}
-
-/* ---- Botones de vista (grid/lista) ---- */
-.view-mode-button {
-    -fx-background-color: #1a2635;
-    -fx-text-fill: #5a7a90;
-    -fx-font-size: 14px;
-    -fx-background-radius: 6;
-    -fx-border-color: #2a3f55;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-cursor: hand;
-    -fx-padding: 4 10;
-    -fx-min-width: 32;
-    -fx-min-height: 28;
-}
-
-.view-mode-button:hover {
-    -fx-background-color: #243650;
-    -fx-text-fill: #ffffff;
-}
-
-.view-mode-active {
-    -fx-background-color: #243650;
-    -fx-text-fill: #ffffff;
-    -fx-border-color: #3a5570;
 }
 
 /* =======================
@@ -367,11 +347,10 @@
     -fx-font-weight: bold;
 }
 
+/* Base del badge; colores por tipo se aplican en código (Forge/Fabric/Vanilla) */
 .instance-card-version-badge {
-    -fx-text-fill: #26d9a0;
     -fx-font-size: 9px;
     -fx-font-weight: bold;
-    -fx-background-color: rgba(38, 217, 160, 0.15);
     -fx-background-radius: 4;
     -fx-padding: 1 5;
 }

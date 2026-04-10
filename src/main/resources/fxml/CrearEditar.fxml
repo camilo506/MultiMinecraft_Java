@@ -18,7 +18,7 @@
             <padding>
                 <Insets bottom="0" left="12" right="0" top="0" />
             </padding>
-            <Label styleClass="title-bar-text" text="MonkeyCraft" />
+            <Label styleClass="title-bar-text" text="MultiMinecraft" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
             <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
@@ -71,20 +71,22 @@
 
             <Region prefHeight="16"/>
 
-            <!-- Fila: Versión de Minecraft + Tipo -->
-            <HBox spacing="16" alignment="CENTER_LEFT">
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="VERSIÓN DE MINECRAFT" styleClass="field-label"/>
-                    <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER_LEFT">
-                        <ComboBox fx:id="versionComboBox" promptText="Release 1.20.4" styleClass="input-combo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    </HBox>
-                </VBox>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="TIPO" styleClass="field-label"/>
-                    <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER_LEFT">
-                        <ComboBox fx:id="loaderTypeComboBox" promptText="Vanilla" styleClass="input-combo" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    </HBox>
-                </VBox>
+            <!-- Fila: Versión de Minecraft + Tipo (grupo junto y centrado) -->
+            <HBox alignment="CENTER">
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="5" alignment="TOP_CENTER">
+                        <Label text="VERSIÓN DE MINECRAFT" styleClass="field-label"/>
+                        <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER" maxWidth="Infinity">
+                            <ComboBox fx:id="versionComboBox" promptText="Release 1.20.4" styleClass="input-combo" prefWidth="110" maxWidth="110"/>
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="5" alignment="TOP_CENTER">
+                        <Label text="TIPO" styleClass="field-label"/>
+                        <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER" maxWidth="Infinity">
+                            <ComboBox fx:id="loaderTypeComboBox" promptText="Vanilla" styleClass="input-combo" prefWidth="110" maxWidth="110"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
             </HBox>
 
             <Region prefHeight="16"/>

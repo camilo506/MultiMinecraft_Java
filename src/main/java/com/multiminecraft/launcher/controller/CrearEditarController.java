@@ -10,6 +10,7 @@ import com.multiminecraft.launcher.service.ConfigService;
 import com.multiminecraft.launcher.util.AlertUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controlador para crear nuevas instancias
@@ -156,13 +158,24 @@ public class CrearEditarController {
                     List<String> versionIds = availableVersions.stream()
                             .map(MinecraftVersion::getId)
                             .toList();
-                    
-                    versionComboBox.setItems(FXCollections.observableArrayList(versionIds));
-                    
-                    if (!versionIds.isEmpty()) {
-                        versionComboBox.setValue(versionIds.get(0)); // Seleccionar la más reciente
+                    ObservableList<String> items = FXCollections.observableArrayList(versionIds);
+
+                    // Al editar, mostrar la versión de Minecraft con la que se creó la instancia (no la última release)
+                    if (isEditMode && currentInstance != null && currentInstance.getVersion() != null
+                            && !currentInstance.getVersion().isBlank()) {
+                        String saved = currentInstance.getVersion().trim();
+                        if (!items.contains(saved)) {
+                            items.add(0, saved);
+                        }
+                        versionComboBox.setItems(items);
+                        versionComboBox.setValue(saved);
+                    } else {
+                        versionComboBox.setItems(items);
+                        if (!versionIds.isEmpty()) {
+                            versionComboBox.setValue(versionIds.get(0));
+                        }
                     }
-                    
+
                     versionComboBox.setDisable(false);
                     
                     logger.info("Cargadas {} versiones de Minecraft", versionIds.size());
@@ -272,8 +285,14 @@ public class CrearEditarController {
         Instance instance = isEditMode ? currentInstance : new Instance(name, version, loaderType);
         if (!isEditMode) {
             instance.setName(name);
+        } else {
+            String prevVersion = instance.getVersion();
+            LoaderType prevLoader = instance.getLoader();
             instance.setVersion(version);
             instance.setLoader(loaderType);
+            if (!Objects.equals(prevVersion, version) || prevLoader != loaderType) {
+                instance.setLoaderVersion(null);
+            }
         }
 
         instance.setMemory(((int) memorySlider.getValue()) + "G");

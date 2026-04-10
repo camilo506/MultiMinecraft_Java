@@ -15,6 +15,8 @@ public class Instance {
     private String icon;
     private String playerName;
     private LocalDateTime lastPlayed;
+    /** Fecha/hora en que se creó la instancia en el launcher (persistida en instance.json) */
+    private LocalDateTime createdAt;
     private long totalPlaytime; // en segundos
 
     public Instance() {
@@ -103,6 +105,14 @@ public class Instance {
 
     public void setLastPlayed(LocalDateTime lastPlayed) {
         this.lastPlayed = lastPlayed;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public long getTotalPlaytime() {
