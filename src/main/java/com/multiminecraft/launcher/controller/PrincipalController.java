@@ -59,6 +59,14 @@ public class PrincipalController {
 
     private static final Logger logger = LoggerFactory.getLogger(PrincipalController.class);
 
+    /**
+     * URL de la imagen del banner en GitHub.
+     * Cambiar esta imagen en el repositorio actualiza el banner de todos los launchers.
+     * Si no hay internet, se usa la imagen local (Banner.png) como fallback.
+     */
+    private static final String REMOTE_BANNER_URL =
+            "https://raw.githubusercontent.com/camilo506/MinecraftBanner/main/banner-remote.png";
+
     private final InstanceService instanceService;
     private final LaunchService launchService;
     private Instance selectedInstance;
@@ -198,6 +206,9 @@ public class PrincipalController {
 
         // Actualizar info del banner con la instancia más reciente por defecto
         updateBannerInfo(null);
+
+        // Intentar cargar banner remoto desde GitHub (fallback: imagen local)
+        loadRemoteBanner();
     }
 
     /**
@@ -241,6 +252,39 @@ public class PrincipalController {
         heroBannerImage.setViewport(new Rectangle2D(x, y, w, h));
         heroBannerImage.setFitWidth(viewWidth);
         heroBannerImage.setFitHeight(viewHeight);
+    }
+
+    /**
+     * Intenta cargar la imagen del banner desde GitHub en un hilo de fondo.
+     * Si la descarga falla (sin internet, URL inválida, etc.), se mantiene
+     * la imagen local por defecto sin afectar la experiencia del usuario.
+     */
+    private void loadRemoteBanner() {
+        new Thread(() -> {
+            try {
+                logger.info("Intentando cargar banner remoto desde: {}", REMOTE_BANNER_URL);
+                Image remoteImage = new Image(REMOTE_BANNER_URL, true); // backgroundLoading=true
+
+                // Esperar a que termine la carga (con timeout de 10 segundos)
+                long startTime = System.currentTimeMillis();
+                while (remoteImage.getProgress() < 1.0 && !remoteImage.isError()
+                        && (System.currentTimeMillis() - startTime) < 10_000) {
+                    Thread.sleep(100);
+                }
+
+                if (!remoteImage.isError() && remoteImage.getWidth() > 0) {
+                    Platform.runLater(() -> {
+                        heroBannerImage.setImage(remoteImage);
+                        logger.info("Banner remoto cargado exitosamente ({}x{})",
+                                (int) remoteImage.getWidth(), (int) remoteImage.getHeight());
+                    });
+                } else {
+                    logger.info("No se pudo cargar el banner remoto, usando imagen local");
+                }
+            } catch (Exception e) {
+                logger.debug("Banner remoto no disponible (sin internet o URL inválida): {}", e.getMessage());
+            }
+        }, "BannerRemoteLoader").start();
     }
 
     /**
