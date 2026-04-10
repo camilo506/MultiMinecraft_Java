@@ -83,8 +83,6 @@ public class PrincipalController {
     private Button maximizeBtn;
     @FXML
     private Button closeBtn;
-    @FXML
-    private TextField searchField;
 
     // Sidebar - Navegación
     @FXML
@@ -1099,7 +1097,7 @@ public class PrincipalController {
         logger.debug("Recursos de instancia: {}", selectedInstance.getName());
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RecursosView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Recursos.fxml"));
             Parent recursosView = loader.load();
 
             RecursosController controller = loader.getController();

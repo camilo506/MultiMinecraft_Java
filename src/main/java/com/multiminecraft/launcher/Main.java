@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
  * Es el truco estándar para ejecutar apps JavaFX 11+ desde un fat-JAR o IDE.
  */
 public class Main {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    
+
     public static void main(String[] args) {
         try {
             logger.info("Iniciando aplicación desde Main...");

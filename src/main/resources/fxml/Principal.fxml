@@ -104,7 +104,7 @@
    <center>
         <StackPane>
             <!-- ÁREA CENTRAL (CONTENIDO PRINCIPAL) -->
-            <HBox alignment="TOP_LEFT" prefHeight="970.0" prefWidth="1024.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
+            <HBox alignment="TOP_LEFT" prefHeight="618.0" prefWidth="880.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
                 
                 <!-- Contenedor del panel principal -->
                 <VBox maxWidth="900" minWidth="800" spacing="0" styleClass="main-content" HBox.hgrow="ALWAYS">
@@ -119,10 +119,10 @@
                         </padding>
                         <StackPane fx:id="heroBanner" maxHeight="400" maxWidth="873" styleClass="hero-banner">
                             <ImageView fx:id="heroBannerImage" fitWidth="873" fitHeight="400" translateX="0" translateY="0" preserveRatio="false" styleClass="hero-banner-image" StackPane.alignment="CENTER">
-                                <Image url="@../recursos2/banner-hero.png" />
+                                <Image url="@../recursos2/Banner.png" />
                             </ImageView>
                             <Region styleClass="hero-banner-overlay" maxWidth="873" translateX="0" />
-                            <VBox alignment="BOTTOM_LEFT" prefHeight="850.0" prefWidth="1024.0" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
+                            <VBox alignment="BOTTOM_LEFT" prefHeight="400.0" prefWidth="873.0" spacing="4" styleClass="hero-banner-content" StackPane.alignment="BOTTOM_LEFT">
                                 <padding>
                                     <Insets bottom="16" left="20" right="20" top="10" />
                                 </padding>

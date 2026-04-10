@@ -23,6 +23,9 @@ public class RecursosController {
     
     @FXML private Label titleLabel;
     @FXML private Button modPackButton;
+    @FXML private Button modButton;
+    @FXML private Button shadersButton;
+    @FXML private Button resourcePacksButton;
     
     @SuppressWarnings("unused")
     private Instance instance;
