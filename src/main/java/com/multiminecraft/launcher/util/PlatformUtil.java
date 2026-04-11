@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -54,9 +55,9 @@ public class PlatformUtil {
             case WINDOWS:
                 String appData = System.getenv("APPDATA");
                 if (appData != null) {
-                    launcherDir = Paths.get(appData, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(appData, ".MultiMinecraft");
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft");
                 }
                 break;
 
@@ -67,14 +68,14 @@ public class PlatformUtil {
             case LINUX:
                 String xdgData = System.getenv("XDG_DATA_HOME");
                 if (xdgData != null) {
-                    launcherDir = Paths.get(xdgData, "MultiMinecraft_Java");
+                    launcherDir = Paths.get(xdgData, "MultiMinecraft");
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft");
                 }
                 break;
 
             default:
-                launcherDir = Paths.get(userHome, ".MultiMinecraft_Java");
+                launcherDir = Paths.get(userHome, ".MultiMinecraft");
                 break;
         }
 
@@ -143,7 +144,20 @@ public class PlatformUtil {
     public static String getSystemJavaPath() {
         String javaHome = System.getProperty("java.home");
         String javaBin = getOS() == OS.WINDOWS ? "java.exe" : "java";
-        return Paths.get(javaHome, "bin", javaBin).toString();
+        Path javaPath = Paths.get(javaHome, "bin", javaBin);
+        
+        if (Files.exists(javaPath)) {
+            return javaPath.toString();
+        }
+        
+        // Si no existe en java.home, buscar en el PATH del sistema o rutas típicas
+        logger.warn("No se encontró Java en java.home: {}. Buscando respaldo...", javaHome);
+        String found = findJavaInstallation(8); // Buscar al menos Java 8
+        if (found != null) {
+            return found;
+        }
+        
+        return javaPath.toString(); // Retornar el original aunque no exista (causará error descriptivo luego)
     }
 
     /**

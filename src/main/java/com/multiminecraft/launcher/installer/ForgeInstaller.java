@@ -264,23 +264,11 @@ public class ForgeInstaller {
     }
     
     /**
-     * Obtiene la ruta de Java
+     * Obtiene la ruta de Java adecuada
      */
     private String getJavaPath() {
-        String javaHome = System.getProperty("java.home");
-        String separator = System.getProperty("file.separator");
-        String javaPath = javaHome + separator + "bin" + separator + "java";
-        
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            javaPath += ".exe";
-        }
-        
-        File javaFile = new File(javaPath);
-        if (!javaFile.exists()) {
-            throw new IllegalStateException("No se encontró Java en: " + javaPath);
-        }
-        
-        return javaPath;
+        // Usar ConfigService para encontrar el mejor Java disponible
+        return com.multiminecraft.launcher.service.ConfigService.getInstance().getDefaultJavaPath();
     }
     
     /**
