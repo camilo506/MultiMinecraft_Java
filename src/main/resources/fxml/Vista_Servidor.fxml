@@ -10,158 +10,128 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="587.0" prefWidth="870.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.Vista_ServidorController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="875.0" minWidth="875.0" prefWidth="875.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.Vista_ServidorController">
 
     <padding>
-        <Insets bottom="20" left="28" right="28" top="22" />
+        <Insets bottom="0" left="0" right="0" top="0" />
     </padding>
 
     <!-- ====== HEADER: Título + botón cerrar ====== -->
     <HBox alignment="CENTER_LEFT" spacing="10">
-        <VBox spacing="4" HBox.hgrow="ALWAYS">
-            <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="ModPack Pajaland servers" />
-            <Label style="-fx-font-size: 13px; -fx-text-fill: #6b7b8d;" text="Conecta con servidores de Minecraft y juega con amigos." />
+        <padding>
+            <Insets bottom="10" left="22" right="22" top="18" />
+        </padding>
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;" text="ModPack Pajaland servers" />
+            <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d;" text="Conecta con servidores y juega con amigos." />
         </VBox>
-        <Button onAction="#onClose" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: #8899aa; -fx-background-radius: 8; -fx-padding: 6 12; -fx-cursor: hand; -fx-font-size: 12px;" text="✕ Volver" />
+        <Button onAction="#onClose" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: #8899aa; -fx-background-radius: 8; -fx-padding: 5 10; -fx-cursor: hand; -fx-font-size: 11px;" text="✕" />
     </HBox>
 
     <Region prefHeight="18" />
 
-    <!-- ====== CONTENIDO PRINCIPAL ====== -->
-    <HBox spacing="14" VBox.vgrow="ALWAYS">
+    <!-- ====== CONTENIDO PRINCIPAL (layout horizontal) ====== -->
+    <VBox spacing="14" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="20" left="28" right="28" top="0" />
+        </padding>
 
-        <!-- ====== COLUMNA IZQUIERDA: Categorías ====== -->
-        <VBox maxWidth="140" minWidth="140" prefWidth="140" spacing="10" VBox.vgrow="ALWAYS">
+        <!-- TARJETA DESTACADA (Featured Server) -->
+        <StackPane maxHeight="270" prefHeight="270" style="-fx-background-color: #1a2332; -fx-background-radius: 16;" VBox.vgrow="NEVER">
 
-            <!-- Spacer para empujar los botones hacia abajo -->
-            <Region VBox.vgrow="ALWAYS" />
+            <!-- Imagen de fondo -->
+            <ImageView fitHeight="270" fitWidth="820" preserveRatio="false" style="-fx-opacity: 0.4;" StackPane.alignment="CENTER">
+                <image><Image url="@../recursos2/Banner.png" /></image>
+            </ImageView>
 
-            <!-- Botón: Mods -->
-            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
-                <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
-                <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
-                    <image><Image url="@../icons/block-emerald-block.png" /></image>
-                </ImageView>
-                <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Mods" />
+            <!-- Degradado oscuro -->
+            <Region style="-fx-background-color: linear-gradient(to top, #1a2332 0%, rgba(26,35,50,0.7) 50%, rgba(26,35,50,0.3) 100%); -fx-background-radius: 16;" />
+
+            <!-- Contenido sobre la imagen -->
+            <VBox alignment="BOTTOM_LEFT" spacing="6" StackPane.alignment="BOTTOM_LEFT">
+                <padding><Insets bottom="22" left="24" right="24" top="20" /></padding>
+                <Label style="-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 4;" text="DESTACADO" />
+                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="MultiMinecraft Survival" />
+                <Label style="-fx-font-size: 13px; -fx-text-fill: #8899aa; -fx-wrap-text: true;" text="Servidor oficial de supervivencia. Únete y construye tu mundo con amigos." wrapText="true" />
+            </VBox>
+
+            <!-- Botón Conectar -->
+            <HBox alignment="BOTTOM_RIGHT" StackPane.alignment="BOTTOM_RIGHT">
+                <padding><Insets bottom="22" right="24" /></padding>
+                <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Conectar" />
             </HBox>
 
-            <!-- Botón: MiniJuegos -->
-            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
-                <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
-                <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
-                    <image><Image url="@../icons/block-lamp.png" /></image>
-                </ImageView>
-                <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Shader " />
-            </HBox>
+        </StackPane>
 
-            <!-- Botón: Creativo -->
-            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
-                <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
-                <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
-                    <image><Image url="@../icons/block-Sphax.png" /></image>
-                </ImageView>
-                <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Resources " />
-            </HBox>
+        <!-- FILA INFERIOR: Categorías + Tarjetas pequeñas (Side-by-side) -->
+        <HBox spacing="14" VBox.vgrow="ALWAYS">
 
-        </VBox>
-
-        <!-- ====== COLUMNA DERECHA: Servidores destacados ====== -->
-        <VBox spacing="14" HBox.hgrow="ALWAYS">
-
-            <!-- TARJETA DESTACADA (Featured Server) -->
-            <StackPane maxHeight="270" prefHeight="270" style="-fx-background-color: #1a2332; -fx-background-radius: 16;" VBox.vgrow="NEVER">
-
-                <!-- Imagen de fondo -->
-                <ImageView fitHeight="270" fitWidth="640" preserveRatio="false" style="-fx-opacity: 0.4;" StackPane.alignment="CENTER">
-                    <image><Image url="@../recursos2/Banner.png" /></image>
-                </ImageView>
-
-                <!-- Degradado oscuro sobre la imagen -->
-                <Region style="-fx-background-color: linear-gradient(to top, #1a2332 0%, rgba(26,35,50,0.7) 50%, rgba(26,35,50,0.3) 100%); -fx-background-radius: 16;" />
-
-                <!-- Contenido sobre la imagen -->
-                <VBox alignment="BOTTOM_LEFT" spacing="6" StackPane.alignment="BOTTOM_LEFT">
-                    <padding><Insets bottom="20" left="22" right="22" top="20" /></padding>
-
-                    <!-- Badge TRENDING -->
-                    <Label style="-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 4;" text="DESCARGAS" />
-
-                    <!-- Nombre del servidor -->
-                    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;" text="RECURSOS PARA EL SERVIDOR" />
-
-                    <!-- Descripción -->
-                    <Label style="-fx-font-size: 12px; -fx-text-fill: #8899aa; -fx-wrap-text: true;" text="Los recursos podrán descargarse e instalarse automáticamente en el launcher." wrapText="true" />
-                </VBox>
-
-                <!-- Botón Conectar -->
-                <HBox alignment="BOTTOM_RIGHT" StackPane.alignment="BOTTOM_RIGHT">
-                    <padding><Insets bottom="20" right="22" /></padding>
+            <!-- Columna Izquierda: Categorías -->
+            <VBox maxWidth="140" minWidth="140" prefWidth="140" spacing="10">
+                <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
+                    <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
+                    <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
+                        <image><Image url="@../icons/block-emerald-block.png" /></image>
+                    </ImageView>
+                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Mods" />
                 </HBox>
+                <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
+                    <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
+                    <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
+                        <image><Image url="@../icons/block-lamp.png" /></image>
+                    </ImageView>
+                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Shader ..." />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
+                    <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
+                    <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
+                        <image><Image url="@../icons/block-Sphax.png" /></image>
+                    </ImageView>
+                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Resorser..." />
+                </HBox>
+            </VBox>
 
-            </StackPane>
-
-            <!-- FILA DE TARJETAS PEQUEÑAS -->
-            <HBox spacing="14" VBox.vgrow="ALWAYS">
-
-                <!-- Tarjeta 1: MiniJuegos -->
-                <VBox spacing="8" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 14; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 14;" HBox.hgrow="ALWAYS">
-                    <padding><Insets bottom="14" left="16" right="16" top="14" /></padding>
-
-                    <!-- Header: ícono + versión -->
+            <!-- Sección Derecha: Tarjetas de Servidor (Horizontal) -->
+            <HBox spacing="14" HBox.hgrow="ALWAYS">
+                <!-- Tarjeta 1 -->
+                <VBox spacing="10" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 14; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 14;" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                             <image><Image url="@../icons/art-TNT.png" /></image>
                         </ImageView>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V_Forge 1.20.1" />
+                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V1.20.1" />
                     </HBox>
-
-                    <!-- Título -->
-                    <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;" text="Exiliados intancia" />
-
-                    <!-- Descripción -->
-                    <Label prefHeight="32.0" prefWidth="318.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta opción te genera la instancia completa para que solo la descargues y puedas jugar." wrapText="true" />
-
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Exiliados ModPack" />
+                    <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta funcion te permite crear una instancia completa con todo lo nesesario pra entrar al servidor" wrapText="true" />
                     <Region VBox.vgrow="ALWAYS" />
-
-                    <!-- Footer: jugadores + botón agregar -->
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Region HBox.hgrow="ALWAYS" />
-                  <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
                     </HBox>
                 </VBox>
 
-                <!-- Tarjeta 2: Modded -->
-                <VBox spacing="8" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 14; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 14;" HBox.hgrow="ALWAYS">
-                    <padding><Insets bottom="14" left="16" right="16" top="14" /></padding>
-
-                    <!-- Header: ícono + versión -->
+                <!-- Tarjeta 2 -->
+                <VBox spacing="10" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 14; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 14;" HBox.hgrow="ALWAYS">
+                    <padding><Insets bottom="16" left="20" right="20" top="16" /></padding>
                     <HBox alignment="CENTER_LEFT" spacing="8">
                         <ImageView fitHeight="24" fitWidth="24" preserveRatio="true">
                             <image><Image url="@../icons/block-emerald-block.png" /></image>
                         </ImageView>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V_Forge 1.20.1" />
+                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V1.20.1" />
                     </HBox>
-
-                    <!-- Título -->
-                    <Label style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;" text="Mods" />
-
-                    <!-- Descripción -->
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Modded Survival" />
                     <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Servidor con mods de tecnología y magia para aventuras épicas." wrapText="true" />
-
                     <Region VBox.vgrow="ALWAYS" />
-
-                    <!-- Footer: jugadores + botón agregar -->
                     <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label style="-fx-text-fill: #26d9a0; -fx-font-size: 12px; -fx-font-weight: bold;" text="32 Jugadores" />
                         <Region HBox.hgrow="ALWAYS" />
+                        <Button style="-fx-background-color: rgba(38,217,160,0.1); -fx-text-fill: #26d9a0; -fx-font-size: 14px; -fx-background-radius: 6; -fx-padding: 2 8; -fx-cursor: hand; -fx-border-color: rgba(38,217,160,0.2); -fx-border-radius: 6;" text="+" />
                     </HBox>
                 </VBox>
-
             </HBox>
-
-        </VBox>
-
-    </HBox>
+        </HBox>
+    </VBox>
 
 </VBox>

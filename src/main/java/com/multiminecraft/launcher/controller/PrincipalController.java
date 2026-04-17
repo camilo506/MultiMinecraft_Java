@@ -1014,6 +1014,7 @@ public class PrincipalController {
             mainContentArea.setVisible(false);
             mainContentArea.setManaged(false);
 
+            StackPane.setAlignment(vistaServidorNode, Pos.TOP_CENTER);
             centerStack.getChildren().add(vistaServidorNode);
             logger.info("Vista_Servidor mostrada en el área central");
 
