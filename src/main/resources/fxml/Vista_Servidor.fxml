@@ -50,15 +50,14 @@
             <!-- Contenido sobre la imagen -->
             <VBox alignment="BOTTOM_LEFT" spacing="6" StackPane.alignment="BOTTOM_LEFT">
                 <padding><Insets bottom="22" left="24" right="24" top="20" /></padding>
-                <Label style="-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 4;" text="DESTACADO" />
-                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="MultiMinecraft Survival" />
-                <Label style="-fx-font-size: 13px; -fx-text-fill: #8899aa; -fx-wrap-text: true;" text="Servidor oficial de supervivencia. Únete y construye tu mundo con amigos." wrapText="true" />
+                <Label style="-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 3 10; -fx-background-radius: 4;" text="DESCARGAS" />
+                <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: white;" text="Recursos para el servidor" />
+                <Label style="-fx-font-size: 13px; -fx-text-fill: #8899aa; -fx-wrap-text: true;" text="Los recursos podrán descargarse e instalarse automáticamente desde el launcher." wrapText="true" />
             </VBox>
 
             <!-- Botón Conectar -->
             <HBox alignment="BOTTOM_RIGHT" StackPane.alignment="BOTTOM_RIGHT">
                 <padding><Insets bottom="22" right="24" /></padding>
-                <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 20; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Conectar" />
             </HBox>
 
         </StackPane>
@@ -80,14 +79,14 @@
                     <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
                         <image><Image url="@../icons/block-lamp.png" /></image>
                     </ImageView>
-                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Shader ..." />
+                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Shader" />
                 </HBox>
                 <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
                     <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
                     <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
                         <image><Image url="@../icons/block-Sphax.png" /></image>
                     </ImageView>
-                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Resorser..." />
+                    <Label style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Resourcer" />
                 </HBox>
             </VBox>
 
@@ -101,10 +100,10 @@
                             <image><Image url="@../icons/art-TNT.png" /></image>
                         </ImageView>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V1.20.1" />
+                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V_Forge 1.20.1" />
                     </HBox>
                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Exiliados ModPack" />
-                    <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta funcion te permite crear una instancia completa con todo lo nesesario pra entrar al servidor" wrapText="true" />
+                    <Label prefHeight="32.0" prefWidth="279.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta funcion te permite crear una instancia completa con todo lo nesesario pra entrar al servidor" wrapText="true" />
                     <Region VBox.vgrow="ALWAYS" />
                     <HBox alignment="CENTER_RIGHT">
                         <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
@@ -119,15 +118,13 @@
                             <image><Image url="@../icons/block-emerald-block.png" /></image>
                         </ImageView>
                         <Region HBox.hgrow="ALWAYS" />
-                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V1.20.1" />
+                        <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V_Forge 1.20.1" />
                     </HBox>
-                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Modded Survival" />
-                    <Label style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Servidor con mods de tecnología y magia para aventuras épicas." wrapText="true" />
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Mods" />
+                    <Label prefHeight="71.0" prefWidth="290.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta función automatiza la actualización de los mods del servidor, asegurando que se mantengan sincronizados con la última versión disponible." wrapText="true" />
                     <Region VBox.vgrow="ALWAYS" />
                     <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label style="-fx-text-fill: #26d9a0; -fx-font-size: 12px; -fx-font-weight: bold;" text="32 Jugadores" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button style="-fx-background-color: rgba(38,217,160,0.1); -fx-text-fill: #26d9a0; -fx-font-size: 14px; -fx-background-radius: 6; -fx-padding: 2 8; -fx-cursor: hand; -fx-border-color: rgba(38,217,160,0.2); -fx-border-radius: 6;" text="+" />
                     </HBox>
                 </VBox>
             </HBox>
