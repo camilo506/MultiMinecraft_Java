@@ -10,14 +10,14 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="580.0" prefWidth="840.0" maxHeight="580.0" maxWidth="840.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.Vista_ServidorController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="587.0" prefWidth="870.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.Vista_ServidorController">
 
     <padding>
         <Insets bottom="20" left="28" right="28" top="22" />
     </padding>
 
     <!-- ====== HEADER: Título + botón cerrar ====== -->
-    <HBox alignment="CENTER_LEFT" spacing="10" maxWidth="784.0">
+    <HBox alignment="CENTER_LEFT" spacing="10">
         <VBox spacing="4" HBox.hgrow="ALWAYS">
             <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;" text="ModPack Pajaland servers" />
             <Label style="-fx-font-size: 13px; -fx-text-fill: #6b7b8d;" text="Conecta con servidores de Minecraft y juega con amigos." />
@@ -28,13 +28,13 @@
     <Region prefHeight="18" />
 
     <!-- ====== CONTENIDO PRINCIPAL ====== -->
-    <HBox spacing="14" VBox.vgrow="ALWAYS" maxWidth="784.0">
+    <HBox spacing="14" VBox.vgrow="ALWAYS">
 
         <!-- ====== COLUMNA IZQUIERDA: Categorías ====== -->
-        <VBox spacing="45" prefWidth="180" minWidth="180" maxWidth="180">
+        <VBox maxWidth="140" minWidth="140" prefWidth="140" spacing="45">
 
             <!-- Botón: Survival -->
-            <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;" prefHeight="58">
+            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
                 <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
                 <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
                     <image><Image url="@../icons/block-emerald-block.png" /></image>
@@ -43,7 +43,7 @@
             </HBox>
 
             <!-- Botón: MiniJuegos -->
-            <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;" prefHeight="58">
+            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
                 <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
                 <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
                     <image><Image url="@../icons/block-lamp.png" /></image>
@@ -52,7 +52,7 @@
             </HBox>
 
             <!-- Botón: Creativo -->
-            <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;" prefHeight="58">
+            <HBox alignment="CENTER_LEFT" prefHeight="58" spacing="12" style="-fx-background-color: rgba(255,255,255,0.04); -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.06); -fx-border-radius: 12; -fx-cursor: hand;">
                 <padding><Insets bottom="10" left="14" right="14" top="10" /></padding>
                 <ImageView fitHeight="28" fitWidth="28" preserveRatio="true">
                     <image><Image url="@../icons/block-Sphax.png" /></image>
@@ -66,10 +66,10 @@
         <VBox spacing="14" HBox.hgrow="ALWAYS">
 
             <!-- TARJETA DESTACADA (Featured Server) -->
-            <StackPane style="-fx-background-color: #1a2332; -fx-background-radius: 16;" prefHeight="270" maxHeight="270" VBox.vgrow="NEVER">
+            <StackPane maxHeight="270" prefHeight="270" style="-fx-background-color: #1a2332; -fx-background-radius: 16;" VBox.vgrow="NEVER">
 
                 <!-- Imagen de fondo -->
-                <ImageView fitWidth="640" fitHeight="270" preserveRatio="false" style="-fx-opacity: 0.4;" StackPane.alignment="CENTER">
+                <ImageView fitHeight="270" fitWidth="640" preserveRatio="false" style="-fx-opacity: 0.4;" StackPane.alignment="CENTER">
                     <image><Image url="@../recursos2/Banner.png" /></image>
                 </ImageView>
 

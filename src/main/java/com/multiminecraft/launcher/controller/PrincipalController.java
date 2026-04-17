@@ -1003,8 +1003,9 @@ public class PrincipalController {
             mainContentArea.setVisible(false);
             mainContentArea.setManaged(false);
             
-            // Agregar margen para no cubrir el borde del launcher
-            StackPane.setMargin(vistaServidorNode, new Insets(20));
+            // Mantener separación solo a la izquierda; arriba/abajo/derecha sin margen
+            // para que la vista cubra completamente esas zonas del área central.
+            StackPane.setMargin(vistaServidorNode, new Insets(0, 0, 0, 20));
             centerStack.getChildren().add(vistaServidorNode);
             
             logger.info("Vista_Servidor mostrada en el área central");
