@@ -75,7 +75,7 @@
                 <Button fx:id="navModpacksButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavModpacksClicked" prefHeight="40" styleClass="nav-button" text="✏️ Editar" />
                 <Button fx:id="navResourcePacksButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="📦 Recursos" />
                 <Button fx:id="navMapsButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="🗑️ Eliminar" />
-                <Button fx:id="navConfigButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="⚙️ Configuracion" />
+                <Button fx:id="navConfigButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="⚙️ Servidor" />
             </VBox>
             
             <Region VBox.vgrow="ALWAYS" />
@@ -102,9 +102,9 @@
         </VBox>
     </left>
    <center>
-        <StackPane>
+        <StackPane fx:id="centerStack">
             <!-- ÁREA CENTRAL (CONTENIDO PRINCIPAL) -->
-            <HBox alignment="TOP_LEFT" prefHeight="618.0" prefWidth="880.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
+            <HBox fx:id="mainContentArea" alignment="TOP_LEFT" prefHeight="618.0" prefWidth="880.0" spacing="0" BorderPane.alignment="CENTER" style="-fx-background-color: #131c28;">
                 
                 <!-- Contenedor del panel principal -->
                 <VBox maxWidth="900" minWidth="800" spacing="0" styleClass="main-content" HBox.hgrow="ALWAYS">

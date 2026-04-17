@@ -204,6 +204,12 @@ public class App extends Application {
             if (mainWindowCss != null) {
                 scene.getStylesheets().add(mainWindowCss.toExternalForm());
             }
+
+            // Cargar CSS de la vista de configuración
+            var configCss = App.class.getResource("/css/configuracion.css");
+            if (configCss != null) {
+                scene.getStylesheets().add(configCss.toExternalForm());
+            }
         } catch (Exception e) {
             logger.error("Error al aplicar el tema: {}", theme, e);
         }

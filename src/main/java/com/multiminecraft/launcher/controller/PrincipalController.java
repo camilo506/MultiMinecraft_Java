@@ -61,19 +61,19 @@ public class PrincipalController {
 
     /**
      * URL de la imagen del banner en GitHub.
-     * Cambiar esta imagen en el repositorio actualiza el banner de todos los launchers.
+     * Cambiar esta imagen en el repositorio actualiza el banner de todos los
+     * launchers.
      * Si no hay internet, se usa la imagen local (Banner.png) como fallback.
      */
-    private static final String REMOTE_BANNER_URL =
-            "https://raw.githubusercontent.com/camilo506/MinecraftBanner/main/banner-remote.png";
+    private static final String REMOTE_BANNER_URL = "https://raw.githubusercontent.com/camilo506/MinecraftBanner/main/banner-remote.png";
 
     private final InstanceService instanceService;
     private final LaunchService launchService;
     private Instance selectedInstance;
-    
+
     // Referencia estática para refrescar desde otros controladores
     private static PrincipalController instance;
-    
+
     public static PrincipalController getInstance() {
         return instance;
     }
@@ -153,10 +153,18 @@ public class PrincipalController {
     @FXML
     private ScrollPane instancesScrollPane;
 
+    // Contenedores de vista central
+    @FXML
+    private StackPane centerStack;
+    @FXML
+    private HBox mainContentArea;
+
+    // Nodo de la vista servidor cargada (para poder removerla)
+    private javafx.scene.Node vistaServidorNode;
+
     // Tamaño de tarjetas
     private static final double CARD_WIDTH = 110;
     private static final double CARD_HEIGHT = 125; // Aumentar un poco el alto para evitar cortes verticales
-
 
     public PrincipalController() {
         this.instanceService = new InstanceService();
@@ -445,7 +453,8 @@ public class PrincipalController {
         // Agregar tarjeta "Nueva Instancia" al final
         instancesGrid.getChildren().add(createNewInstanceCard());
 
-        // Misma instancia seleccionada pero con datos recargados desde disco (p. ej. tras editar)
+        // Misma instancia seleccionada pero con datos recargados desde disco (p. ej.
+        // tras editar)
         if (selectedInstance != null) {
             String selName = selectedInstance.getName();
             instances.stream()
@@ -459,7 +468,8 @@ public class PrincipalController {
             selectInstance(instances.get(0));
         }
 
-        // Actualizar selección visual si ya había una seleccionada o mostrar estado por defecto
+        // Actualizar selección visual si ya había una seleccionada o mostrar estado por
+        // defecto
         if (selectedInstance != null) {
             updateInstanceCardsSelection();
         } else {
@@ -574,7 +584,10 @@ public class PrincipalController {
         return cardWrapper;
     }
 
-    /** Badge verde del banner al seleccionar: borde/texto según Forge (verde), Fabric (azul), Vanilla (amarillo) */
+    /**
+     * Badge verde del banner al seleccionar: borde/texto según Forge (verde),
+     * Fabric (azul), Vanilla (amarillo)
+     */
     private static void applyHeroLoaderBadgeStyle(Label badge, LoaderType loader) {
         if (loader == null) {
             loader = LoaderType.VANILLA;
@@ -733,10 +746,10 @@ public class PrincipalController {
             navModpacksButton.setDisable(true);
             navResourcePacksButton.setDisable(true);
             navMapsButton.setDisable(true);
-            
+
             // Mantener el tamaño original de la tarjeta mediante minHeight
             selectedInstanceCard.setMinHeight(160);
-            
+
             // Cargar logo de Monkey Studio más grande y centrado
             try {
                 Image logo = new Image(getClass().getResourceAsStream("/recursos2/Monkey-Logo.png"));
@@ -770,7 +783,7 @@ public class PrincipalController {
         selectedInstanceSidebarIcon.setFitWidth(56);
 
         selectedInstanceSidebarName.setText(instance.getName());
-        
+
         // Formato: Minecraft 1.21.1 Fabric
         String versionText = "Minecraft " + instance.getVersion() + " " + instance.getLoader().getDisplayName();
         selectedInstanceSidebarVersion.setText(versionText);
@@ -796,19 +809,22 @@ public class PrincipalController {
         }
 
         logger.info("Iniciando instancia desde el sidebar: {}", selectedInstance.getName());
-        
+
         try {
             // Aquí llamaríamos a la lógica de lanzamiento.
             // Para simplificar y dado que ya existe la lógica de LaunchService:
             launchService.launchInstance(selectedInstance);
-            
+
             // Opcional: mostrar algún feedback visual en el botón
             sidebarPlayButton.setText("¡Lanzando!");
             sidebarPlayButton.setDisable(true);
-            
+
             // Rehabilitar después de un tiempo
             new Thread(() -> {
-                try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+                }
                 Platform.runLater(() -> {
                     sidebarPlayButton.setText("▶ Jugar");
                     sidebarPlayButton.setDisable(false);
@@ -898,6 +914,7 @@ public class PrincipalController {
 
     @FXML
     private void onNavModpacksClicked() {
+        restoreMainContent();
         if (selectedInstance == null) {
             AlertUtil.showWarning("No hay instancia seleccionada", "Por favor, selecciona una instancia primero.");
             return;
@@ -907,16 +924,16 @@ public class PrincipalController {
             logger.info("Abriendo ventana de edición para: {}", selectedInstance.getName());
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearEditar.fxml"));
             Parent root = loader.load();
-            
+
             CrearEditarController controller = loader.getController();
             controller.setInstanceToEdit(selectedInstance);
-            
+
             Stage stage = new Stage();
             stage.setTitle("Editar Instancia - " + selectedInstance.getName());
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initOwner(App.getPrimaryStage());
             stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
-            
+
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
@@ -924,10 +941,11 @@ public class PrincipalController {
             scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
             stage.setScene(scene);
             stage.setResizable(false);
-            
+
             stage.showAndWait();
-            
-            // Refrescar UI después de editar (loadInstances re-sincroniza la instancia seleccionada desde disco)
+
+            // Refrescar UI después de editar (loadInstances re-sincroniza la instancia
+            // seleccionada desde disco)
             loadInstances();
 
         } catch (Exception e) {
@@ -938,35 +956,37 @@ public class PrincipalController {
 
     @FXML
     private void onNavResourcePacksClicked() {
+        restoreMainContent();
         if (selectedInstance == null) {
             AlertUtil.showWarning("No hay instancia seleccionada", "Selecciona una instancia para abrir su carpeta.");
             return;
         }
-        
+
         logger.info("Abriendo carpeta de la instancia: {}", selectedInstance.getName());
         instanceService.openInstanceFolder(selectedInstance.getName());
     }
 
     @FXML
     private void onNavMapsClicked() {
+        restoreMainContent();
         if (selectedInstance == null) {
             AlertUtil.showWarning("No hay instancia seleccionada", "Selecciona una instancia para eliminarla.");
             return;
         }
-        
-        boolean confirmed = AlertUtil.showConfirmation("Eliminar Instancia", 
-            "¿Estás seguro de que deseas eliminar la instancia \"" + selectedInstance.getName() + "\"?\n\n" +
-            "Esta acción eliminará todos tus mundos, mods y configuraciones de forma permanente.");
-            
+
+        boolean confirmed = AlertUtil.showConfirmation("Eliminar Instancia",
+                "¿Estás seguro de que deseas eliminar la instancia \"" + selectedInstance.getName() + "\"?\n\n" +
+                        "Esta acción eliminará todos tus mundos, mods y configuraciones de forma permanente.");
+
         if (confirmed) {
             try {
                 logger.warn("Eliminando instancia: {}", selectedInstance.getName());
                 instanceService.deleteInstance(selectedInstance.getName());
-                
+
                 selectedInstance = null;
                 updateSidebarCard(null);
                 loadInstances();
-                
+
                 AlertUtil.showInfo("Instancia eliminada", "La instancia se ha eliminado correctamente.");
             } catch (Exception e) {
                 logger.error("Error al eliminar instancia", e);
@@ -978,16 +998,54 @@ public class PrincipalController {
     @FXML
     private void onNavConfigClicked() {
         setActiveNavButton(navConfigButton);
-        showComingSoon("Configuración");
+
+        // Si ya está mostrando la vista del servidor, no hacer nada
+        if (vistaServidorNode != null) {
+            return;
+        }
+
+        try {
+            logger.info("Abriendo Vista_Servidor dentro del área central");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Vista_Servidor.fxml"));
+            Parent root = loader.load();
+            vistaServidorNode = root;
+
+            // Ocultar contenido principal y mostrar Vista_Servidor
+            mainContentArea.setVisible(false);
+            mainContentArea.setManaged(false);
+
+            centerStack.getChildren().add(vistaServidorNode);
+            logger.info("Vista_Servidor mostrada en el área central");
+
+        } catch (IOException e) {
+            logger.error("Error al abrir Vista_Servidor", e);
+            AlertUtil.showError("Error", "No se pudo abrir la vista del servidor: " + e.getMessage());
+        }
     }
 
-    private void showComingSoon(String sectionName) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(sectionName);
-        alert.setHeaderText(null);
-        alert.setContentText("La sección \"" + sectionName + "\" estará disponible próximamente.");
-        AlertUtil.styleAlert(alert);
-        alert.showAndWait();
+    /**
+     * Restaura el contenido principal ocultando la Vista_Servidor.
+     * Llamado desde Vista_ServidorController al cerrar la vista.
+     */
+    public void restoreMainContent() {
+        if (vistaServidorNode != null) {
+            centerStack.getChildren().remove(vistaServidorNode);
+            vistaServidorNode = null;
+        }
+
+        mainContentArea.setVisible(true);
+        mainContentArea.setManaged(true);
+
+        // Quitar el estilo activo del botón de servidor
+        navConfigButton.getStyleClass().remove("nav-button-active");
+    }
+
+    /**
+     * Refresca la información del jugador en el sidebar.
+     * Llamado desde ConfiguracionController después de guardar cambios.
+     */
+    public void refreshPlayerInfo() {
+        Platform.runLater(this::setupPlayerInfo);
     }
 
     // ==================== ACCIONES DE INSTANCIAS ====================
