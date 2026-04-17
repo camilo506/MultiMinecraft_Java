@@ -177,7 +177,7 @@ public class Installer extends Application {
         if (appData == null) {
             appData = System.getProperty("user.home");
         }
-        return Paths.get(appData, ".MultiMinecraft");
+        return Paths.get(appData, ".MultiMinecraft_Developer");
     }
     
     /**

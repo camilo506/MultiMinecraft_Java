@@ -10,9 +10,9 @@
     
     <!-- Appender para archivo -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/.MultiMinecraft_Java/logs/launcher.log</file>
+        <file>${user.home}/.MultiMinecraft_Developer/logs/launcher.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/.MultiMinecraft_Java/logs/launcher.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${user.home}/.MultiMinecraft_Developer/logs/launcher.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

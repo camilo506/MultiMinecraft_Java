@@ -182,8 +182,8 @@ public class ForgeService {
         
         if (os == PlatformUtil.OS.WINDOWS) {
             // Establecer APPDATA para que apunte al directorio padre de .minecraft
-            // Si minecraftDir es: C:\Users\...\.MultiMinecraft\Instancias\prueba4\.minecraft
-            // Entonces APPDATA debería ser: C:\Users\...\.MultiMinecraft\Instancias\prueba4
+            // Si minecraftDir es: C:\Users\...\.MultiMinecraft_Developer\Instancias\prueba4\.minecraft
+            // Entonces APPDATA debería ser: C:\Users\...\.MultiMinecraft_Developer\Instancias\prueba4
             Path appDataPath = minecraftDir.getParent();
             if (appDataPath != null) {
                 env.put("APPDATA", appDataPath.toString());

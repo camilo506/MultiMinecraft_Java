@@ -153,6 +153,15 @@ public class PrincipalController {
     @FXML
     private ScrollPane instancesScrollPane;
 
+    // Panel central (para swap de vistas)
+    @FXML
+    private StackPane centerStack;
+    @FXML
+    private HBox mainContentArea;
+
+    // Nodo de la vista servidor cargada (para poder removerla)
+    private javafx.scene.Node vistaServidorNode;
+
     // Tamaño de tarjetas
     private static final double CARD_WIDTH = 110;
     private static final double CARD_HEIGHT = 125; // Aumentar un poco el alto para evitar cortes verticales
@@ -978,7 +987,50 @@ public class PrincipalController {
     @FXML
     private void onNavConfigClicked() {
         setActiveNavButton(navConfigButton);
-        showComingSoon("Configuración");
+        
+        // Si ya está mostrando la vista del servidor, no hacer nada
+        if (vistaServidorNode != null) {
+            return;
+        }
+        
+        try {
+            logger.info("Abriendo Vista_Servidor dentro del área central");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Vista_Servidor.fxml"));
+            Parent root = loader.load();
+            vistaServidorNode = root;
+            
+            // Ocultar contenido principal y mostrar Vista_Servidor
+            mainContentArea.setVisible(false);
+            mainContentArea.setManaged(false);
+            
+            // Agregar margen para no cubrir el borde del launcher
+            StackPane.setMargin(vistaServidorNode, new Insets(20));
+            centerStack.getChildren().add(vistaServidorNode);
+            
+            logger.info("Vista_Servidor mostrada en el área central");
+            
+        } catch (Exception e) {
+            logger.error("Error al abrir Vista_Servidor", e);
+            AlertUtil.showError("Error", "No se pudo abrir la vista del servidor: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Restaura el contenido principal ocultando la Vista_Servidor.
+     * Llamado desde Vista_ServidorController al cerrar la vista.
+     */
+    public void restoreMainContent() {
+        if (vistaServidorNode != null) {
+            centerStack.getChildren().remove(vistaServidorNode);
+            vistaServidorNode = null;
+        }
+        mainContentArea.setVisible(true);
+        mainContentArea.setManaged(true);
+        
+        // Quitar el estilo activo del botón de servidor
+        navConfigButton.getStyleClass().remove("nav-button-active");
+        
+        logger.info("Contenido principal restaurado");
     }
 
     private void showComingSoon(String sectionName) {
