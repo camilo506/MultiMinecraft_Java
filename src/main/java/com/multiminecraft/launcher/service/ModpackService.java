@@ -82,8 +82,16 @@ public class ModpackService {
             if (modpackInstance.getName() == null) {
                 throw new IOException("El archivo instancia.json no tiene un nombre válido");
             }
+
+            // Usar el nombre de jugador configurado globalmente en el launcher
+            String globalPlayerName = configService.getLauncherConfig().getPlayerName();
+            if (globalPlayerName != null && !globalPlayerName.trim().isEmpty()) {
+                modpackInstance.setPlayerName(globalPlayerName);
+                logger.info("Asignando nombre de jugador '{}' a la nueva instancia", globalPlayerName);
+            }
             
-            // 6. Instalar base (Vanilla + Loader) (0.5 - 0.9)
+            // Establecer fecha de creación
+            modpackInstance.setCreatedAt(java.time.LocalDateTime.now());
             statusCallback.accept("Instalando base de Minecraft y complementos...");
             instanceService.createInstance(modpackInstance, 
                 status -> statusCallback.accept("Base: " + status),
