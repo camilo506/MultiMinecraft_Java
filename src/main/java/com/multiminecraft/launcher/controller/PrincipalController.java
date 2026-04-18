@@ -65,7 +65,7 @@ public class PrincipalController {
      * launchers.
      * Si no hay internet, se usa la imagen local (Banner.png) como fallback.
      */
-    private static final String REMOTE_BANNER_URL = "https://raw.githubusercontent.com/camilo506/MinecraftBanner/main/banner-remote.png";
+    private static final String REMOTE_BANNER_URL = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/banner-remote.png";
 
     private final InstanceService instanceService;
     private final LaunchService launchService;

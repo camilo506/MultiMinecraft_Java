@@ -12,6 +12,9 @@ import com.multiminecraft.launcher.service.ModpackService;
 import com.multiminecraft.launcher.util.AlertUtil;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import com.multiminecraft.launcher.util.JsonUtil;
+import com.multiminecraft.launcher.service.DownloadService;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,28 +26,60 @@ public class Vista_ServidorController {
     
     private static final Logger logger = LoggerFactory.getLogger(Vista_ServidorController.class);
 
+    // URL del archivo de configuración remota en GitHub
+    private static final String REMOTE_CONFIG_URL = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/modpack-direccion.json";
+
     @FXML private Button btnInstallExiliados;
     @FXML private Button btnInstallMods;
 
     private final ModpackService modpackService = new ModpackService();
+    private final DownloadService downloadService = new DownloadService();
+    
+    // Enlaces por defecto (Fallbacks)
+    private String exiliadosUrl = "https://drive.google.com/file/d/1BuBWyig6oVjQ7f5dVXM2EEkqLnc1Ymuv/view?usp=sharing";
+    private String modsUrl = "https://drive.google.com/file/d/YOUR_MODS_FILE_ID/view?usp=sharing";
 
     @FXML
     public void initialize() {
         logger.info("Inicializando Vista_ServidorController");
+        loadRemoteConfig();
+    }
+
+    /**
+     * Carga los enlaces actualizados desde GitHub de forma asíncrona
+     */
+    private void loadRemoteConfig() {
+        new Thread(() -> {
+            try {
+                logger.info("Cargando configuración remota de servidores desde GitHub...");
+                String json = downloadService.downloadString(REMOTE_CONFIG_URL);
+                if (json != null && !json.isEmpty()) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, String> config = JsonUtil.fromJson(json, Map.class);
+                    
+                    if (config.containsKey("exiliados_url")) {
+                        this.exiliadosUrl = config.get("exiliados_url");
+                        logger.info("URL de Exiliados actualizada remotamente.");
+                    }
+                    if (config.containsKey("mods_url")) {
+                        this.modsUrl = config.get("mods_url");
+                        logger.info("URL de Pack de Mods actualizada remotamente.");
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo cargar la configuración remota (usando fallbacks locales): {}", e.getMessage());
+            }
+        }, "RemoteConfigLoader").start();
     }
 
     @FXML
     private void onInstallExiliados() {
-        // Enlace de Drive real para Exiliados ModPack (Archivo ZIP Público)
-        String driveUrl = "https://drive.google.com/file/d/1BuBWyig6oVjQ7f5dVXM2EEkqLnc1Ymuv/view?usp=sharing";
-        startModpackInstallation("Exiliados ModPack", driveUrl);
+        startModpackInstallation("Exiliados ModPack", exiliadosUrl);
     }
 
     @FXML
     private void onInstallMods() {
-        // Marcador de posición para la URL de Drive de Mods
-        String driveUrl = "https://drive.google.com/file/d/YOUR_MODS_FILE_ID/view?usp=sharing";
-        startModpackInstallation("Pack de Mods", driveUrl);
+        startModpackInstallation("Pack de Mods", modsUrl);
     }
 
     private void startModpackInstallation(String packName, String driveUrl) {

@@ -52,30 +52,31 @@ public class PlatformUtil {
         Path launcherDir;
 
         switch (getOS()) {
-            case WINDOWS:
+            case WINDOWS: // para windows
                 String appData = System.getenv("APPDATA");
                 if (appData != null) {
-                    launcherDir = Paths.get(appData, ".MultiMinecraft");
+                    launcherDir = Paths.get(appData, ".MultiMinecraft_developer"); // C:\Users\LEGOLAS\AppData\Roaming\.MultiMinecraft
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // C:\Users\LEGOLAS\.MultiMinecraft
                 }
                 break;
 
-            case MACOS:
-                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft_Java");
+            case MACOS: // para mac
+                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft_developer"); // /Users/LEGOLAS/Library/Application
+                                                                                                                 // Support/MultiMinecraft_Java
                 break;
 
-            case LINUX:
+            case LINUX: // para linux
                 String xdgData = System.getenv("XDG_DATA_HOME");
                 if (xdgData != null) {
-                    launcherDir = Paths.get(xdgData, "MultiMinecraft");
+                    launcherDir = Paths.get(xdgData, "MultiMinecraft_developer");
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft");
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // /home/LEGOLAS/.MultiMinecraft
                 }
                 break;
 
             default:
-                launcherDir = Paths.get(userHome, ".MultiMinecraft");
+                launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // /home/LEGOLAS/.MultiMinecraft
                 break;
         }
 
@@ -145,18 +146,18 @@ public class PlatformUtil {
         String javaHome = System.getProperty("java.home");
         String javaBin = getOS() == OS.WINDOWS ? "java.exe" : "java";
         Path javaPath = Paths.get(javaHome, "bin", javaBin);
-        
+
         if (Files.exists(javaPath)) {
             return javaPath.toString();
         }
-        
+
         // Si no existe en java.home, buscar en el PATH del sistema o rutas típicas
         logger.warn("No se encontró Java en java.home: {}. Buscando respaldo...", javaHome);
         String found = findJavaInstallation(8); // Buscar al menos Java 8
         if (found != null) {
             return found;
         }
-        
+
         return javaPath.toString(); // Retornar el original aunque no exista (causará error descriptivo luego)
     }
 
@@ -183,7 +184,8 @@ public class PlatformUtil {
                     // 1.20.5+ requiere Java 21, 1.20.0-1.20.4 requiere Java 17
                     if (parts.length >= 3) {
                         int patch = Integer.parseInt(parts[2]);
-                        if (patch >= 5) return 21;
+                        if (patch >= 5)
+                            return 21;
                     }
                     return 17;
                 }
@@ -198,7 +200,8 @@ public class PlatformUtil {
     }
 
     /**
-     * Busca automáticamente una instalación de Java con la versión mínima requerida.
+     * Busca automáticamente una instalación de Java con la versión mínima
+     * requerida.
      * Busca en ubicaciones comunes del sistema operativo.
      *
      * @param minRequiredVersion Versión mínima requerida (ej: 21, 17, 8)
@@ -206,20 +209,21 @@ public class PlatformUtil {
      */
     public static String findJavaInstallation(int minRequiredVersion) {
         String javaBin = getOS() == OS.WINDOWS ? "java.exe" : "java";
-        
+
         // Verificar si el Java actual del sistema cumple el requisito
         int currentVersion = getCurrentJavaVersion();
         if (currentVersion >= minRequiredVersion) {
-            logger.debug("Java del sistema (versión {}) cumple el requisito (>= {})", currentVersion, minRequiredVersion);
+            logger.debug("Java del sistema (versión {}) cumple el requisito (>= {})", currentVersion,
+                    minRequiredVersion);
             return getSystemJavaPath();
         }
 
-        logger.info("Java del sistema es versión {} pero se requiere {}. Buscando otra instalación...", 
-                     currentVersion, minRequiredVersion);
-        
+        logger.info("Java del sistema es versión {} pero se requiere {}. Buscando otra instalación...",
+                currentVersion, minRequiredVersion);
+
         // Lista de rutas candidatas para buscar
         java.util.List<Path> candidates = new java.util.ArrayList<>();
-        
+
         if (getOS() == OS.WINDOWS) {
             // Eclipse Adoptium / Temurin
             addJavaCandidates(candidates, "C:\\Program Files\\Eclipse Adoptium", minRequiredVersion, javaBin);
@@ -235,10 +239,12 @@ public class PlatformUtil {
             addJavaCandidates(candidates, "C:\\Program Files\\BellSoft", minRequiredVersion, javaBin);
         } else if (getOS() == OS.MACOS) {
             addJavaCandidates(candidates, "/Library/Java/JavaVirtualMachines", minRequiredVersion, javaBin);
-            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java", minRequiredVersion, javaBin);
+            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java",
+                    minRequiredVersion, javaBin);
         } else { // Linux
             addJavaCandidates(candidates, "/usr/lib/jvm", minRequiredVersion, javaBin);
-            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java", minRequiredVersion, javaBin);
+            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java",
+                    minRequiredVersion, javaBin);
         }
 
         // Verificar cada candidato
@@ -284,17 +290,22 @@ public class PlatformUtil {
     }
 
     /**
-     * Busca en un directorio base instalaciones de Java que cumplan la versión mínima
+     * Busca en un directorio base instalaciones de Java que cumplan la versión
+     * mínima
      */
-    private static void addJavaCandidates(java.util.List<Path> candidates, String baseDir, int minVersion, String javaBin) {
+    private static void addJavaCandidates(java.util.List<Path> candidates, String baseDir, int minVersion,
+            String javaBin) {
         File base = new File(baseDir);
-        if (!base.exists() || !base.isDirectory()) return;
+        if (!base.exists() || !base.isDirectory())
+            return;
 
         File[] children = base.listFiles();
-        if (children == null) return;
+        if (children == null)
+            return;
 
         for (File child : children) {
-            if (!child.isDirectory()) continue;
+            if (!child.isDirectory())
+                continue;
             int detectedVersion = detectJavaVersionFromPath(child.getAbsolutePath());
             if (detectedVersion >= minVersion) {
                 // Buscar el ejecutable en bin/
@@ -321,40 +332,54 @@ public class PlatformUtil {
      */
     private static int detectJavaVersionFromPath(String path) {
         String dirName = new File(path).getName().toLowerCase();
-        
-        // Patrones comunes: jdk-21.0.7.6-hotspot, jdk-17, jdk17, java-21-openjdk, corretto-21
+
+        // Patrones comunes: jdk-21.0.7.6-hotspot, jdk-17, jdk17, java-21-openjdk,
+        // corretto-21
         java.util.regex.Matcher matcher;
-        
+
         // Patrón: jdk-21, jdk-17.0.x, jdk-21.0.7.6-hotspot
         matcher = java.util.regex.Pattern.compile("jdk-?(\\d+)").matcher(dirName);
         if (matcher.find()) {
-            try { return Integer.parseInt(matcher.group(1)); } catch (NumberFormatException ignored) {}
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+            }
         }
-        
+
         // Patrón: java-21-openjdk, java-17-openjdk
         matcher = java.util.regex.Pattern.compile("java-?(\\d+)").matcher(dirName);
         if (matcher.find()) {
-            try { return Integer.parseInt(matcher.group(1)); } catch (NumberFormatException ignored) {}
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+            }
         }
-        
+
         // Patrón: corretto-21, corretto-17
         matcher = java.util.regex.Pattern.compile("corretto-?(\\d+)").matcher(dirName);
         if (matcher.find()) {
-            try { return Integer.parseInt(matcher.group(1)); } catch (NumberFormatException ignored) {}
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+            }
         }
-        
+
         // Patrón: zulu-21, zulu21
         matcher = java.util.regex.Pattern.compile("zulu-?(\\d+)").matcher(dirName);
         if (matcher.find()) {
-            try { return Integer.parseInt(matcher.group(1)); } catch (NumberFormatException ignored) {}
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException ignored) {
+            }
         }
-        
+
         return 0;
     }
 
     /**
      * Obtiene la ruta de Java adecuada para una versión de Minecraft.
-     * Si la versión requiere Java 21 y el sistema tiene Java 17, busca una instalación de Java 21.
+     * Si la versión requiere Java 21 y el sistema tiene Java 17, busca una
+     * instalación de Java 21.
      *
      * @param minecraftVersion Versión de Minecraft
      * @return Ruta al ejecutable de Java apropiado
@@ -365,9 +390,10 @@ public class PlatformUtil {
         if (javaPath != null) {
             return javaPath;
         }
-        // Fallback: usar el Java del sistema aunque no cumpla (el usuario verá el error)
-        logger.warn("No se encontró Java >= {} para Minecraft {}. Usando Java del sistema.", 
-                     requiredVersion, minecraftVersion);
+        // Fallback: usar el Java del sistema aunque no cumpla (el usuario verá el
+        // error)
+        logger.warn("No se encontró Java >= {} para Minecraft {}. Usando Java del sistema.",
+                requiredVersion, minecraftVersion);
         return getSystemJavaPath();
     }
 
