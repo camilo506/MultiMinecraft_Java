@@ -103,10 +103,10 @@
                         <Label style="-fx-text-fill: #6b7b8d; -fx-font-size: 11px;" text="V_Forge 1.20.1" />
                     </HBox>
                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Exiliados ModPack" />
-                    <Label prefHeight="32.0" prefWidth="279.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta funcion te permite crear una instancia completa con todo lo nesesario pra entrar al servidor" wrapText="true" />
+                    <Label prefHeight="32.0" prefWidth="279.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta función te permite crear una instancia completa con todo lo necesario para entrar al servidor" wrapText="true" />
                     <Region VBox.vgrow="ALWAYS" />
                     <HBox alignment="CENTER_RIGHT">
-                        <Button style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
+                        <Button fx:id="btnInstallExiliados" onAction="#onInstallExiliados" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
                     </HBox>
                 </VBox>
 
@@ -123,8 +123,8 @@
                     <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;" text="Mods" />
                     <Label prefHeight="71.0" prefWidth="290.0" style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d; -fx-wrap-text: true;" text="Esta función automatiza la actualización de los mods del servidor, asegurando que se mantengan sincronizados con la última versión disponible." wrapText="true" />
                     <Region VBox.vgrow="ALWAYS" />
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Region HBox.hgrow="ALWAYS" />
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button fx:id="btnInstallMods" onAction="#onInstallMods" style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 18; -fx-cursor: hand; -fx-border-color: rgba(255,255,255,0.15); -fx-border-radius: 8;" text="⬇ Instalar" />
                     </HBox>
                 </VBox>
             </HBox>

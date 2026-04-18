@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Servicio para descargar archivos con seguimiento de progreso
@@ -53,49 +55,93 @@ public class DownloadService {
     public void downloadFile(String url, Path destination, Consumer<Double> progressCallback) 
             throws IOException, InterruptedException {
         
-        logger.info("Descargando: {} -> {}", url, destination);
+        String currentUrl = url;
+        boolean triedConfirm = false;
         
-        // Crear directorio padre si no existe
-        if (destination.getParent() != null) {
-            Files.createDirectories(destination.getParent());
-        }
-        
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
-                .GET()
-                .build();
-        
-        HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-        
-        if (response.statusCode() != 200) {
-            throw new IOException("Error HTTP " + response.statusCode() + " al descargar: " + url);
-        }
-        
-        long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(-1);
-        
-        try (InputStream in = response.body()) {
-            Path tempFile = destination.getParent().resolve(destination.getFileName() + ".tmp");
+        for (int attempt = 0; attempt < 2; attempt++) {
+            logger.info("Intento de descarga {}: {}", (attempt + 1), currentUrl);
             
-            try (var out = Files.newOutputStream(tempFile)) {
-                byte[] buffer = new byte[BUFFER_SIZE];
-                long totalBytesRead = 0;
-                int bytesRead;
-                
-                while ((bytesRead = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                    totalBytesRead += bytesRead;
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(currentUrl))
+                    .timeout(Duration.ofSeconds(TIMEOUT_SECONDS))
+                    .GET()
+                    .build();
+            
+            HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            
+            // Manejo especial para Google Drive (archivos grandes o advertencias)
+            if (currentUrl.contains("drive.google.com") && response.statusCode() == 200 && !triedConfirm) {
+                String contentType = response.headers().firstValue("Content-Type").orElse("");
+                if (contentType.contains("text/html")) {
+                    logger.info("Detectada página HTML de Drive en lugar de archivo, analizando formulario...");
                     
-                    if (progressCallback != null && contentLength > 0) {
-                        double progress = (double) totalBytesRead / contentLength;
-                        progressCallback.accept(progress);
+                    try (InputStream bodyIn = response.body()) {
+                        byte[] firstBytes = bodyIn.readNBytes(20000); // Leer un poco más para asegurar capturar todo el formulario
+                        String body = new String(firstBytes);
+                        
+                        // Buscar todos los inputs ocultos (name y value)
+                        Pattern inputPattern = Pattern.compile("<input type=\"hidden\" name=\"([^\"]+)\" value=\"([^\"]*)\">");
+                        Matcher matcher = inputPattern.matcher(body);
+                        StringBuilder params = new StringBuilder();
+                        boolean hasConfirm = false;
+                        
+                        while (matcher.find()) {
+                            String name = matcher.group(1);
+                            String value = matcher.group(2);
+                            if (params.length() > 0) params.append("&");
+                            params.append(name).append("=").append(value);
+                            if (name.equals("confirm")) hasConfirm = true;
+                        }
+                        
+                        if (hasConfirm) {
+                            // Cambiamos a la URL de descarga directa de contenido con todos los parámetros extraídos
+                            currentUrl = "https://drive.usercontent.google.com/download?" + params.toString();
+                            logger.info("Url de descarga construida con éxito. Reintentando...");
+                            triedConfirm = true;
+                            continue;
+                        } else if (body.contains("Access Denied") || body.contains("Sign in") || body.contains("iniciar sesión")) {
+                            throw new IOException("Acceso denegado a Google Drive. Asegúrate de que el enlace sea PÚBLICO.");
+                        } else {
+                            throw new IOException("No se pudo extraer el token de descarga de la página de Drive. El archivo podría no estar disponible.");
+                        }
                     }
                 }
             }
+
+            if (response.statusCode() != 200) {
+                try { response.body().close(); } catch (Exception ignored) {}
+                throw new IOException("Error HTTP " + response.statusCode() + " al descargar: " + currentUrl);
+            }
+
+            long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(-1);
             
-            // Mover archivo temporal al destino final
-            Files.move(tempFile, destination, StandardCopyOption.REPLACE_EXISTING);
-            logger.info("Descarga completada: {}", destination.getFileName());
+            // Si llegamos aquí, procedemos con la descarga real
+            try (InputStream in = response.body()) {
+                if (destination.getParent() != null) {
+                    Files.createDirectories(destination.getParent());
+                }
+                Path tempFile = destination.getParent().resolve(destination.getFileName() + ".tmp");
+                
+                try (var out = Files.newOutputStream(tempFile)) {
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    long totalBytesRead = 0;
+                    int bytesRead;
+                    
+                    while ((bytesRead = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, bytesRead);
+                        totalBytesRead += bytesRead;
+                        
+                        if (progressCallback != null && contentLength > 0) {
+                            double progress = (double) totalBytesRead / contentLength;
+                            progressCallback.accept(progress);
+                        }
+                    }
+                }
+                
+                Files.move(tempFile, destination, StandardCopyOption.REPLACE_EXISTING);
+                logger.info("Descarga completada con éxito: {}", destination.getFileName());
+                return; // Éxito, salimos del bucle y del método
+            }
         }
     }
     
