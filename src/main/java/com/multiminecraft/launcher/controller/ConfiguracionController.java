@@ -4,35 +4,33 @@ import com.multiminecraft.launcher.App;
 import com.multiminecraft.launcher.model.LauncherConfig;
 import com.multiminecraft.launcher.service.ConfigService;
 import com.multiminecraft.launcher.util.AlertUtil;
+import com.multiminecraft.launcher.service.UpdateService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-
 /**
  * Controlador de la vista de Configuración del launcher.
- * Permite al usuario editar: nombre del jugador, ruta de Java,
- * memoria RAM, directorio de instancias, tema e idioma.
+ * Permite al usuario editar: nombre del jugador, 
+ * memoria RAM, tema e idioma.
  */
 public class ConfiguracionController {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfiguracionController.class);
 
     @FXML private TextField playerNameField;
-    @FXML private TextField javaPathField;
     @FXML private ComboBox<String> memoryComboBox;
-    @FXML private TextField instancesPathField;
     @FXML private ComboBox<String> themeComboBox;
     @FXML private ComboBox<String> languageComboBox;
     @FXML private Label versionLabel;
+    @FXML private Label updateStatusLabel;
+    @FXML private Button btnUpdateLauncher;
     @FXML private Label websiteLink;
     @FXML private Label statusLabel;
 
@@ -65,21 +63,11 @@ public class ConfiguracionController {
                 playerNameField.setText(playerName);
             }
 
-            String javaPath = config.getDefaultJavaPath();
-            if (javaPath != null && !javaPath.isEmpty()) {
-                javaPathField.setText(javaPath);
-            }
-
             String memory = config.getDefaultMemory();
             if (memory != null && !memory.isEmpty()) {
                 memoryComboBox.setValue(memory);
             } else {
                 memoryComboBox.setValue("2G");
-            }
-
-            String instancesPath = config.getInstancesPath();
-            if (instancesPath != null && !instancesPath.isEmpty()) {
-                instancesPathField.setText(instancesPath);
             }
 
             String theme = config.getTheme();
@@ -90,7 +78,7 @@ public class ConfiguracionController {
             int langIndex = findIndex(LANGUAGE_VALUES, language != null ? language : "es");
             languageComboBox.getSelectionModel().select(langIndex >= 0 ? langIndex : 0);
 
-            versionLabel.setText("1.0.0");
+            versionLabel.setText(UpdateService.LAUNCHER_VERSION);
             statusLabel.setText("");
 
             logger.info("Configuración actual cargada en el formulario");
@@ -99,48 +87,7 @@ public class ConfiguracionController {
         }
     }
 
-    @FXML
-    private void onBrowseJavaClicked() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Seleccionar ejecutable de Java");
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("win")) {
-            fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Ejecutable Java", "java.exe", "javaw.exe"),
-                new FileChooser.ExtensionFilter("Todos los archivos", "*.*")
-            );
-        }
-        String currentPath = javaPathField.getText();
-        if (currentPath != null && !currentPath.isEmpty()) {
-            File currentFile = new File(currentPath);
-            if (currentFile.getParentFile() != null && currentFile.getParentFile().exists()) {
-                fileChooser.setInitialDirectory(currentFile.getParentFile());
-            }
-        }
-        Stage stage = (Stage) javaPathField.getScene().getWindow();
-        File selectedFile = fileChooser.showOpenDialog(stage);
-        if (selectedFile != null) {
-            javaPathField.setText(selectedFile.getAbsolutePath());
-        }
-    }
 
-    @FXML
-    private void onBrowseInstancesClicked() {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Seleccionar directorio de instancias");
-        String currentPath = instancesPathField.getText();
-        if (currentPath != null && !currentPath.isEmpty()) {
-            File currentDir = new File(currentPath);
-            if (currentDir.exists() && currentDir.isDirectory()) {
-                directoryChooser.setInitialDirectory(currentDir);
-            }
-        }
-        Stage stage = (Stage) instancesPathField.getScene().getWindow();
-        File selectedDir = directoryChooser.showDialog(stage);
-        if (selectedDir != null) {
-            instancesPathField.setText(selectedDir.getAbsolutePath());
-        }
-    }
 
     @FXML
     private void onSaveClicked() {
@@ -156,16 +103,10 @@ public class ConfiguracionController {
             }
 
             config.setPlayerName(playerName);
-            config.setDefaultJavaPath(javaPathField.getText().trim());
 
             String selectedMemory = memoryComboBox.getValue();
             if (selectedMemory != null) {
                 config.setDefaultMemory(selectedMemory);
-            }
-
-            String instancesPath = instancesPathField.getText().trim();
-            if (!instancesPath.isEmpty()) {
-                config.setInstancesPath(instancesPath);
             }
 
             int themeIndex = themeComboBox.getSelectionModel().getSelectedIndex();
@@ -212,9 +153,7 @@ public class ConfiguracionController {
             "Esta acción no se puede deshacer.");
         if (confirmed) {
             playerNameField.setText("");
-            javaPathField.setText("");
             memoryComboBox.setValue("2G");
-            instancesPathField.setText("Instancias");
             themeComboBox.getSelectionModel().select(0);
             languageComboBox.getSelectionModel().select(0);
             statusLabel.setText("⟳ Valores restablecidos (sin guardar)");
@@ -225,6 +164,61 @@ public class ConfiguracionController {
     @FXML
     private void onWebsiteLinkClicked() {
         App.openWebPage("https://monkeystudio.netlify.app/");
+    }
+
+    @FXML
+    private void onUpdateLauncherClicked() {
+        logger.info("Iniciando búsqueda de actualizaciones reales...");
+        btnUpdateLauncher.setDisable(true);
+        btnUpdateLauncher.setText("Buscando...");
+        updateStatusLabel.setText("Conectando con el servidor...");
+
+        new Thread(() -> {
+            try {
+                LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+                UpdateService.UpdateCheckResult result = UpdateService.getInstance().checkForUpdates(
+                        config.getInstalledModpackVersion(), 
+                        config.getInstalledModsVersion()
+                );
+
+                javafx.application.Platform.runLater(() -> {
+                    btnUpdateLauncher.setDisable(false);
+                    btnUpdateLauncher.setText("Buscar Actualización");
+
+                    if (result.launcherUpdate) {
+                        updateStatusLabel.setText("¡Nueva versión disponible! (" + result.remoteLauncherVersion + ")");
+                        updateStatusLabel.setStyle("-fx-text-fill: #e67e22; -fx-font-weight: bold; -fx-font-size: 13px;");
+                        AlertUtil.showInfo("Actualización Disponible", 
+                            "Hay una nueva versión del launcher disponible (" + result.remoteLauncherVersion + ").\n" +
+                            "Por favor, descárgala del sitio oficial.");
+                    } else {
+                        updateStatusLabel.setText("Launcher al día (v" + UpdateService.LAUNCHER_VERSION + ")");
+                        updateStatusLabel.setStyle("-fx-text-fill: #26d9a0; -fx-font-weight: bold; -fx-font-size: 13px;");
+                        AlertUtil.showInfo("Actualización", "Tu launcher está actualizado.");
+                    }
+                });
+            } catch (Exception e) {
+                logger.error("Error en el botón de actualización", e);
+                javafx.application.Platform.runLater(() -> {
+                    updateStatusLabel.setText("Error al buscar actualizaciones");
+                    updateStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    btnUpdateLauncher.setDisable(false);
+                    btnUpdateLauncher.setText("Reintentar");
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * Cierra la vista de configuración y restaura el contenido principal.
+     */
+    @FXML
+    private void onClose() {
+        logger.info("Cerrando vista de configuración acoplada");
+        PrincipalController principal = PrincipalController.getInstance();
+        if (principal != null) {
+            principal.restoreMainContent();
+        }
     }
 
     private int findIndex(String[] array, String value) {

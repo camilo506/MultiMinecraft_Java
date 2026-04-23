@@ -11,13 +11,19 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox styleClass="config-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.ConfiguracionController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="875.0" minWidth="875.0" prefWidth="875.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12;" styleClass="config-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.ConfiguracionController">
 
-    <!-- Header -->
-    <VBox spacing="4" styleClass="config-header">
-        <Label styleClass="config-title" text="⚙  Configuración" />
-        <Label styleClass="config-subtitle" text="Personaliza tu experiencia en MultiMinecraft" />
-    </VBox>
+    <!-- Header con botón cerrar -->
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <padding>
+            <Insets bottom="10" left="32" right="22" top="18" />
+        </padding>
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label styleClass="config-title" text="⚙  Configuración" />
+            <Label styleClass="config-subtitle" text="Personaliza tu experiencia en MultiMinecraft" />
+        </VBox>
+        <Button onAction="#onClose" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: #8899aa; -fx-background-radius: 8; -fx-padding: 5 10; -fx-cursor: hand; -fx-font-size: 11px;" text="✕" />
+    </HBox>
 
     <!-- Scrollable settings content -->
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="config-scroll" VBox.vgrow="ALWAYS">
@@ -41,24 +47,6 @@
                 </VBox>
             </VBox>
 
-            <!-- SECCIÓN: JAVA -->
-            <VBox spacing="12" styleClass="config-section">
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label styleClass="config-section-icon" text="☕" />
-                    <VBox spacing="2">
-                        <Label styleClass="config-section-title" text="Java" />
-                        <Label styleClass="config-section-description" text="Ruta del ejecutable de Java (dejar vacío para auto-detectar)" />
-                    </VBox>
-                </HBox>
-                <VBox spacing="6">
-                    <Label styleClass="config-field-label" text="Ruta de Java" />
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <TextField fx:id="javaPathField" editable="true" promptText="Automático (Java del sistema)" styleClass="config-text-field" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="browseJavaButton" onAction="#onBrowseJavaClicked" styleClass="config-browse-button" text="📂 Buscar" />
-                    </HBox>
-                </VBox>
-            </VBox>
-
             <!-- SECCIÓN: MEMORIA RAM -->
             <VBox spacing="12" styleClass="config-section">
                 <HBox alignment="CENTER_LEFT" spacing="8">
@@ -71,24 +59,6 @@
                 <VBox spacing="6">
                     <Label styleClass="config-field-label" text="Memoria por Defecto" />
                     <ComboBox fx:id="memoryComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
-                </VBox>
-            </VBox>
-
-            <!-- SECCIÓN: DIRECTORIO -->
-            <VBox spacing="12" styleClass="config-section">
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label styleClass="config-section-icon" text="📁" />
-                    <VBox spacing="2">
-                        <Label styleClass="config-section-title" text="Directorio de Instancias" />
-                        <Label styleClass="config-section-description" text="Carpeta donde se guardan tus instancias de Minecraft" />
-                    </VBox>
-                </HBox>
-                <VBox spacing="6">
-                    <Label styleClass="config-field-label" text="Ruta de Instancias" />
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <TextField fx:id="instancesPathField" editable="false" promptText="Directorio de instancias" styleClass="config-text-field" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="browseInstancesButton" onAction="#onBrowseInstancesClicked" styleClass="config-browse-button" text="📂 Buscar" />
-                    </HBox>
                 </VBox>
             </VBox>
 
@@ -110,6 +80,25 @@
                         <Label styleClass="config-field-label" text="Idioma" />
                         <ComboBox fx:id="languageComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
                     </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- SECCIÓN: ACTUALIZACIÓN -->
+            <VBox spacing="12" styleClass="config-section">
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label styleClass="config-section-icon" text="🔄" />
+                    <VBox spacing="2">
+                        <Label styleClass="config-section-title" text="Actualización del Launcher" />
+                        <Label styleClass="config-section-description" text="Busca y descarga la última versión de MultiMinecraft" />
+                    </VBox>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <VBox spacing="4">
+                        <Label styleClass="config-field-label" text="Estado" />
+                        <Label fx:id="updateStatusLabel" style="-fx-text-fill: #26d9a0; -fx-font-weight: bold; -fx-font-size: 13px;" text="Launcher al día" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="btnUpdateLauncher" onAction="#onUpdateLauncherClicked" style="-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16; -fx-cursor: hand;" text="Buscar Actualización" />
                 </HBox>
             </VBox>
 

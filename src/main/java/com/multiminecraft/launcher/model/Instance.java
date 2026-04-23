@@ -18,6 +18,7 @@ public class Instance {
     /** Fecha/hora en que se creó la instancia en el launcher (persistida en instance.json) */
     private LocalDateTime createdAt;
     private long totalPlaytime; // en segundos
+    private boolean isSpecial; // Marcador para instancias automáticas de la vista Server
 
     public Instance() {
         this.loader = LoaderType.VANILLA;
@@ -121,6 +122,14 @@ public class Instance {
 
     public void setTotalPlaytime(long totalPlaytime) {
         this.totalPlaytime = totalPlaytime;
+    }
+
+    public boolean isSpecial() {
+        return isSpecial;
+    }
+
+    public void setSpecial(boolean special) {
+        isSpecial = special;
     }
 
     /**

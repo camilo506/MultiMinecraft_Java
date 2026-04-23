@@ -30,8 +30,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import com.multiminecraft.launcher.model.LauncherConfig;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.canvas.Canvas;
@@ -101,12 +104,16 @@ public class PrincipalController {
     private Button navMapsButton;
     @FXML
     private Button navConfigButton;
+    @FXML
+    private Button navSettingsButton;
 
     // Sidebar - Jugador
     @FXML
     private ImageView playerAvatar;
     @FXML
     private Label playerNameLabel;
+    @FXML
+    private Label playerStatusLabel;
     @FXML
     private Button createInstanceButton;
 
@@ -159,8 +166,12 @@ public class PrincipalController {
     @FXML
     private HBox mainContentArea;
 
-    // Nodo de la vista servidor cargada (para poder removerla)
-    private javafx.scene.Node vistaServidorNode;
+    // Nodo de la vista cargada dinámicamente (para poder removerla)
+    private javafx.scene.Node activeSubViewNode;
+
+    private String remoteAccessKey = null;
+    private String launcherDownloadUrl = null;
+    private final com.multiminecraft.launcher.service.DownloadService downloadService = new com.multiminecraft.launcher.service.DownloadService();
 
     // Tamaño de tarjetas
     private static final double CARD_WIDTH = 110;
@@ -217,6 +228,65 @@ public class PrincipalController {
 
         // Intentar cargar banner remoto desde GitHub (fallback: imagen local)
         loadRemoteBanner();
+
+        // Cargar configuración remota (clave de acceso)
+        loadRemoteConfig();
+
+        // Comprobar actualizaciones en segundo plano
+        Platform.runLater(this::checkUpdates);
+    }
+
+    private void loadRemoteConfig() {
+        new Thread(() -> {
+            try {
+                String url = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Acceso_Vista_Server.json";
+                String json = downloadService.downloadString(url);
+                if (json != null && !json.isEmpty()) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, String> config = com.multiminecraft.launcher.util.JsonUtil.fromJson(json, java.util.Map.class);
+                    if (config.containsKey("acceso_server")) {
+                        this.remoteAccessKey = config.get("acceso_server");
+                        logger.info("Clave de acceso remoto cargada desde Acceso_Vista_Server.json");
+                        
+                        // Verificar inmediatamente si el usuario es Premium
+                        Platform.runLater(this::updatePremiumStatus);
+                    }
+                }
+                
+                // Cargar también la URL de descarga del launcher desde Direccion-Descargas.json
+                String urlDescargas = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Direccion-Descargas.json";
+                String jsonDescargas = downloadService.downloadString(urlDescargas);
+                if (jsonDescargas != null && !jsonDescargas.isEmpty()) {
+                    @SuppressWarnings("unchecked")
+                    java.util.Map<String, String> configDesc = com.multiminecraft.launcher.util.JsonUtil.fromJson(jsonDescargas, java.util.Map.class);
+                    if (configDesc.containsKey("MultiMinecraft_url")) {
+                        this.launcherDownloadUrl = configDesc.get("MultiMinecraft_url");
+                        logger.info("URL de descarga del launcher cargada: {}", launcherDownloadUrl);
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo cargar la configuración remota: {}", e.getMessage());
+            }
+        }, "RemoteConfigInit").start();
+    }
+
+    private void updatePremiumStatus() {
+        LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+        if (remoteAccessKey != null && !remoteAccessKey.isEmpty() && remoteAccessKey.equals(config.getLastAccessKey())) {
+            if (playerStatusLabel != null) {
+                playerStatusLabel.setText("PREMIUM");
+                playerStatusLabel.setStyle("-fx-text-fill: #eab308; -fx-font-weight: bold; -fx-effect: dropshadow(three-pass-box, rgba(234, 179, 8, 0.3), 5, 0, 0, 0);");
+            }
+            if (heroBadge != null) {
+                heroBadge.setText("PREMIUM");
+                heroBadge.setStyle("-fx-background-color: rgba(234, 179, 8, 0.2); -fx-text-fill: #eab308; -fx-border-color: #eab308;");
+            }
+        } else {
+            if (playerStatusLabel != null) {
+                playerStatusLabel.setText("ACTIVA");
+                playerStatusLabel.setStyle("");
+            }
+        }
     }
 
     /**
@@ -897,7 +967,7 @@ public class PrincipalController {
 
     private void setActiveNavButton(Button active) {
         Button[] navButtons = { navModpacksButton, navResourcePacksButton, navMapsButton,
-                navConfigButton };
+                navConfigButton, navSettingsButton };
         for (Button btn : navButtons) {
             btn.getStyleClass().remove("nav-button-active");
         }
@@ -997,25 +1067,109 @@ public class PrincipalController {
 
     @FXML
     private void onNavConfigClicked() {
-        setActiveNavButton(navConfigButton);
-
-        // Si ya está mostrando la vista del servidor, no hacer nada
-        if (vistaServidorNode != null) {
+        if (activeSubViewNode != null && activeSubViewNode.getUserData() != null && activeSubViewNode.getUserData().equals("servidor")) {
             return;
         }
+
+        if (remoteAccessKey == null) {
+            loadRemoteConfig();
+        }
+
+        // Verificar si ya tenemos la clave correcta guardada
+        LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+        if (remoteAccessKey != null && !remoteAccessKey.isEmpty() && remoteAccessKey.equals(config.getLastAccessKey())) {
+            openServidorView();
+            return;
+        }
+
+        // --- DIÁLOGO PERSONALIZADO PREMIUM ---
+        javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Acceso Restringido");
+        dialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+        if (createInstanceButton != null && createInstanceButton.getScene() != null) {
+            dialog.initOwner(createInstanceButton.getScene().getWindow());
+        }
+
+        javafx.scene.control.DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+        
+        // Contenedor principal del diálogo
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(25));
+        root.setAlignment(Pos.CENTER);
+        root.setStyle("-fx-background-color: #0d1117; -fx-border-color: #26d9a0; -fx-border-width: 2; -fx-border-radius: 15; -fx-background-radius: 15;");
+        root.setPrefWidth(350);
+
+        Label iconLabel = new Label("🔒");
+        iconLabel.setStyle("-fx-font-size: 40px;");
+
+        Label titleLabel = new Label("Área Protegida");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label descLabel = new Label("Introduce la clave maestra para acceder:");
+        descLabel.setStyle("-fx-text-fill: #8b949e; -fx-font-size: 12px;");
+
+        javafx.scene.control.PasswordField passwordField = new javafx.scene.control.PasswordField();
+        passwordField.setPromptText("Clave de acceso");
+        passwordField.setStyle("-fx-background-color: #161b22; -fx-text-fill: white; -fx-border-color: #30363d; -fx-border-radius: 5; -fx-padding: 10;");
+
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        Button btnAccept = new Button("Acceder");
+        btnAccept.setStyle("-fx-background-color: #26d9a0; -fx-text-fill: #0d1117; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20; -fx-background-radius: 5;");
+        
+        Button btnCancel = new Button("Cancelar");
+        btnCancel.setStyle("-fx-background-color: transparent; -fx-text-fill: #8b949e; -fx-cursor: hand; -fx-padding: 8 20;");
+
+        buttonBox.getChildren().addAll(btnAccept, btnCancel);
+        root.getChildren().addAll(iconLabel, titleLabel, descLabel, passwordField, buttonBox);
+
+        dialogPane.setContent(root);
+        dialogPane.setStyle("-fx-background-color: transparent;");
+        dialog.getDialogPane().getScene().setFill(Color.TRANSPARENT);
+
+        // Lógica de botones
+        btnAccept.setOnAction(e -> dialog.setResult(passwordField.getText()));
+        btnCancel.setOnAction(e -> dialog.setResult(null));
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        
+        if (result.isPresent()) {
+            String password = result.get();
+            if (remoteAccessKey != null && password.equals(remoteAccessKey)) {
+                // Guardar la clave para no pedirla más
+                config.setLastAccessKey(password);
+                ConfigService.getInstance().saveLauncherConfig();
+                
+                // Actualizar estatus visual
+                updatePremiumStatus();
+                
+                openServidorView();
+            } else {
+                showError("Acceso Denegado", "La clave introducida es incorrecta.");
+            }
+        }
+    }
+
+    private void openServidorView() {
+        restoreMainContent();
+        setActiveNavButton(navConfigButton);
 
         try {
             logger.info("Abriendo Vista_Servidor dentro del área central");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Vista_Servidor.fxml"));
             Parent root = loader.load();
-            vistaServidorNode = root;
+            activeSubViewNode = root;
+            activeSubViewNode.setUserData("servidor");
 
-            // Ocultar contenido principal y mostrar Vista_Servidor
+            // Ocultar contenido principal y mostrar sub-vista
             mainContentArea.setVisible(false);
             mainContentArea.setManaged(false);
 
-            StackPane.setAlignment(vistaServidorNode, Pos.TOP_CENTER);
-            centerStack.getChildren().add(vistaServidorNode);
+            StackPane.setAlignment(activeSubViewNode, Pos.TOP_CENTER);
+            centerStack.getChildren().add(activeSubViewNode);
             logger.info("Vista_Servidor mostrada en el área central");
 
         } catch (IOException e) {
@@ -1024,21 +1178,53 @@ public class PrincipalController {
         }
     }
 
+    @FXML
+    private void onNavSettingsClicked() {
+        // Si ya está mostrando la vista, no hacer nada
+        if (activeSubViewNode != null && activeSubViewNode.getUserData() != null && activeSubViewNode.getUserData().equals("configuracion")) {
+            return;
+        }
+
+        restoreMainContent();
+        setActiveNavButton(navSettingsButton);
+
+        try {
+            logger.info("Abriendo Configuración dentro del área central");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Configuracion.fxml"));
+            Parent root = loader.load();
+            activeSubViewNode = root;
+            activeSubViewNode.setUserData("configuracion");
+
+            // Ocultar contenido principal y mostrar sub-vista
+            mainContentArea.setVisible(false);
+            mainContentArea.setManaged(false);
+
+            StackPane.setAlignment(activeSubViewNode, Pos.TOP_CENTER);
+            centerStack.getChildren().add(activeSubViewNode);
+            logger.info("Configuración mostrada en el área central");
+
+        } catch (IOException e) {
+            logger.error("Error al abrir Configuración", e);
+            AlertUtil.showError("Error", "No se pudo abrir la configuración: " + e.getMessage());
+        }
+    }
+
     /**
      * Restaura el contenido principal ocultando la Vista_Servidor.
      * Llamado desde Vista_ServidorController al cerrar la vista.
      */
     public void restoreMainContent() {
-        if (vistaServidorNode != null) {
-            centerStack.getChildren().remove(vistaServidorNode);
-            vistaServidorNode = null;
+        if (activeSubViewNode != null) {
+            centerStack.getChildren().remove(activeSubViewNode);
+            activeSubViewNode = null;
         }
 
         mainContentArea.setVisible(true);
         mainContentArea.setManaged(true);
 
-        // Quitar el estilo activo del botón de servidor
+        // Quitar el estilo activo de los botones de navegación especial
         navConfigButton.getStyleClass().remove("nav-button-active");
+        navSettingsButton.getStyleClass().remove("nav-button-active");
     }
 
     /**
@@ -1417,5 +1603,104 @@ public class PrincipalController {
         alert.setContentText(message);
         AlertUtil.styleAlert(alert);
         alert.showAndWait();
+    }
+    private void checkUpdates() {
+        new Thread(() -> {
+            try {
+                LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+                com.multiminecraft.launcher.service.UpdateService.UpdateCheckResult result = com.multiminecraft.launcher.service.UpdateService.getInstance().checkForUpdates(
+                        config.getInstalledModpackVersion(), 
+                        config.getInstalledModsVersion()
+                );
+
+                Platform.runLater(() -> {
+                    // Alerta de Launcher (Para TODOS)
+                    if (result.launcherUpdate) {
+                        showNotification("Actualización de Launcher disponible (v" + result.remoteLauncherVersion + ")", "#e67e22", true);
+                    }
+                    
+                    // Alerta de Modpack / Mods (Solo para PREMIUM con el pack instalado)
+                    if (isPremium() && hasSpecialInstanceInstalled() && (result.modpackUpdate || result.modsUpdate)) {
+                        StringBuilder sb = new StringBuilder("Actualización disponible: ");
+                        if (result.modpackUpdate) sb.append("Modpack ");
+                        if (result.modsUpdate) sb.append("Mods ");
+                        showNotification(sb.toString().trim(), "#26d9a0", false);
+                    }
+                });
+            } catch (Exception e) {
+                logger.error("Error al comprobar actualizaciones en el inicio", e);
+            }
+        }).start();
+    }
+
+    private boolean isPremium() {
+        LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+        return remoteAccessKey != null && !remoteAccessKey.isEmpty() && remoteAccessKey.equals(config.getLastAccessKey());
+    }
+
+    private boolean hasSpecialInstanceInstalled() {
+        List<Instance> instances = instanceService.listInstances();
+        for (Instance inst : instances) {
+            // Ahora usamos la marca interna 'isSpecial'
+            // Esto diferencia 100% entre automáticas y manuales
+            if (inst.isSpecial()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void showNotification(String message, String color, boolean isCritical) {
+        // Asegurarnos de tener un contenedor para múltiples notificaciones
+        VBox notificationBox = (VBox) centerStack.lookup("#notificationContainer");
+        if (notificationBox == null) {
+            notificationBox = new VBox(5);
+            notificationBox.setId("notificationContainer");
+            notificationBox.setPickOnBounds(false); // Permitir clics a través del espacio vacío
+            StackPane.setAlignment(notificationBox, Pos.TOP_CENTER);
+            centerStack.getChildren().add(notificationBox);
+        }
+
+        HBox banner = new HBox(15);
+        banner.setAlignment(Pos.CENTER_LEFT);
+        banner.setPadding(new Insets(8, 20, 8, 20));
+        String gradient = isCritical ? "linear-gradient(to right, #e67e22, #d35400)" : "linear-gradient(to right, #26d9a0, #1ab085)";
+        banner.setStyle("-fx-background-color: " + gradient + "; -fx-background-radius: 0 0 10 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 0);");
+        banner.setMaxHeight(45);
+
+        Label icon = new Label(isCritical ? "🚀" : "📦");
+        icon.setStyle("-fx-font-size: 16px;");
+
+        Label text = new Label(message);
+        text.setStyle("-fx-text-fill: #0d1117; -fx-font-weight: bold; -fx-font-size: 12px;");
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button btnAction = new Button(isCritical ? "Actualizar" : "Ver Detalles");
+        btnAction.setStyle("-fx-background-color: #0d1117; -fx-text-fill: " + (isCritical ? "#e67e22" : "#26d9a0") + "; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand; -fx-font-size: 11px;");
+        VBox finalNotificationBox = notificationBox;
+        btnAction.setOnAction(e -> {
+            if (isCritical && launcherDownloadUrl != null && !launcherDownloadUrl.isEmpty()) {
+                App.openWebPage(launcherDownloadUrl);
+            } else {
+                onNavSettingsClicked();
+            }
+            finalNotificationBox.getChildren().remove(banner);
+        });
+
+        Button btnClose = new Button("✕");
+        btnClose.setStyle("-fx-background-color: transparent; -fx-text-fill: #0d1117; -fx-font-size: 12px; -fx-font-weight: bold; -fx-cursor: hand;");
+        btnClose.setOnAction(e -> finalNotificationBox.getChildren().remove(banner));
+
+        banner.getChildren().addAll(icon, text, spacer, btnAction, btnClose);
+
+        finalNotificationBox.getChildren().add(banner);
+        
+        // Animación de entrada
+        banner.setTranslateY(-50);
+        javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(400), banner);
+        tt.setToY(0);
+        tt.play();
     }
 }

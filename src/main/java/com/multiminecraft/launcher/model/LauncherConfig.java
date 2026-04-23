@@ -10,6 +10,9 @@ public class LauncherConfig {
     private String language;
     private String instancesPath;
     private String playerName;
+    private String installedModpackVersion;
+    private String installedModsVersion = "0.0.0";
+    private String lastAccessKey = "";
 
     public LauncherConfig() {
         // Valores por defecto
@@ -19,6 +22,8 @@ public class LauncherConfig {
         this.language = "es";
         this.instancesPath = "Instancias";
         this.playerName = "";
+        this.installedModpackVersion = "0.0.0";
+        this.installedModsVersion = "0.0.0";
     }
 
     // Getters y Setters
@@ -68,5 +73,29 @@ public class LauncherConfig {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public String getInstalledModpackVersion() {
+        return installedModpackVersion;
+    }
+
+    public void setInstalledModpackVersion(String installedModpackVersion) {
+        this.installedModpackVersion = installedModpackVersion;
+    }
+
+    public String getInstalledModsVersion() {
+        return installedModsVersion;
+    }
+
+    public void setInstalledModsVersion(String installedModsVersion) {
+        this.installedModsVersion = installedModsVersion;
+    }
+
+    public String getLastAccessKey() {
+        return lastAccessKey;
+    }
+
+    public void setLastAccessKey(String lastAccessKey) {
+        this.lastAccessKey = lastAccessKey;
     }
 }

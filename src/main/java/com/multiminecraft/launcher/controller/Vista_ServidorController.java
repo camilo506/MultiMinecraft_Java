@@ -34,7 +34,7 @@ public class Vista_ServidorController {
     private static final Logger logger = LoggerFactory.getLogger(Vista_ServidorController.class);
 
     // URL del archivo de configuración remota en GitHub
-    private static final String REMOTE_CONFIG_URL = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/modpack-direccion.json";
+    private static final String REMOTE_CONFIG_URL = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Direccion-Descargas.json";
 
     @FXML private Button btnInstallExiliados;
     @FXML private Button btnInstallMods;
@@ -46,6 +46,7 @@ public class Vista_ServidorController {
     // Enlaces por defecto (Fallbacks)
     private String exiliadosUrl = "https://drive.google.com/file/d/1BuBWyig6oVjQ7f5dVXM2EEkqLnc1Ymuv/view?usp=sharing";
     private String modsUrl = "https://drive.google.com/file/d/YOUR_MODS_FILE_ID/view?usp=sharing";
+    private String launcherDownloadUrl = "";
 
     @FXML
     public void initialize() {
@@ -72,6 +73,10 @@ public class Vista_ServidorController {
                     if (config.containsKey("mods_url")) {
                         this.modsUrl = config.get("mods_url");
                         logger.info("URL de Pack de Mods actualizada remotamente.");
+                    }
+                    if (config.containsKey("MultiMinecraft_url")) {
+                        this.launcherDownloadUrl = config.get("MultiMinecraft_url");
+                        logger.info("URL del Launcher actualizada remotamente.");
                     }
                 }
             } catch (Exception e) {

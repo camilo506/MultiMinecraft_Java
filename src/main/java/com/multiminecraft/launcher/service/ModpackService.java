@@ -90,8 +90,9 @@ public class ModpackService {
                 logger.info("Asignando nombre de jugador '{}' a la nueva instancia", globalPlayerName);
             }
             
-            // Establecer fecha de creación
+            // Establecer fecha de creación y marca de instancia especial
             modpackInstance.setCreatedAt(java.time.LocalDateTime.now());
+            modpackInstance.setSpecial(true);
             statusCallback.accept("Instalando base de Minecraft y complementos...");
             instanceService.createInstance(modpackInstance, 
                 status -> statusCallback.accept("Base: " + status),

@@ -76,6 +76,7 @@
                 <Button fx:id="navResourcePacksButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavResourcePacksClicked" prefHeight="40" styleClass="nav-button" text="📦 Recursos" />
                 <Button fx:id="navMapsButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavMapsClicked" prefHeight="40" styleClass="nav-button" text="🗑️ Eliminar" />
                 <Button fx:id="navConfigButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavConfigClicked" prefHeight="40" styleClass="nav-button" text="⚙️ Servidor" />
+                <Button fx:id="navSettingsButton" alignment="CENTER" maxWidth="Infinity" onAction="#onNavSettingsClicked" prefHeight="40" styleClass="nav-button" text="🔧 Configuración" />
             </VBox>
             
             <Region VBox.vgrow="ALWAYS" />
@@ -88,7 +89,7 @@
                 <ImageView fx:id="playerAvatar" fitHeight="36" fitWidth="36" preserveRatio="true" styleClass="player-avatar" />
                 <VBox alignment="CENTER_LEFT" spacing="1">
                     <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
-                    <Label styleClass="player-status-label" text="ACTIVA" />
+                    <Label fx:id="playerStatusLabel" styleClass="player-status-label" text="ACTIVA" />
                 </VBox>
             </HBox>
             
