@@ -97,11 +97,11 @@
                     <Label text="MEMORIA RAM" styleClass="field-label"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <HBox alignment="CENTER_RIGHT" spacing="4">
-                        <Label fx:id="memoryLabel" text="4GB" styleClass="ram-value-label"/>
+                        <Label fx:id="memoryLabel" text="2GB" styleClass="ram-value-label"/>
                         <Label text="ASIGNADOS" styleClass="ram-asignados-label"/>
                     </HBox>
                 </HBox>
-                <Slider fx:id="memorySlider" min="1" max="16" value="4"
+                <Slider fx:id="memorySlider" min="1" max="16" value="2"
                         showTickLabels="true" showTickMarks="false"
                         majorTickUnit="4" minorTickCount="3"
                         styleClass="ram-slider" maxWidth="Infinity"/>

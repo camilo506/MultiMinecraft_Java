@@ -27,8 +27,11 @@ public class InstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
 
-    /** Si existe una instancia con este nombre (sin distinguir mayúsculas), va siempre en la primera posición del grid. */
-    private static final String PINNED_FIRST_INSTANCE_NAME = "pajaland";
+    /**
+     * Instancias con prioridad especial en el grid (sin distinguir mayúsculas). Se
+     * muestran primero, ordenadas entre sí por antigüedad.
+     */
+    private static final List<String> PINNED_INSTANCE_NAMES = List.of("pajaland", "exiliados");
 
     private final ConfigService configService;
     private final MojangService mojangService;
@@ -48,7 +51,8 @@ public class InstanceService {
     /**
      * Crea una nueva instancia de Minecraft con callback de progreso numérico
      */
-    public void createInstance(Instance instance, Consumer<String> statusCallback, Consumer<Double> progressCallback) throws Exception {
+    public void createInstance(Instance instance, Consumer<String> statusCallback, Consumer<Double> progressCallback)
+            throws Exception {
         logger.info("Creando instancia: {}", instance.getName());
 
         // Validar nombre
@@ -119,20 +123,20 @@ public class InstanceService {
                     String defaultIconName = "art-Crafting_Table.png";
                     String resourcePath = "/icons/" + defaultIconName;
                     java.io.InputStream iconStream = getClass().getResourceAsStream(resourcePath);
-                    
+
                     if (iconStream != null) {
                         Path iconDir = instanceDir.resolve("icons");
                         FileUtil.createDirectory(iconDir);
                         Path iconFile = iconDir.resolve(defaultIconName);
-                        
+
                         // Copiar el ícono desde resources a la carpeta de la instancia
                         Files.copy(iconStream, iconFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                         iconStream.close();
-                        
+
                         // Actualizar el nombre del ícono en la instancia
                         instance.setIcon(defaultIconName);
                         configService.saveInstanceConfig(instance);
-                        
+
                         logger.info("Ícono por defecto copiado: {}", iconFile);
                     } else {
                         logger.warn("No se encontró el ícono por defecto en resources: {}", resourcePath);
@@ -181,7 +185,8 @@ public class InstanceService {
         switch (instance.getLoader()) {
             case FORGE:
                 ForgeService forgeService = new ForgeService();
-                // installForge ahora maneja toda la verificación y descarga de librerías internamente
+                // installForge ahora maneja toda la verificación y descarga de librerías
+                // internamente
                 forgeService.installForge(instance.getVersion(), minecraftDir, statusCallback);
                 logger.info("Forge instalado y verificado para instancia: {}", instance.getName());
                 break;
@@ -226,23 +231,34 @@ public class InstanceService {
             }
         }
 
-        // Orden: primero la instancia "pajaland" (sin importar mayúsculas); el resto por antigüedad (más vieja primero).
+        // Orden: primero las instancias con prioridad especial ("pajaland",
+        // "exiliados"),
+        // ordenadas entre sí por antigüedad (más vieja primero).
+        // Luego el resto de instancias, también por antigüedad.
         instances.sort(Comparator
-                .comparing((Instance i) -> isPinnedPajalandFirst(i) ? 0 : 1)
+                .comparing((Instance i) -> isPinnedInstance(i) ? 0 : 1)
                 .thenComparingLong(i -> creationOrderMillis(i, instancesDir)));
 
         return instances;
     }
 
-    private static boolean isPinnedPajalandFirst(Instance instance) {
+    /**
+     * Determina si una instancia tiene prioridad especial en el grid.
+     * Compara el nombre (sin distinguir mayúsculas) contra la lista de nombres
+     * pinneados.
+     */
+    private static boolean isPinnedInstance(Instance instance) {
         if (instance.getName() == null) {
             return false;
         }
-        return PINNED_FIRST_INSTANCE_NAME.equalsIgnoreCase(instance.getName().trim());
+        String name = instance.getName().trim();
+        return PINNED_INSTANCE_NAMES.stream()
+                .anyMatch(pinned -> name.equalsIgnoreCase(pinned));
     }
 
     /**
-     * Marca de tiempo para ordenar: preferir {@code createdAt} guardado; si no existe, fecha de creación del directorio.
+     * Marca de tiempo para ordenar: preferir {@code createdAt} guardado; si no
+     * existe, fecha de creación del directorio.
      */
     private static long creationOrderMillis(Instance instance, Path instancesDir) {
         if (instance.getCreatedAt() != null) {

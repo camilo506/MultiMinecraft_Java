@@ -22,20 +22,25 @@
         <!-- === Anillo de Progreso === -->
         <StackPane alignment="CENTER" prefHeight="160.0" prefWidth="160.0" styleClass="progress-ring-wrapper">
             <!-- Aro de fondo -->
-            <Pane maxHeight="140.0" maxWidth="140.0" prefHeight="140.0" prefWidth="140.0" styleClass="progress-track-pane" />
+            <Pane maxHeight="140.0" maxWidth="140.0" minHeight="140.0" minWidth="140.0"
+                  prefHeight="140.0" prefWidth="140.0" styleClass="progress-track-pane"
+                  StackPane.alignment="CENTER" />
 
             <!-- Indicador de progreso (Arco verde) -->
             <ProgressIndicator fx:id="progressIndicator" maxHeight="140.0" maxWidth="140.0"
+                               minHeight="140.0" minWidth="140.0"
                                prefHeight="140.0" prefWidth="140.0" progress="0.0"
-                               styleClass="descarga-progress-indicator" />
+                               styleClass="descarga-progress-indicator"
+                               StackPane.alignment="CENTER" />
 
             <!-- Texto central del porcentaje -->
-            <VBox alignment="CENTER" mouseTransparent="true" prefHeight="140.0" prefWidth="140.0" spacing="1.0">
+            <VBox alignment="CENTER" mouseTransparent="true" prefHeight="140.0" prefWidth="140.0" spacing="1.0"
+                  translateY="5" StackPane.alignment="CENTER">
                 <HBox alignment="CENTER" spacing="1.0">
                     <Label fx:id="percentLabel" styleClass="percent-number" text="0" />
                     <Label styleClass="percent-symbol" text="\%" />
                 </HBox>
-                <Label styleClass="progress-word-label" text="PROGRESS" />
+                <Label styleClass="progress-word-label" text="PROGRESO" />
             </VBox>
         </StackPane>
 

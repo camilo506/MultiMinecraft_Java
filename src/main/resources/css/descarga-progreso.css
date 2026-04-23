@@ -36,11 +36,20 @@
     -fx-progress-color: #26d9a0;
     -fx-background-color: transparent;
     -fx-effect: dropshadow(three-pass-box, rgba(38, 217, 160, 0.5), 15, 0.4, 0, 0);
+    -fx-translate-y: 5;
+    /* Mueve el indicador hacia abajo */
 }
 
 .descarga-progress-indicator .indicator {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+}
+
+.descarga-progress-indicator .indicator .spinner {
+    -fx-padding: 0;
 }
 
 .descarga-progress-indicator .progress {
@@ -51,11 +60,21 @@
 
 .descarga-progress-indicator .percentage {
     -fx-fill: transparent;
-    visibility: hidden;
+    -fx-font-size: 0;
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
 }
 
 .descarga-progress-indicator .tick {
-    visibility: hidden;
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-shape: "";
 }
 
 /* ---- Número del porcentaje ---- */
@@ -66,7 +85,7 @@
 }
 
 .percent-symbol {
-    -fx-text-fill: #26d9a0;
+    -fx-text-fill: white;
     -fx-font-family: "Segoe UI Semibold", "SansSerif";
     -fx-font-size: 20px;
     -fx-translate-y: 8;

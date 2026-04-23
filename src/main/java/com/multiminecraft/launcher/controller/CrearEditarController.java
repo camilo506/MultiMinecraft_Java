@@ -108,6 +108,20 @@ public class CrearEditarController {
             playerNameField.setText(globalPlayerName);
         }
         
+        // Precargar memoria desde la configuración global
+        String defaultMemory = ConfigService.getInstance().getLauncherConfig().getDefaultMemory();
+        if (defaultMemory != null && !isEditMode) {
+            try {
+                String memStr = defaultMemory.replaceAll("[^0-9]", "");
+                double memValue = Double.parseDouble(memStr);
+                memorySlider.setValue(memValue);
+                memoryLabel.setText(((int)memValue) + "GB");
+                logger.info("Memoria por defecto cargada: {}GB", (int)memValue);
+            } catch (Exception e) {
+                logger.warn("No se pudo cargar la memoria por defecto: {}", defaultMemory);
+            }
+        }
+        
         // Cargar versiones
         loadVersions();
     }
