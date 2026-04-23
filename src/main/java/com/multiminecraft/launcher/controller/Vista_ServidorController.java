@@ -8,13 +8,20 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import com.multiminecraft.launcher.App;
+import com.multiminecraft.launcher.model.Instance;
 import com.multiminecraft.launcher.service.ModpackService;
+import com.multiminecraft.launcher.service.InstanceService;
 import com.multiminecraft.launcher.util.AlertUtil;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.DialogPane;
 import com.multiminecraft.launcher.util.JsonUtil;
 import com.multiminecraft.launcher.service.DownloadService;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +41,7 @@ public class Vista_ServidorController {
 
     private final ModpackService modpackService = new ModpackService();
     private final DownloadService downloadService = new DownloadService();
+    private final InstanceService instanceService = new InstanceService();
     
     // Enlaces por defecto (Fallbacks)
     private String exiliadosUrl = "https://drive.google.com/file/d/1BuBWyig6oVjQ7f5dVXM2EEkqLnc1Ymuv/view?usp=sharing";
@@ -79,7 +87,120 @@ public class Vista_ServidorController {
 
     @FXML
     private void onInstallMods() {
-        startModpackInstallation("Pack de Mods", modsUrl);
+        // Verificar que la URL esté configurada
+        if (modsUrl.contains("YOUR_")) {
+            AlertUtil.showWarning("Configuración requerida", 
+                "El enlace de descarga para 'Pack de Mods' no ha sido configurado todavía.");
+            return;
+        }
+
+        // Obtener las instancias existentes
+        List<Instance> instances = instanceService.listInstances();
+        
+        if (instances.isEmpty()) {
+            AlertUtil.showWarning("Sin instancias", 
+                "No hay instancias disponibles. Primero crea una instancia o instala el modpack Exiliados.");
+            return;
+        }
+
+        // Crear lista de nombres para el selector
+        List<String> instanceNames = instances.stream()
+            .map(Instance::getName)
+            .collect(Collectors.toList());
+
+        // Mostrar diálogo de selección de instancia
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(instanceNames.get(0), instanceNames);
+        dialog.setTitle("Seleccionar Instancia");
+        dialog.setHeaderText("Actualizar Mods del Servidor");
+        dialog.setContentText("Selecciona la instancia donde se instalarán los mods:");
+        
+        // Aplicar estilo al diálogo
+        styleChoiceDialog(dialog);
+
+        Optional<String> result = dialog.showAndWait();
+        
+        if (result.isEmpty()) {
+            return; // El usuario canceló
+        }
+
+        String selectedInstance = result.get();
+
+        // Confirmar la acción
+        boolean confirmed = AlertUtil.showConfirmation("Confirmar actualización",
+            "Se actualizarán los mods de la instancia '" + selectedInstance + "'.\n\n" +
+            "• Los mods indicados para eliminación serán removidos.\n" +
+            "• Los mods nuevos se agregarán a la carpeta.\n\n" +
+            "¿Deseas continuar?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        // Iniciar la actualización de mods
+        startModsUpdate(selectedInstance, modsUrl);
+    }
+
+    /**
+     * Aplica los estilos del proyecto al ChoiceDialog
+     */
+    private void styleChoiceDialog(ChoiceDialog<String> dialog) {
+        dialog.initStyle(StageStyle.TRANSPARENT);
+        DialogPane dialogPane = dialog.getDialogPane();
+        
+        String mainCss = getClass().getResource("/css/main.css") != null
+                ? getClass().getResource("/css/main.css").toExternalForm() : null;
+        String darkCss = getClass().getResource("/css/dark-theme.css") != null
+                ? getClass().getResource("/css/dark-theme.css").toExternalForm() : null;
+        String alertCss = getClass().getResource("/css/alert.css") != null
+                ? getClass().getResource("/css/alert.css").toExternalForm() : null;
+
+        if (mainCss != null) dialogPane.getStylesheets().add(mainCss);
+        if (darkCss != null) dialogPane.getStylesheets().add(darkCss);
+        if (alertCss != null) dialogPane.getStylesheets().add(alertCss);
+
+        dialogPane.getStyleClass().add("custom-alert");
+
+        dialog.setOnShowing(e -> {
+            Stage stage = (Stage) dialogPane.getScene().getWindow();
+            if (stage != null && stage.getScene() != null) {
+                stage.getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
+            }
+        });
+    }
+
+    /**
+     * Inicia la actualización de mods en una instancia existente
+     */
+    private void startModsUpdate(String instanceName, String driveUrl) {
+        Stage ownerStage = (Stage) btnInstallMods.getScene().getWindow();
+        DescargaProgresoController progressCtrl = DescargaProgresoController.show(ownerStage);
+        
+        if (progressCtrl == null) {
+            AlertUtil.showError("Error", "No se pudo iniciar la ventana de progreso.");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                modpackService.updateModsFromDrive(driveUrl, instanceName,
+                    status -> progressCtrl.setProgress(progressCtrl.getCurrentProgress(), "Mods: " + instanceName, status),
+                    progress -> progressCtrl.setProgress(progress)
+                );
+                
+                Platform.runLater(() -> {
+                    progressCtrl.close();
+                    AlertUtil.showInfo("Actualización Exitosa", 
+                        "Los mods se han actualizado correctamente en la instancia '" + instanceName + "'.");
+                });
+            } catch (Exception e) {
+                logger.error("Error al actualizar mods de la instancia: {}", instanceName, e);
+                Platform.runLater(() -> {
+                    progressCtrl.close();
+                    AlertUtil.showError("Error de Actualización", 
+                        "No se pudieron actualizar los mods: " + e.getMessage());
+                });
+            }
+        }).start();
     }
 
     private void startModpackInstallation(String packName, String driveUrl) {

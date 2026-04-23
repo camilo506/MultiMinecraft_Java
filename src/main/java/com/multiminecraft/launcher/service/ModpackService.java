@@ -123,6 +123,205 @@ public class ModpackService {
     }
 
     /**
+     * Actualiza los mods de una instancia existente desde un ZIP en Google Drive.
+     * El ZIP debe contener archivos .jar de mods y opcionalmente un archivo .json
+     * con una lista de mods a eliminar de la instancia antes de copiar los nuevos.
+     *
+     * @param driveUrl URL de compartir de Drive
+     * @param instanceName Nombre de la instancia destino
+     * @param statusCallback Callback para mensajes de estado
+     * @param progressCallback Callback para el porcentaje de progreso (0-1)
+     * @throws Exception Si ocurre un error en el proceso
+     */
+    public void updateModsFromDrive(String driveUrl, String instanceName, 
+            Consumer<String> statusCallback, Consumer<Double> progressCallback) throws Exception {
+        
+        logger.info("Iniciando actualización de mods para instancia '{}' desde Drive: {}", instanceName, driveUrl);
+        
+        // 1. Convertir enlace a descarga directa
+        String directUrl = GoogleDriveUtil.getDirectDownloadUrl(driveUrl);
+        
+        // 2. Crear carpetas temporales
+        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir", "temp"), "mods_update_" + System.currentTimeMillis());
+        Files.createDirectories(tempDir);
+        Path zipPath = tempDir.resolve("mods.zip");
+        Path extractDir = tempDir.resolve("extracted");
+        
+        try {
+            // 3. Descargar ZIP (0.0 - 0.5)
+            statusCallback.accept("Descargando paquete de mods...");
+            downloadService.downloadFile(directUrl, zipPath, p -> progressCallback.accept(p * 0.5));
+            
+            // 4. Extraer ZIP (0.5 - 0.6)
+            statusCallback.accept("Extrayendo mods...");
+            progressCallback.accept(0.55);
+            ZipUtil.unzip(zipPath, extractDir);
+            progressCallback.accept(0.6);
+            
+            // 5. Obtener la carpeta de mods de la instancia destino
+            Path targetModsDir = configService.getInstanceMinecraftDirectory(instanceName).resolve("mods");
+            if (!Files.exists(targetModsDir)) {
+                Files.createDirectories(targetModsDir);
+            }
+            
+            // 6. Buscar y procesar el archivo JSON de eliminación (0.6 - 0.7)
+            statusCallback.accept("Procesando lista de mods...");
+            processModRemovalJson(extractDir, targetModsDir);
+            progressCallback.accept(0.7);
+            
+            // 7. Copiar los nuevos mods al directorio de la instancia (0.7 - 1.0)
+            statusCallback.accept("Instalando mods nuevos...");
+            int modsInstalled = deployNewMods(extractDir, targetModsDir);
+            progressCallback.accept(1.0);
+            
+            statusCallback.accept("Actualización completada: " + modsInstalled + " mods instalados en '" + instanceName + "'.");
+            logger.info("Actualización de mods completada para '{}': {} mods instalados", instanceName, modsInstalled);
+            
+        } catch (Exception e) {
+            logger.error("Error al actualizar mods de la instancia '{}'", instanceName, e);
+            throw e;
+        } finally {
+            // 8. Limpieza
+            try {
+                FileUtil.deleteDirectory(tempDir);
+            } catch (IOException e) {
+                logger.warn("No se pudo limpiar el directorio temporal: {}", tempDir);
+            }
+        }
+    }
+
+    /**
+     * Busca un archivo .json dentro del directorio extraído y elimina los mods
+     * listados en él de la carpeta de mods de la instancia.
+     * 
+     * Formato esperado del JSON:
+     * {
+     *   "eliminar": ["modA.jar", "modB.jar"]
+     * }
+     * 
+     * O bien un array simple:
+     * ["modA.jar", "modB.jar"]
+     */
+    @SuppressWarnings("unchecked")
+    private void processModRemovalJson(Path extractDir, Path targetModsDir) throws IOException {
+        // Buscar archivos .json en el directorio extraído (nivel raíz y subcarpetas)
+        Path jsonFile = null;
+        try (var stream = Files.walk(extractDir, 3)) {
+            jsonFile = stream
+                .filter(p -> Files.isRegularFile(p) && p.toString().toLowerCase().endsWith(".json"))
+                .findFirst()
+                .orElse(null);
+        }
+        
+        if (jsonFile == null) {
+            logger.info("No se encontró archivo JSON de eliminación en el ZIP. Se omitirá la eliminación selectiva.");
+            return;
+        }
+        
+        logger.info("Archivo JSON de eliminación encontrado: {}", jsonFile.getFileName());
+        String jsonContent = Files.readString(jsonFile);
+        
+        java.util.List<String> modsToRemove = new java.util.ArrayList<>();
+        
+        try {
+            // Intentar como objeto con clave "eliminar"
+            Object parsed = JsonUtil.fromJson(jsonContent, Object.class);
+            if (parsed instanceof java.util.Map) {
+                java.util.Map<String, Object> map = (java.util.Map<String, Object>) parsed;
+                Object eliminarObj = map.get("eliminar");
+                if (eliminarObj == null) eliminarObj = map.get("remove");
+                if (eliminarObj instanceof java.util.List) {
+                    for (Object item : (java.util.List<?>) eliminarObj) {
+                        modsToRemove.add(item.toString());
+                    }
+                }
+            } else if (parsed instanceof java.util.List) {
+                // Array simple
+                for (Object item : (java.util.List<?>) parsed) {
+                    modsToRemove.add(item.toString());
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Error al parsear el JSON de eliminación: {}", e.getMessage());
+            return;
+        }
+        
+        if (modsToRemove.isEmpty()) {
+            logger.info("La lista de mods a eliminar está vacía.");
+            return;
+        }
+        
+        logger.info("Mods a eliminar: {}", modsToRemove);
+        
+        // Verificar si se usa la palabra clave especial "todos" para borrar todo
+        boolean deleteAll = modsToRemove.stream()
+            .anyMatch(s -> s.equalsIgnoreCase("todos") || s.equalsIgnoreCase("all"));
+        
+        if (deleteAll) {
+            logger.info("Palabra clave 'todos' detectada. Eliminando TODOS los mods de la instancia.");
+        }
+        
+        // Eliminar los mods indicados de la carpeta de la instancia
+        if (Files.exists(targetModsDir)) {
+            try (var modFiles = Files.list(targetModsDir)) {
+                modFiles.filter(Files::isRegularFile).forEach(modFile -> {
+                    String fileName = modFile.getFileName().toString();
+                    
+                    boolean shouldRemove;
+                    if (deleteAll) {
+                        // "todos" → eliminar todos los .jar
+                        shouldRemove = fileName.toLowerCase().endsWith(".jar");
+                    } else {
+                        // Eliminación selectiva por nombre
+                        shouldRemove = modsToRemove.stream()
+                            .anyMatch(toRemove -> fileName.equalsIgnoreCase(toRemove) 
+                                || fileName.toLowerCase().contains(toRemove.toLowerCase()));
+                    }
+                    
+                    if (shouldRemove) {
+                        try {
+                            Files.delete(modFile);
+                            logger.info("Mod eliminado: {}", fileName);
+                        } catch (IOException e) {
+                            logger.warn("No se pudo eliminar el mod: {}", fileName, e);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Copia los archivos .jar de mods desde el directorio extraído a la carpeta de mods destino.
+     * Busca recursivamente en el directorio extraído para encontrar los archivos .jar.
+     * 
+     * @return Cantidad de mods copiados
+     */
+    private int deployNewMods(Path extractDir, Path targetModsDir) throws IOException {
+        // Primero, buscar si hay una carpeta "mods" dentro del ZIP
+        Path modsSourceDir = findItem(extractDir, "mods", true);
+        
+        // Si encontramos una carpeta "mods", usarla como fuente; sino, usar la raíz
+        Path sourceDir = (modsSourceDir != null) ? modsSourceDir : extractDir;
+        
+        int count = 0;
+        try (var stream = Files.list(sourceDir)) {
+            var jarFiles = stream
+                .filter(p -> Files.isRegularFile(p) && p.toString().toLowerCase().endsWith(".jar"))
+                .collect(java.util.stream.Collectors.toList());
+            
+            for (Path jarFile : jarFiles) {
+                Path dest = targetModsDir.resolve(jarFile.getFileName());
+                Files.copy(jarFile, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                logger.debug("Mod copiado: {}", jarFile.getFileName());
+                count++;
+            }
+        }
+        
+        return count;
+    }
+
+    /**
      * Busca recursivamente la carpeta que contiene el archivo instancia.json
      */
     private Path findModpackRoot(Path startPath) throws IOException {
