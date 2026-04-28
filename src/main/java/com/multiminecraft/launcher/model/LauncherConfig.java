@@ -13,6 +13,7 @@ public class LauncherConfig {
     private String installedModpackVersion;
     private String installedModsVersion = "0.0.0";
     private String lastAccessKey = "";
+    private String skinPath = "";
 
     public LauncherConfig() {
         // Valores por defecto
@@ -24,6 +25,7 @@ public class LauncherConfig {
         this.playerName = "";
         this.installedModpackVersion = "0.0.0";
         this.installedModsVersion = "0.0.0";
+        this.skinPath = "";
     }
 
     // Getters y Setters
@@ -97,5 +99,13 @@ public class LauncherConfig {
 
     public void setLastAccessKey(String lastAccessKey) {
         this.lastAccessKey = lastAccessKey;
+    }
+
+    public String getSkinPath() {
+        return skinPath != null ? skinPath : "";
+    }
+
+    public void setSkinPath(String skinPath) {
+        this.skinPath = skinPath;
     }
 }

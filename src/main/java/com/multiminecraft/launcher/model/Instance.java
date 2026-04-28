@@ -14,6 +14,7 @@ public class Instance {
     private String memory;
     private String icon;
     private String playerName;
+    private String skinPath = "";
     private LocalDateTime lastPlayed;
     /** Fecha/hora en que se creó la instancia en el launcher (persistida en instance.json) */
     private LocalDateTime createdAt;
@@ -98,6 +99,14 @@ public class Instance {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public String getSkinPath() {
+        return skinPath != null ? skinPath : "";
+    }
+
+    public void setSkinPath(String skinPath) {
+        this.skinPath = skinPath;
     }
 
     public LocalDateTime getLastPlayed() {

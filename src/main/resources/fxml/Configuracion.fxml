@@ -7,19 +7,23 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox maxHeight="1.7976931348623157E308" maxWidth="875.0" minWidth="875.0" prefWidth="875.0" spacing="0" style="-fx-background-color: #131c28; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 12;" styleClass="config-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.multiminecraft.launcher.controller.ConfiguracionController">
 
-    <!-- Header con botón cerrar -->
+    <!-- Header con botón cerrar y StatusLabel -->
     <HBox alignment="CENTER_LEFT" spacing="10">
         <padding>
             <Insets bottom="10" left="32" right="22" top="18" />
         </padding>
         <VBox spacing="2" HBox.hgrow="ALWAYS">
-            <Label styleClass="config-title" text="⚙  Configuración" />
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label styleClass="config-title" text="⚙  Configuración" />
+                <Label fx:id="statusLabel" styleClass="config-status-saved" text="" />
+            </HBox>
             <Label styleClass="config-subtitle" text="Personaliza tu experiencia en MultiMinecraft" />
         </VBox>
         <Button onAction="#onClose" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: #8899aa; -fx-background-radius: 8; -fx-padding: 5 10; -fx-cursor: hand; -fx-font-size: 11px;" text="✕" />
@@ -43,7 +47,11 @@
                 </HBox>
                 <VBox spacing="6">
                     <Label styleClass="config-field-label" text="Nombre del Jugador" />
-                    <TextField fx:id="playerNameField" promptText="Ingresa tu nombre de jugador" styleClass="config-text-field" />
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <TextField fx:id="playerNameField" promptText="Ingresa tu nombre de jugador" styleClass="config-text-field" HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onSaveClicked" styleClass="config-section-save-btn" text="💾" />
+                        <Button onAction="#onResetClicked" styleClass="config-section-reset-btn" text="↺" />
+                    </HBox>
                 </VBox>
             </VBox>
 
@@ -58,7 +66,12 @@
                 </HBox>
                 <VBox spacing="6">
                     <Label styleClass="config-field-label" text="Memoria por Defecto" />
-                    <ComboBox fx:id="memoryComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <ComboBox fx:id="memoryComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onSaveClicked" styleClass="config-section-save-btn" text="💾" />
+                        <Button onAction="#onResetClicked" styleClass="config-section-reset-btn" text="↺" />
+                    </HBox>
                 </VBox>
             </VBox>
 
@@ -79,6 +92,11 @@
                     <VBox spacing="6">
                         <Label styleClass="config-field-label" text="Idioma" />
                         <ComboBox fx:id="languageComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <VBox alignment="BOTTOM_CENTER" spacing="8">
+                        <Button onAction="#onSaveClicked" styleClass="config-section-save-btn" text="💾" />
+                        <Button onAction="#onResetClicked" styleClass="config-section-reset-btn" text="↺" />
                     </VBox>
                 </HBox>
             </VBox>
@@ -128,14 +146,6 @@
             </VBox>
 
             <Separator styleClass="config-separator" />
-
-            <!-- BOTONES DE ACCIÓN -->
-            <HBox alignment="CENTER_RIGHT" spacing="12">
-                <Label fx:id="statusLabel" styleClass="config-status-saved" text="" />
-                <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="resetButton" onAction="#onResetClicked" styleClass="config-reset-button" text="Restablecer" />
-                <Button fx:id="saveButton" onAction="#onSaveClicked" prefWidth="160" styleClass="config-save-button" text="💾  Guardar" />
-            </HBox>
         </VBox>
     </ScrollPane>
 </VBox>

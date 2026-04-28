@@ -5,11 +5,11 @@
 
 /* ---- Borde verde de la ventana ---- */
 .crear-editar-root {
-    -fx-border-color: #26d9a0;
-    -fx-border-width: 2;
-    -fx-border-radius: 10;
-    -fx-background-radius: 10;
-    -fx-background-color: #141e2b;
+    -fx-background-color: #131c28;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
 }
 
 /* ---- Contenedor central del formulario ---- */
@@ -26,14 +26,14 @@
 
 /* ---- Subtítulo ---- */
 .crear-subtitle {
-    -fx-text-fill: #8899aa;
+    -fx-text-fill: #6b7b8d;
     -fx-font-size: 11.5px;
     -fx-wrap-text: true;
 }
 
 /* ---- Etiquetas de campo (mayúsculas, gris claro) ---- */
 .field-label {
-    -fx-text-fill: #8899aa;
+    -fx-text-fill: #6b7b8d;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
 }
@@ -46,28 +46,27 @@
 
 /* ---- Contenedor del preview del ícono ---- */
 .icon-preview-container {
-    -fx-background-color: #1c2d40;
-    -fx-background-radius: 10;
-    -fx-border-color: #2a3f5f;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 10;
-    -fx-border-style: dashed;
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
 }
 
 .icon-placeholder-label {
     -fx-font-size: 28px;
-    -fx-text-fill: #3a5070;
+    -fx-text-fill: #6b7b8d;
 }
 
 /* ---- Botón Seleccionar (estilo outline verde) ---- */
 .btn-select-icon {
-    -fx-background-color: transparent;
-    -fx-text-fill: #26d9a0;
-    -fx-border-color: #26d9a0;
-    -fx-border-width: 1.5;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-font-size: 10px;
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0d1117;
+    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-padding: 4 10 4 10;
     -fx-cursor: hand;
@@ -75,15 +74,15 @@
 }
 
 .btn-select-icon:hover {
-    -fx-background-color: #26d9a018;
+    -fx-background-color: #33edb0;
 }
 
 /* ---- Campos de texto de entrada ---- */
 .input-field {
-    -fx-background-color: #1c2d40;
-    -fx-text-fill: #d0dce8;
-    -fx-prompt-text-fill: #4a6070;
-    -fx-border-color: #2a3f5f;
+    -fx-background-color: #1a2332;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #6b7b8d;
+    -fx-border-color: rgba(255,255,255,0.10);
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
@@ -93,15 +92,15 @@
 
 .input-field:focused {
     -fx-border-color: #26d9a0;
-    -fx-effect: dropshadow(gaussian, #26d9a040, 8, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(38,217,160,0.25), 8, 0, 0, 0);
 }
 
 /* ---- ComboBox de selección ---- */
 .input-combo {
-    -fx-background-color: #1c2d40;
-    -fx-text-fill: #d0dce8;
-    -fx-prompt-text-fill: #4a6070;
-    -fx-border-color: #2a3f5f;
+    -fx-background-color: #1a2332;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #6b7b8d;
+    -fx-border-color: rgba(255,255,255,0.10);
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
@@ -110,8 +109,8 @@
 }
 
 .input-combo .list-cell {
-    -fx-background-color: #1c2d40;
-    -fx-text-fill: #d0dce8;
+    -fx-background-color: #1a2332;
+    -fx-text-fill: #ffffff;
 }
 
 .input-combo:focused {
@@ -119,12 +118,12 @@
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: #1c2d40;
-    -fx-border-color: #2a3f5f;
+    -fx-background-color: #1a2332;
+    -fx-border-color: rgba(255,255,255,0.10);
 }
 
 .combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #243650;
+    -fx-background-color: rgba(255,255,255,0.10);
     -fx-text-fill: #ffffff;
 }
 
@@ -136,7 +135,7 @@
 }
 
 .ram-asignados-label {
-    -fx-text-fill: #8899aa;
+    -fx-text-fill: #6b7b8d;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
     -fx-padding: 5 0 0 2;
@@ -144,9 +143,16 @@
 
 /* ---- Slider de RAM ---- */
 .ram-slider .track {
-    -fx-background-color: #1a2940;
+    -fx-background-color: linear-gradient(to right, #26d9a0, #1fb887);
     -fx-background-radius: 5;
     -fx-pref-height: 5;
+}
+
+/* Forzar color verde del track en JavaFX (selector específico por fx:id) */
+#memorySlider .track {
+    -fx-background-color: #26d9a0;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
 }
 
 .ram-slider .thumb {
@@ -169,14 +175,18 @@
 }
 
 .ram-slider .tick-label {
-    -fx-fill: #4a6070;
+    -fx-fill: #ffffff;
     -fx-font-size: 9px;
+}
+
+#memorySlider .axis .tick-label {
+    -fx-fill: #ffffff;
 }
 
 /* ---- Botón Cancelar ---- */
 .btn-cancel {
-    -fx-background-color: transparent;
-    -fx-text-fill: #8899aa;
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0d1117;
     -fx-border-color: transparent;
     -fx-font-size: 13px;
     -fx-cursor: hand;
@@ -185,27 +195,25 @@
 }
 
 .btn-cancel:hover {
-    -fx-text-fill: #d0dce8;
-    -fx-background-color: #1c2d40;
+    -fx-text-fill: #0d1117;
+    -fx-background-color: #33edb0;
 }
 
 /* ---- Botón Crear Instancia (verde sólido) ---- */
 .btn-create {
-    -fx-background-color: linear-gradient(to right, #26d9a0, #1fb887);
-    -fx-text-fill: #0a1018;
-    -fx-font-size: 13px;
+    -fx-background-color: #26d9a0;
+    -fx-text-fill: #0d1117;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-padding: 9 22 9 22;
+    -fx-padding: 8 18 8 18;
     -fx-background-radius: 8;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, #26d9a050, 10, 0, 0, 2);
 }
 
 .btn-create:hover {
-    -fx-background-color: linear-gradient(to right, #33edb0, #26d9a0);
+    -fx-background-color: #33edb0;
     -fx-effect: dropshadow(gaussian, #26d9a070, 14, 0, 0, 3);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
 }
 
 .btn-create:pressed {
@@ -215,13 +223,13 @@
 
 /* ---- Contenedor de progreso (parte inferior) ---- */
 .creation-progress-container {
-    -fx-background-color: #111922;
-    -fx-border-color: #26d9a055 transparent transparent transparent;
+    -fx-background-color: #131c28;
+    -fx-border-color: rgba(255,255,255,0.10) transparent transparent transparent;
     -fx-border-width: 2 0 0 0;
 }
 
 .progress-status-label {
-    -fx-text-fill: #b0c4d8;
+    -fx-text-fill: #6b7b8d;
     -fx-font-size: 12px;
 }
 

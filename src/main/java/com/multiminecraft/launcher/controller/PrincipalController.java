@@ -21,7 +21,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -984,44 +983,13 @@ public class PrincipalController {
 
     @FXML
     private void onNavModpacksClicked() {
-        restoreMainContent();
         if (selectedInstance == null) {
             AlertUtil.showWarning("No hay instancia seleccionada", "Por favor, selecciona una instancia primero.");
             return;
         }
 
-        try {
-            logger.info("Abriendo ventana de edición para: {}", selectedInstance.getName());
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearEditar.fxml"));
-            Parent root = loader.load();
-
-            CrearEditarController controller = loader.getController();
-            controller.setInstanceToEdit(selectedInstance);
-
-            Stage stage = new Stage();
-            stage.setTitle("Editar Instancia - " + selectedInstance.getName());
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(App.getPrimaryStage());
-            stage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
-
-            Scene scene = new Scene(root);
-            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setResizable(false);
-
-            stage.showAndWait();
-
-            // Refrescar UI después de editar (loadInstances re-sincroniza la instancia
-            // seleccionada desde disco)
-            loadInstances();
-
-        } catch (Exception e) {
-            logger.error("Error al abrir ventana de edición", e);
-            AlertUtil.showError("Error", "No se pudo abrir la ventana de edición: " + e.getMessage());
-        }
+        setActiveNavButton(navModpacksButton);
+        openCrearEditarView(selectedInstance);
     }
 
     @FXML
@@ -1223,6 +1191,7 @@ public class PrincipalController {
         mainContentArea.setManaged(true);
 
         // Quitar el estilo activo de los botones de navegación especial
+        navModpacksButton.getStyleClass().remove("nav-button-active");
         navConfigButton.getStyleClass().remove("nav-button-active");
         navSettingsButton.getStyleClass().remove("nav-button-active");
     }
@@ -1233,6 +1202,18 @@ public class PrincipalController {
      */
     public void refreshPlayerInfo() {
         Platform.runLater(this::setupPlayerInfo);
+    }
+
+    /**
+     * Actualiza el texto del nombre del jugador en el sidebar de forma inmediata.
+     * Útil para actualizaciones en tiempo real desde la configuración.
+     */
+    public void setPlayerNameText(String name) {
+        if (playerNameLabel != null) {
+            Platform.runLater(() -> {
+                playerNameLabel.setText(name == null || name.trim().isEmpty() ? "Jugador" : name);
+            });
+        }
     }
 
     // ==================== ACCIONES DE INSTANCIAS ====================
@@ -1479,35 +1460,39 @@ public class PrincipalController {
     @FXML
     private void onCreateInstanceClicked() {
         logger.debug("Crear nueva instancia");
+        openCrearEditarView(null);
+    }
+
+    private void openCrearEditarView(Instance instanceToEdit) {
+        restoreMainContent();
 
         try {
+            boolean editMode = instanceToEdit != null;
+            logger.info("Abriendo CrearEditar dentro del área central (modo: {})", editMode ? "editar" : "crear");
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CrearEditar.fxml"));
-            Parent createInstanceView = loader.load();
+            Parent root = loader.load();
+            root.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
+            CrearEditarController controller = loader.getController();
+            controller.setEmbeddedInMainView(true);
 
-            Stage createInstanceStage = new Stage();
-            createInstanceStage.setTitle("Crear Nueva Instancia");
-            createInstanceStage.initModality(Modality.WINDOW_MODAL);
-            createInstanceStage.initOwner(createInstanceButton.getScene().getWindow());
-            createInstanceStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+            if (editMode) {
+                controller.setInstanceToEdit(instanceToEdit);
+            }
 
-            Scene scene = new Scene(createInstanceView);
-            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/create-instance.css").toExternalForm());
+            activeSubViewNode = root;
+            activeSubViewNode.setUserData(editMode ? "editar-instancia" : "crear-instancia");
 
-            createInstanceStage.setScene(scene);
-            createInstanceStage.setResizable(false);
+            mainContentArea.setVisible(false);
+            mainContentArea.setManaged(false);
 
-            createInstanceStage.showAndWait();
-
-            // Recargar instancias después de cerrar la ventana
-            loadInstances();
-            updateBannerInfo(null);
+            StackPane.setAlignment(activeSubViewNode, Pos.TOP_CENTER);
+            centerStack.getChildren().add(activeSubViewNode);
+            logger.info("CrearEditar mostrado en el área central");
 
         } catch (IOException e) {
-            logger.error("Error al abrir ventana de crear instancia", e);
-            showError("Error", "No se pudo abrir la ventana de crear instancia: " + e.getMessage());
+            logger.error("Error al abrir vista Crear/Editar instancia", e);
+            showError("Error", "No se pudo abrir la vista de crear/editar instancia: " + e.getMessage());
         }
     }
 

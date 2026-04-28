@@ -18,6 +18,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
@@ -45,6 +48,13 @@ public class CrearEditarController {
     @FXML private ImageView iconPreview;
     @FXML private Label iconPlaceholder;
     
+    // Skin
+    @FXML private ImageView skinPreview;
+    @FXML private Label skinPlaceholder;
+    @FXML private Label skinNameLabel;
+    @FXML private Button btnRemoveSkin;
+    private String selectedSkinPath;
+    
     private String selectedIconName;
     // Campos del progreso inline (en desuso, se usa DescargaProgresoController)
     @FXML private VBox progressContainer;
@@ -67,6 +77,11 @@ public class CrearEditarController {
     // Modo edición
     private boolean isEditMode = false;
     private Instance currentInstance;
+    private boolean embeddedInMainView = false;
+
+    public void setEmbeddedInMainView(boolean embeddedInMainView) {
+        this.embeddedInMainView = embeddedInMainView;
+    }
     
     @FXML
     public void initialize() {
@@ -150,6 +165,14 @@ public class CrearEditarController {
             
             loaderTypeComboBox.setValue(instance.getLoader());
             versionComboBox.setValue(instance.getVersion());
+            
+            // Cargar skin de la instancia
+            selectedSkinPath = instance.getSkinPath();
+            if (selectedSkinPath != null && !selectedSkinPath.isEmpty()) {
+                loadSkinPreview(selectedSkinPath);
+            } else {
+                clearSkinPreview();
+            }
             
             selectedIconName = instance.getIcon();
             loadIconPreview(selectedIconName);
@@ -319,6 +342,9 @@ public class CrearEditarController {
         if (selectedIconName != null && !selectedIconName.isEmpty()) {
             instance.setIcon(selectedIconName);
         }
+
+        // Guardar skin de la instancia
+        instance.setSkinPath(selectedSkinPath);
         
         // Deshabilitar formulario y abrir modal
         setFormEnabled(false);
@@ -327,10 +353,12 @@ public class CrearEditarController {
         DescargaProgresoController progresoCtrl = DescargaProgresoController.show(App.getPrimaryStage());
         System.out.println("[DEBUG] PROGRESO_CTRL: " + (progresoCtrl != null ? "CREADO" : "FALLÓ (NULL)"));
 
-        // Cerrar esta ventana inmediatamente
-        Stage currentStage = (Stage) createButton.getScene().getWindow();
-        if (currentStage != null) {
-            currentStage.close();
+        // En modo modal se cierra la ventana; en modo embebido se mantiene la vista.
+        if (!embeddedInMainView) {
+            Stage currentStage = (Stage) createButton.getScene().getWindow();
+            if (currentStage != null) {
+                currentStage.close();
+            }
         }
 
         // Callback de cancelación
@@ -408,6 +436,9 @@ public class CrearEditarController {
                     // Refrescar el grid de la ventana principal
                     if (PrincipalController.getInstance() != null) {
                         PrincipalController.getInstance().refreshInstances();
+                        if (embeddedInMainView) {
+                            PrincipalController.getInstance().restoreMainContent();
+                        }
                     }
 
                     // Pequeña pausa para que el usuario vea el 100%
@@ -459,6 +490,14 @@ public class CrearEditarController {
     
     @FXML
     private void onCancel() {
+        // Si está embebida, regresar al contenido principal.
+        if (embeddedInMainView) {
+            if (PrincipalController.getInstance() != null) {
+                PrincipalController.getInstance().restoreMainContent();
+            }
+            return;
+        }
+
         // Cerrar la ventana modal
         Stage stage = (Stage) createButton.getScene().getWindow();
         if (stage != null) {
@@ -557,14 +596,147 @@ public class CrearEditarController {
             loadDefaultIcon();
         }
     }
-    
+
     /**
-     * Crea un icono por defecto simple para la vista previa
+     * Muestra una previsualizacion simple cuando no hay icono disponible.
      */
     private void createDefaultIconPreview() {
-        // Usar el método del MainController para crear un icono por defecto
-        // Por ahora, simplemente dejamos el ImageView vacío o con un placeholder
-        // En una implementación más completa, podrías crear un Canvas y generar una imagen
-        iconPreview.setImage(null);
+        if (iconPreview != null) {
+            iconPreview.setImage(null);
+        }
+        if (iconPlaceholder != null) {
+            iconPlaceholder.setText("🖼");
+            iconPlaceholder.setVisible(true);
+        }
+        selectedIconName = null;
+    }
+    
+    /**
+     * Selecciona una skin (.png) desde el explorador de archivos
+     */
+    @FXML
+    private void onBrowseSkin() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Seleccionar Skin (.png)");
+        fileChooser.getExtensionFilters().addAll(
+                new javafx.stage.FileChooser.ExtensionFilter("Imágenes PNG", "*.png")
+        );
+
+        java.io.File file = fileChooser.showOpenDialog(nameField.getScene().getWindow());
+        if (file != null) {
+            try {
+                // Igual que en Configuración: copiar a una ruta gestionada por el launcher.
+                String playerName = playerNameField.getText() != null ? playerNameField.getText().trim() : "";
+                if (playerName.isEmpty()) {
+                    playerName = nameField.getText() != null ? nameField.getText().trim() : "";
+                }
+                if (playerName.isEmpty()) {
+                    playerName = "Player";
+                }
+
+                String instanceName = nameField.getText() != null ? nameField.getText().trim() : "";
+                String fileHint = (instanceName.isEmpty() ? "instance" : instanceName) + "_" + playerName + "_skin";
+                java.nio.file.Path destPath = ConfigService.getInstance()
+                        .copySkinToStorage(file.toPath(), fileHint);
+
+                selectedSkinPath = destPath.toAbsolutePath().toString();
+                loadSkinPreview(selectedSkinPath);
+                logger.info("Skin seleccionada y copiada para la instancia: {}", selectedSkinPath);
+            } catch (Exception e) {
+                logger.error("No se pudo copiar la skin seleccionada", e);
+                showError("No se pudo guardar la skin seleccionada");
+            }
+        }
+    }
+
+    @FXML
+    private void onRemoveSkin() {
+        selectedSkinPath = "";
+        clearSkinPreview();
+        logger.info("Skin de la instancia eliminada");
+    }
+
+    private void loadSkinPreview(String path) {
+        try {
+            java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                Image image = new Image(file.toURI().toString());
+                skinPreview.setImage(buildSkinFrontPreview(image));
+                skinPreview.setViewport(null);
+                skinPreview.setSmooth(false);
+                skinPreview.setPreserveRatio(false);
+                skinPlaceholder.setVisible(false);
+                skinNameLabel.setText(file.getName());
+                btnRemoveSkin.setDisable(false);
+            } else {
+                clearSkinPreview();
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo cargar previsualización de skin: {}", path);
+            clearSkinPreview();
+        }
+    }
+
+    private void clearSkinPreview() {
+        skinPreview.setImage(null);
+        skinPlaceholder.setVisible(true);
+        skinNameLabel.setText("Usar skin global del launcher");
+        btnRemoveSkin.setDisable(true);
+    }
+
+    private Image buildSkinFrontPreview(Image skinTexture) {
+        if (skinTexture == null) {
+            return null;
+        }
+
+        int texH = (int) Math.round(skinTexture.getHeight());
+        PixelReader pr = skinTexture.getPixelReader();
+        if (pr == null || texH <= 0) {
+            return skinTexture;
+        }
+
+        final int scale = 4;
+        final int w = 16 * scale;
+        final int h = 32 * scale;
+        WritableImage result = new WritableImage(w, h);
+        PixelWriter pw = result.getPixelWriter();
+        boolean modernSkin = texH >= 64;
+
+        // Ensamblado en formato delgado (Alex): brazos de 3px
+        copyPart(pr, pw, 8, 8, 8, 8, 4, 0, scale, false);    // cabeza
+        copyPart(pr, pw, 20, 20, 8, 12, 4, 8, scale, false); // torso
+        copyPart(pr, pw, 44, 20, 3, 12, 1, 8, scale, false); // brazo der (delgado)
+        if (modernSkin) {
+            copyPart(pr, pw, 36, 52, 3, 12, 12, 8, scale, false); // brazo izq (delgado)
+        } else {
+            copyPart(pr, pw, 44, 20, 3, 12, 12, 8, scale, true);
+        }
+        copyPart(pr, pw, 4, 20, 4, 12, 4, 20, scale, false); // pierna der
+        if (modernSkin) {
+            copyPart(pr, pw, 20, 52, 4, 12, 8, 20, scale, false); // pierna izq
+        } else {
+            copyPart(pr, pw, 4, 20, 4, 12, 8, 20, scale, true);
+        }
+
+        return result;
+    }
+
+    private void copyPart(PixelReader pr, PixelWriter pw,
+                          int srcX, int srcY, int srcW, int srcH,
+                          int dstX, int dstY, int scale, boolean mirror) {
+        for (int sy = 0; sy < srcH; sy++) {
+            for (int sx = 0; sx < srcW; sx++) {
+                int argb = pr.getArgb(srcX + sx, srcY + sy);
+                for (int dy = 0; dy < scale; dy++) {
+                    for (int dx = 0; dx < scale; dx++) {
+                        int destCol = mirror
+                                ? (dstX + srcW - 1 - sx) * scale + dx
+                                : (dstX + sx) * scale + dx;
+                        int destRow = (dstY + sy) * scale + dy;
+                        pw.setArgb(destCol, destRow, argb);
+                    }
+                }
+            }
+        }
     }
 }

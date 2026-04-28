@@ -33,11 +33,13 @@ public class LaunchService {
 
     private final ConfigService configService;
     private final MojangService mojangService;
+    private final SkinDeploymentService skinDeploymentService;
     private String currentPlayerName = "Player";
 
     public LaunchService() {
         this.configService = ConfigService.getInstance();
         this.mojangService = new MojangService();
+        this.skinDeploymentService = new SkinDeploymentService(this.configService);
     }
 
     /**
@@ -48,6 +50,9 @@ public class LaunchService {
         String pName = instance.getPlayerName();
         this.currentPlayerName = (pName != null && !pName.trim().isEmpty()) ? pName.trim() : "Player";
         logger.info("Lanzando instancia: {}", instance.getName());
+
+        // Preparar skin local del jugador para CustomSkinLoader
+        preparePlayerSkin(instance);
 
         Path minecraftDir = configService.getInstanceMinecraftDirectory(instance.getName());
         String baseVersion = instance.getVersion();
@@ -147,8 +152,10 @@ public class LaunchService {
         command = filterDemoArguments(command);
 
         // CRÍTICO: Asegurar que el client JAR de vanilla esté en el ignoreList de Forge
-        // Sin esto, el BootstrapLauncher carga el JAR como módulo automático (ej: _1._20._1)
-        // lo que causa ResolutionException por conflicto de paquetes con el módulo "minecraft"
+        // Sin esto, el BootstrapLauncher carga el JAR como módulo automático (ej:
+        // _1._20._1)
+        // lo que causa ResolutionException por conflicto de paquetes con el módulo
+        // "minecraft"
         if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FORGE) {
             fixForgeIgnoreList(command, versionData);
         }
@@ -904,14 +911,17 @@ public class LaunchService {
         // Determinar directorio de librerías
         // IMPORTANTE: Para Forge, ${library_directory} debe apuntar al directorio de
         // librerías de la INSTANCIA, porque el instalador de Forge descarga sus JARs
-        // (ASM, securejarhandler, bootstraplauncher, etc.) ahí, NO al directorio compartido.
+        // (ASM, securejarhandler, bootstraplauncher, etc.) ahí, NO al directorio
+        // compartido.
         // Si la instancia tiene un directorio de librerías con contenido Forge (cpw/),
         // usar ese; de lo contrario, usar el compartido.
         Path instanceLibDir = minecraftDir.resolve("libraries");
         Path libraryDirectory;
-        if (Files.exists(instanceLibDir.resolve("cpw")) || Files.exists(instanceLibDir.resolve("net").resolve("minecraftforge"))) {
+        if (Files.exists(instanceLibDir.resolve("cpw"))
+                || Files.exists(instanceLibDir.resolve("net").resolve("minecraftforge"))) {
             libraryDirectory = instanceLibDir;
-            logger.debug("Usando directorio de librerías de la instancia para ${library_directory}: {}", libraryDirectory);
+            logger.debug("Usando directorio de librerías de la instancia para ${library_directory}: {}",
+                    libraryDirectory);
         } else {
             libraryDirectory = PlatformUtil.getSharedLibrariesDirectory();
             logger.debug("Usando directorio de librerías compartido para ${library_directory}: {}", libraryDirectory);
@@ -981,9 +991,18 @@ public class LaunchService {
     }
 
     /**
+     * Despliega la skin configurada de la instancia al directorio de
+     * CustomSkinLoader y fuerza una configuración LocalSkin-only.
+     */
+    private void preparePlayerSkin(Instance instance) {
+        skinDeploymentService.deploySkinToInstance(instance, currentPlayerName);
+    }
+
+    /**
      * Busca la versión de Forge instalada para una versión de Minecraft
      * Mejora: Busca también variaciones del formato (como en Python)
      */
+
     private String findForgeVersion(Path minecraftDir, String minecraftVersion) {
         try {
             Path versionsDir = minecraftDir.resolve("versions");
@@ -1547,18 +1566,22 @@ public class LaunchService {
     }
 
     /**
-     * Corrige el argumento -DignoreList de Forge para asegurar que el JAR de vanilla esté en él.
-     * Esto previene que el BootstrapLauncher lo cargue como un módulo automático, lo que
-     * causaría un ResolutionException por conflicto de paquetes (ej. net.minecraft.data).
+     * Corrige el argumento -DignoreList de Forge para asegurar que el JAR de
+     * vanilla esté en él.
+     * Esto previene que el BootstrapLauncher lo cargue como un módulo automático,
+     * lo que
+     * causaría un ResolutionException por conflicto de paquetes (ej.
+     * net.minecraft.data).
      */
     private void fixForgeIgnoreList(List<String> command, JsonObject versionData) {
         try {
             // Verificar si tenemos información de la versión base
-            if (!versionData.has("inheritsFrom")) return;
-            
+            if (!versionData.has("inheritsFrom"))
+                return;
+
             String baseVersion = versionData.get("inheritsFrom").getAsString();
             String vanillaJarName = baseVersion + ".jar";
-            
+
             // Buscar el argumento -DignoreList
             for (int i = 0; i < command.size(); i++) {
                 String arg = command.get(i);
@@ -1567,14 +1590,14 @@ public class LaunchService {
                     if (arg.contains(vanillaJarName)) {
                         return;
                     }
-                    
+
                     // Agregar el jar de vanilla al final de la lista
                     String newArg = arg;
                     if (!arg.endsWith(",")) {
                         newArg += ",";
                     }
                     newArg += vanillaJarName;
-                    
+
                     command.set(i, newArg);
                     logger.debug("Corección de Forge: Añadido {} a {}", vanillaJarName, newArg);
                     return;

@@ -6,22 +6,24 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.shape.Rectangle?>
 
-<BorderPane styleClass="root-pane, crear-editar-root"
+<BorderPane styleClass="crear-editar-root"
+            style="-fx-background-color: #131c28; -fx-background-radius: 12; -fx-border-color: rgba(255,255,255,0.08); -fx-border-width: 1; -fx-border-radius: 12;"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.multiminecraft.launcher.controller.CrearEditarController"
-            prefWidth="460" prefHeight="520">
+            prefWidth="460" prefHeight="550">
 
-    <!-- Barra de título personalizada -->
     <top>
-        <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="0" styleClass="custom-title-bar">
+        <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="10">
             <padding>
-                <Insets bottom="0" left="12" right="0" top="0" />
+                <Insets bottom="10" left="22" right="22" top="18" />
             </padding>
-            <Label styleClass="title-bar-text" text="MultiMinecraft" />
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label fx:id="titleLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;" text="Crear Nueva Instancia"/>
+                <Label text="Configura tu entorno de juego personalizado." style="-fx-font-size: 11px; -fx-text-fill: #6b7b8d;"/>
+            </VBox>
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
-            <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
+            <Button fx:id="closeBtn" onAction="#onCancel" style="-fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: #8899aa; -fx-background-radius: 8; -fx-padding: 5 10; -fx-cursor: hand; -fx-font-size: 11px;" text="✕" />
         </HBox>
     </top>
 
@@ -31,104 +33,92 @@
                 <Insets top="24" right="28" bottom="20" left="28"/>
             </padding>
 
-            <!-- Header: Título -->
-            <VBox spacing="4">
-                <Label fx:id="titleLabel" text="Crear Nueva Instancia" styleClass="crear-title"/>
-                <Label text="Configura tu entorno de juego personalizado para MultiMinecraft Launcher." styleClass="crear-subtitle"/>
-            </VBox>
+            <Region prefHeight="4"/>
 
-            <!-- Separador visual -->
             <Region prefHeight="16"/>
 
-            <!-- Sección: Icono + Nombre de instancia / Jugador -->
             <HBox spacing="20" alignment="TOP_LEFT">
-
-                <!-- Columna izquierda: Icono -->
-                <VBox spacing="10" alignment="CENTER" styleClass="icon-section">
+                <VBox spacing="10" alignment="CENTER">
                     <Label text="ICONO" styleClass="field-label"/>
-                    <StackPane styleClass="icon-preview-container" prefWidth="90" prefHeight="90">
+                    <StackPane prefWidth="90" prefHeight="90">
                         <ImageView fx:id="iconPreview" fitWidth="80" fitHeight="80" preserveRatio="true"/>
-                        <Label fx:id="iconPlaceholder" text="🖼" styleClass="icon-placeholder-label"/>
+                        <Label fx:id="iconPlaceholder" text="🖼" styleClass="icon-placeholder-label" />
                     </StackPane>
-                    <Button text="SELECCIONAR" onAction="#onBrowseIcon" styleClass="btn-select-icon"/>
+                    <Button text="SELECCIONAR" onAction="#onBrowseIcon" styleClass="btn-select-icon" />
                 </VBox>
 
-                <!-- Columna derecha: Campos de texto -->
                 <VBox spacing="12" HBox.hgrow="ALWAYS">
-                    <!-- Nombre de instancia -->
                     <VBox spacing="5">
                         <Label text="NOMBRE DE INSTANCIA" styleClass="field-label"/>
-                        <TextField fx:id="nameField" promptText="Mi Aventura Survival" styleClass="input-field" maxWidth="Infinity"/>
+                        <TextField fx:id="nameField" styleClass="input-field" maxWidth="Infinity"/>
                     </VBox>
-
-                    <!-- Nombre del jugador -->
                     <VBox spacing="5">
                         <Label text="NOMBRE DEL JUGADOR" styleClass="field-label"/>
-                        <TextField fx:id="playerNameField" promptText="Steve_Player" styleClass="input-field" maxWidth="Infinity"/>
+                        <TextField fx:id="playerNameField" styleClass="input-field" maxWidth="Infinity"/>
                     </VBox>
                 </VBox>
             </HBox>
 
             <Region prefHeight="16"/>
 
-            <!-- Fila: Versión de Minecraft + Tipo (grupo junto y centrado) -->
-            <HBox alignment="CENTER">
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <VBox spacing="5" alignment="TOP_CENTER">
-                        <Label text="VERSIÓN DE MINECRAFT" styleClass="field-label"/>
-                        <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER" maxWidth="Infinity">
-                            <ComboBox fx:id="versionComboBox" promptText="Release 1.20.4" styleClass="input-combo" prefWidth="110" maxWidth="110"/>
-                        </HBox>
-                    </VBox>
-                    <VBox spacing="5" alignment="TOP_CENTER">
-                        <Label text="TIPO" styleClass="field-label"/>
-                        <HBox spacing="0" styleClass="combo-wrapper" alignment="CENTER" maxWidth="Infinity">
-                            <ComboBox fx:id="loaderTypeComboBox" promptText="Vanilla" styleClass="input-combo" prefWidth="110" maxWidth="110"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
+            <HBox alignment="CENTER" spacing="10">
+                <VBox spacing="5">
+                    <Label text="VERSIÓN" styleClass="field-label"/>
+                    <ComboBox fx:id="versionComboBox" prefWidth="110" styleClass="input-combo"/>
+                </VBox>
+                <VBox spacing="5">
+                    <Label text="TIPO" styleClass="field-label"/>
+                    <ComboBox fx:id="loaderTypeComboBox" prefWidth="110" styleClass="input-combo"/>
+                </VBox>
             </HBox>
 
             <Region prefHeight="16"/>
 
-            <!-- Memoria RAM -->
             <VBox spacing="8">
                 <HBox alignment="CENTER_LEFT">
                     <Label text="MEMORIA RAM" styleClass="field-label"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <HBox alignment="CENTER_RIGHT" spacing="4">
-                        <Label fx:id="memoryLabel" text="2GB" styleClass="ram-value-label"/>
-                        <Label text="ASIGNADOS" styleClass="ram-asignados-label"/>
-                    </HBox>
+                    <Label fx:id="memoryLabel" text="2GB" />
                 </HBox>
-                <Slider fx:id="memorySlider" min="1" max="16" value="2"
-                        showTickLabels="true" showTickMarks="false"
-                        majorTickUnit="4" minorTickCount="3"
-                        styleClass="ram-slider" maxWidth="Infinity"/>
+                <Slider fx:id="memorySlider" min="1" max="16" value="2" maxWidth="Infinity"
+                        styleClass="ram-slider" showTickLabels="true" showTickMarks="true"
+                        majorTickUnit="1" minorTickCount="0" snapToTicks="true"/>
+            </VBox>
+
+            <Region prefHeight="16"/>
+
+            <!-- SECCIÓN: SKIN (Simplificada al extremo) -->
+            <VBox spacing="8">
+                <Label text="SKIN (OPCIONAL)" styleClass="field-label"/>
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <StackPane prefWidth="96" prefHeight="140" style="-fx-background-color: #1a2332; -fx-background-radius: 10; -fx-border-color: rgba(255,255,255,0.08); -fx-border-radius: 10;">
+                        <ImageView fx:id="skinPreview" fitWidth="78" fitHeight="128" preserveRatio="false" smooth="false" />
+                        <Label fx:id="skinPlaceholder" text="👤" />
+                    </StackPane>
+                    <VBox spacing="5">
+                        <Label fx:id="skinNameLabel" text="Global" styleClass="crear-subtitle" />
+                        <HBox spacing="5">
+                            <Button text="Elegir" onAction="#onBrowseSkin" styleClass="btn-select-icon" />
+                            <Button fx:id="btnRemoveSkin" text="🗑" onAction="#onRemoveSkin" styleClass="btn-cancel" />
+                        </HBox>
+                    </VBox>
+                </HBox>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <!-- Botones de acción -->
             <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Button text="Cancelar" onAction="#onCancel" styleClass="btn-cancel"/>
-                <Button fx:id="createButton" text="Crear Instancia" styleClass="btn-create" onAction="#onCreate"/>
+                <Button text="Cancelar" onAction="#onCancel" styleClass="btn-cancel" />
+                <Button fx:id="createButton" text="Crear Instancia" onAction="#onCreate" styleClass="btn-create" />
             </HBox>
         </VBox>
     </center>
 
-    <!-- Indicador de progreso -->
     <bottom>
-        <VBox fx:id="progressContainer" styleClass="creation-progress-container" spacing="8"
-              visible="false" managed="false" alignment="CENTER">
-            <padding>
-                <Insets top="12" right="20" bottom="12" left="20"/>
-            </padding>
-            <StackPane>
-                <ProgressIndicator fx:id="progressBar" prefWidth="48" prefHeight="48"/>
-                <Label fx:id="progressPercentLabel" text="" styleClass="progress-percent-label" mouseTransparent="true"/>
-            </StackPane>
-            <Label fx:id="progressLabel" text="Creando instancia..." styleClass="progress-status-label"/>
+        <VBox fx:id="progressContainer" visible="false" managed="false" alignment="CENTER">
+            <ProgressIndicator fx:id="progressBar" />
+            <Label fx:id="progressPercentLabel" text="" />
+            <Label fx:id="progressLabel" text="" />
         </VBox>
     </bottom>
 

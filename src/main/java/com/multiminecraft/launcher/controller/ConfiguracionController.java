@@ -11,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +49,17 @@ public class ConfiguracionController {
         memoryComboBox.setItems(FXCollections.observableArrayList(MEMORY_OPTIONS));
         themeComboBox.setItems(FXCollections.observableArrayList(THEME_OPTIONS_DISPLAY));
         languageComboBox.setItems(FXCollections.observableArrayList(LANGUAGE_OPTIONS_DISPLAY));
+        
+        // Listener para actualizar el nombre en el sidebar en tiempo real
+        playerNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            PrincipalController principal = PrincipalController.getInstance();
+            if (principal != null) {
+                principal.setPlayerNameText(newValue);
+            }
+            // Sincronizar con el objeto de configuración en memoria inmediatamente
+            ConfigService.getInstance().getLauncherConfig().setPlayerName(newValue != null ? newValue.trim() : "");
+        });
+
         loadCurrentConfig();
     }
 
@@ -95,14 +105,15 @@ public class ConfiguracionController {
             ConfigService configService = ConfigService.getInstance();
             LauncherConfig config = configService.getLauncherConfig();
 
-            String playerName = playerNameField.getText().trim();
-            if (playerName.isEmpty()) {
+            String playerName = playerNameField.getText();
+            if (playerName == null || playerName.trim().isEmpty()) {
                 statusLabel.setText("⚠ El nombre no puede estar vacío");
                 statusLabel.getStyleClass().setAll("config-status-error");
                 return;
             }
-
+            playerName = playerName.trim();
             config.setPlayerName(playerName);
+            logger.info("Nombre de jugador actualizado a: {}", playerName);
 
             String selectedMemory = memoryComboBox.getValue();
             if (selectedMemory != null) {

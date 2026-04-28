@@ -216,6 +216,20 @@ public class App extends Application {
     }
 
     /**
+     * Se ejecuta al cerrar la aplicación
+     */
+    @Override
+    public void stop() throws Exception {
+        logger.info("Cerrando MultiMinecraft Launcher y guardando configuración...");
+        try {
+            ConfigService.getInstance().saveLauncherConfig();
+        } catch (Exception e) {
+            logger.error("Error al guardar configuración durante el cierre", e);
+        }
+        super.stop();
+    }
+
+    /**
      * Obtiene el Stage principal
      */
     public static Stage getPrimaryStage() {
