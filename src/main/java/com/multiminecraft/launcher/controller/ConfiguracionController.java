@@ -3,16 +3,24 @@ package com.multiminecraft.launcher.controller;
 import com.multiminecraft.launcher.App;
 import com.multiminecraft.launcher.model.LauncherConfig;
 import com.multiminecraft.launcher.service.ConfigService;
+import com.multiminecraft.launcher.service.DownloadService;
 import com.multiminecraft.launcher.util.AlertUtil;
+import com.multiminecraft.launcher.util.JsonUtil;
+import com.multiminecraft.launcher.util.PlatformUtil;
 import com.multiminecraft.launcher.service.UpdateService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 
 /**
  * Controlador de la vista de Configuración del launcher.
@@ -42,6 +50,7 @@ public class ConfiguracionController {
 
     private static final String[] LANGUAGE_OPTIONS_DISPLAY = { "Español", "English" };
     private static final String[] LANGUAGE_VALUES = { "es", "en" };
+    private final DownloadService downloadService = new DownloadService();
 
     @FXML
     public void initialize() {
@@ -174,7 +183,13 @@ public class ConfiguracionController {
 
     @FXML
     private void onWebsiteLinkClicked() {
-        App.openWebPage("https://monkeystudio.netlify.app/");
+        PrincipalController principal = PrincipalController.getInstance();
+        String url = principal != null ? principal.getSupportWebsiteUrl() : null;
+        if (url == null || url.isBlank()) {
+            AlertUtil.showWarning("Enlace no disponible", "No se pudo cargar la URL de la página web desde GitHub.");
+            return;
+        }
+        App.openWebPage(url);
     }
 
     @FXML
@@ -192,25 +207,43 @@ public class ConfiguracionController {
                         config.getInstalledModsVersion()
                 );
 
-                javafx.application.Platform.runLater(() -> {
-                    btnUpdateLauncher.setDisable(false);
-                    btnUpdateLauncher.setText("Buscar Actualización");
-
-                    if (result.launcherUpdate) {
-                        updateStatusLabel.setText("¡Nueva versión disponible! (" + result.remoteLauncherVersion + ")");
+                if (result.launcherUpdate) {
+                    Platform.runLater(() -> {
+                        updateStatusLabel.setText("Nueva versión encontrada (" + result.remoteLauncherVersion + "), descargando...");
                         updateStatusLabel.setStyle("-fx-text-fill: #e67e22; -fx-font-weight: bold; -fx-font-size: 13px;");
-                        AlertUtil.showInfo("Actualización Disponible", 
-                            "Hay una nueva versión del launcher disponible (" + result.remoteLauncherVersion + ").\n" +
-                            "Por favor, descárgala del sitio oficial.");
-                    } else {
+                        btnUpdateLauncher.setText("Descargando...");
+                    });
+
+                    String url = resolveLauncherDownloadUrl();
+                    if (url == null || url.isBlank()) {
+                        throw new IllegalStateException("No se encontró URL de descarga del launcher");
+                    }
+
+                    String installerName = buildInstallerFileName(url);
+                    Path installerPath = PlatformUtil.getLauncherDirectory().resolve("updates").resolve(installerName);
+                    downloadService.downloadFile(url, installerPath);
+                    launchInstaller(installerPath);
+
+                    Platform.runLater(() -> {
+                        updateStatusLabel.setText("Instalador ejecutado. Cerrando launcher...");
+                        updateStatusLabel.setStyle("-fx-text-fill: #26d9a0; -fx-font-weight: bold; -fx-font-size: 13px;");
+                        var stage = (javafx.stage.Stage) btnUpdateLauncher.getScene().getWindow();
+                        if (stage != null) {
+                            stage.close();
+                        }
+                    });
+                } else {
+                    Platform.runLater(() -> {
                         updateStatusLabel.setText("Launcher al día (v" + UpdateService.LAUNCHER_VERSION + ")");
                         updateStatusLabel.setStyle("-fx-text-fill: #26d9a0; -fx-font-weight: bold; -fx-font-size: 13px;");
                         AlertUtil.showInfo("Actualización", "Tu launcher está actualizado.");
-                    }
-                });
+                        btnUpdateLauncher.setDisable(false);
+                        btnUpdateLauncher.setText("Buscar Actualización");
+                    });
+                }
             } catch (Exception e) {
                 logger.error("Error en el botón de actualización", e);
-                javafx.application.Platform.runLater(() -> {
+                Platform.runLater(() -> {
                     updateStatusLabel.setText("Error al buscar actualizaciones");
                     updateStatusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 13px;");
                     btnUpdateLauncher.setDisable(false);
@@ -218,6 +251,41 @@ public class ConfiguracionController {
                 });
             }
         }).start();
+    }
+
+    private String resolveLauncherDownloadUrl() {
+        try {
+            String url = "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Direccion-Descargas.json";
+            String json = downloadService.downloadString(url);
+            @SuppressWarnings("unchecked")
+            Map<String, String> map = JsonUtil.fromJson(json, Map.class);
+            return map.get("MultiMinecraft_url");
+        } catch (Exception e) {
+            logger.warn("No se pudo resolver URL de descarga del launcher", e);
+            return null;
+        }
+    }
+
+    private static String buildInstallerFileName(String url) {
+        String cleanUrl = url;
+        int queryIndex = cleanUrl.indexOf('?');
+        if (queryIndex >= 0) {
+            cleanUrl = cleanUrl.substring(0, queryIndex);
+        }
+        String fileName = Paths.get(cleanUrl).getFileName() != null
+                ? Paths.get(cleanUrl).getFileName().toString()
+                : "";
+        return fileName.isBlank() ? "MultiMinecraft_Update.exe" : fileName;
+    }
+
+    private void launchInstaller(Path installerPath) throws Exception {
+        String absolute = installerPath.toAbsolutePath().toString();
+        switch (PlatformUtil.getOS()) {
+            case WINDOWS -> new ProcessBuilder("cmd", "/c", "start", "", "\"" + absolute + "\"").start();
+            case MACOS -> new ProcessBuilder("open", absolute).start();
+            case LINUX -> new ProcessBuilder("xdg-open", absolute).start();
+            default -> throw new IllegalStateException("Sistema operativo no soportado para auto-instalación");
+        }
     }
 
     /**

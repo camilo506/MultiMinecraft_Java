@@ -87,7 +87,7 @@
                     <Insets bottom="10" left="12" right="12" top="10" />
                 </padding>
                 <ImageView fx:id="playerAvatar" fitHeight="36" fitWidth="36" preserveRatio="true" styleClass="player-avatar" />
-                <VBox alignment="CENTER_LEFT" spacing="1">
+                <VBox alignment="CENTER" spacing="3">
                     <Label fx:id="playerNameLabel" styleClass="player-name-label" text="legolas" />
                     <Label fx:id="playerStatusLabel" styleClass="player-status-label" text="ACTIVA" />
                 </VBox>
@@ -162,24 +162,42 @@
                         </ScrollPane>
                     </VBox>
                     
-                    <!-- C. Barra de Progreso -->
-                    <HBox fx:id="progressContainer" alignment="CENTER_LEFT" spacing="10" visible="false">
-                        <VBox.margin>
-                            <Insets bottom="12" left="20" right="20" top="8" />
-                        </VBox.margin>
-                        <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="8" styleClass="progress-bar" HBox.hgrow="ALWAYS" />
-                        <Label fx:id="progressLabel" styleClass="progress-label" text="0%" />
-                    </HBox>
                 </VBox>
             </HBox>
 
-            <!-- Enlace de Soporte en la esquina inferior derecha -->
-            <HBox alignment="BOTTOM_RIGHT" mouseTransparent="false" pickOnBounds="false">
-                <padding>
-                    <Insets bottom="15" right="20" />
-                </padding>
-                <Label onMouseClicked="#onSupportLinkClicked" styleClass="title-bar-link" text="www.monkeystudio.com" style="-fx-font-size: 11px; -fx-opacity: 0.7;" />
-            </HBox>
         </StackPane>
    </center>
+   <bottom>
+        <!-- Pie fijo al borde inferior de la ventana -->
+        <StackPane fx:id="footerLayer" maxWidth="Infinity" pickOnBounds="false">
+            <HBox alignment="CENTER_LEFT" maxWidth="Infinity" mouseTransparent="false" pickOnBounds="false" spacing="14">
+                <padding>
+                    <Insets bottom="8" left="20" right="20" top="0" />
+                </padding>
+                <Region maxWidth="Infinity" minWidth="0" HBox.hgrow="ALWAYS" />
+                <HBox fx:id="progressContainer" alignment="CENTER_LEFT" managed="false" spacing="8" visible="false">
+                    <ProgressBar fx:id="progressBar" minHeight="10" prefHeight="10" prefWidth="300" styleClass="progress-bar" />
+                    <Label fx:id="progressLabel" styleClass="progress-label" text="0%" />
+                </HBox>
+                <Label contentDisplay="LEFT" graphicTextGap="5" onMouseClicked="#onDiscordLinkClicked" styleClass="title-bar-link" text="La cueva del virgen" style="-fx-font-size: 11px; -fx-opacity: 0.7;">
+                    <graphic>
+                        <ImageView fitHeight="11" fitWidth="11" preserveRatio="true">
+                            <image>
+                                <Image url="@../recursos2/discord.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Label>
+                <Label contentDisplay="LEFT" graphicTextGap="5" onMouseClicked="#onSupportLinkClicked" styleClass="title-bar-link" text="www.monkeystudio.com" style="-fx-font-size: 11px; -fx-opacity: 0.7;">
+                    <graphic>
+                        <ImageView fitHeight="11" fitWidth="11" preserveRatio="true">
+                            <image>
+                                <Image url="@../recursos2/globe.png" />
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Label>
+            </HBox>
+        </StackPane>
+   </bottom>
 </BorderPane>

@@ -40,7 +40,7 @@ public class ModpackService {
         String directUrl = GoogleDriveUtil.getDirectDownloadUrl(driveUrl);
         
         // 2. Crear carpetas temporales
-        Path tempDir = Paths.get(System.getProperty("java.io.tmpcase", "temp"), "modpack_download_" + System.currentTimeMillis());
+        Path tempDir = Paths.get(System.getProperty("java.io.tmpdir", "temp"), "modpack_download_" + System.currentTimeMillis());
         Files.createDirectories(tempDir);
         Path zipPath = tempDir.resolve("modpack.zip");
         Path extractDir = tempDir.resolve("extracted");
@@ -105,6 +105,9 @@ public class ModpackService {
             
             // Usamos extractDir como base para buscar todos los archivos necesarios
             deployModpackFiles(extractDir, targetMcDir);
+
+            // 8. Reemplazo final de options.txt para garantizar prioridad del modpack
+            replaceOptionsAtEnd(modpackRoot, targetMcDir);
             
             progressCallback.accept(1.0);
             statusCallback.accept("Modpack '" + modpackInstance.getName() + "' instalado con éxito.");
@@ -365,7 +368,6 @@ public class ModpackService {
      */
     private void deployModpackFiles(Path source, Path target) throws IOException {
         String[] essentialFolders = {"mods", "config", "resourcepacks", "shaderpacks"};
-        String[] essentialFiles = {"options.txt"};
         
         for (String folder : essentialFolders) {
             Path srcPath = findItem(source, folder, true);
@@ -379,14 +381,21 @@ public class ModpackService {
                 copyFolder(srcPath, destPath);
             }
         }
-        
-        for (String file : essentialFiles) {
-            Path srcPath = findItem(source, file, false);
-            if (srcPath != null) {
-                logger.info("Encontrado archivo: {} -> {}", file, srcPath);
-                Files.copy(srcPath, target.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-            }
+    }
+
+    /**
+     * Reemplaza al final el options.txt de la instancia con el del modpack.
+     */
+    private void replaceOptionsAtEnd(Path modpackRoot, Path targetMcDir) throws IOException {
+        Path modpackOptions = modpackRoot.resolve("options.txt");
+        if (!Files.exists(modpackOptions) || !Files.isRegularFile(modpackOptions)) {
+            logger.info("El modpack no contiene options.txt en su raíz real, se omite reemplazo final");
+            return;
         }
+
+        Path targetOptions = targetMcDir.resolve("options.txt");
+        Files.copy(modpackOptions, targetOptions, StandardCopyOption.REPLACE_EXISTING);
+        logger.info("options.txt final reemplazado desde el modpack: {}", modpackOptions);
     }
 
     private void copyFolder(Path source, Path target) throws IOException {

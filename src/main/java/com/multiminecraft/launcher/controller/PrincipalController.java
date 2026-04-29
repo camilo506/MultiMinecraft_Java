@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -154,6 +155,8 @@ public class PrincipalController {
     @FXML
     private HBox progressContainer;
     @FXML
+    private StackPane footerLayer;
+    @FXML
     private Label progressLabel;
 
     @FXML
@@ -170,6 +173,8 @@ public class PrincipalController {
 
     private String remoteAccessKey = null;
     private String launcherDownloadUrl = null;
+    private String supportWebsiteUrl = null;
+    private String discordCommunityUrl = null;
     private final com.multiminecraft.launcher.service.DownloadService downloadService = new com.multiminecraft.launcher.service.DownloadService();
 
     // Tamaño de tarjetas
@@ -233,6 +238,19 @@ public class PrincipalController {
 
         // Comprobar actualizaciones en segundo plano
         Platform.runLater(this::checkUpdates);
+
+        // Asegurar estado inicial oculto del progreso.
+        if (progressContainer != null) {
+            progressContainer.setVisible(false);
+            progressContainer.setManaged(false);
+        }
+        // Pie encima del HBox principal (mismo centerStack); no usar toFront en progressContainer: en un HBox
+        // reordena hijos y movería la barra a la derecha de los enlaces, fuera de vista.
+        Platform.runLater(() -> {
+            if (footerLayer != null) {
+                footerLayer.toFront();
+            }
+        });
     }
 
     private void loadRemoteConfig() {
@@ -263,10 +281,52 @@ public class PrincipalController {
                         logger.info("URL de descarga del launcher cargada: {}", launcherDownloadUrl);
                     }
                 }
+
+                // Cargar también enlaces de red social/sitio desde Direcciones_redes
+                loadRemoteSocialLinks();
             } catch (Exception e) {
                 logger.warn("No se pudo cargar la configuración remota: {}", e.getMessage());
             }
         }, "RemoteConfigInit").start();
+    }
+
+    private void loadRemoteSocialLinks() {
+        String[] candidateUrls = {
+                "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Direcciones_redes",
+                "https://raw.githubusercontent.com/camilo506/Launcher_Configuracion/main/Direcciones_redes.json"
+        };
+
+        for (String linksUrl : candidateUrls) {
+            try {
+                String jsonLinks = downloadService.downloadString(linksUrl);
+                if (jsonLinks == null || jsonLinks.isEmpty()) {
+                    continue;
+                }
+
+                @SuppressWarnings("unchecked")
+                java.util.Map<String, String> links = com.multiminecraft.launcher.util.JsonUtil.fromJson(jsonLinks, java.util.Map.class);
+                if (links == null || links.isEmpty()) {
+                    continue;
+                }
+
+                String page = links.get("Pagina_web");
+                if (page != null && !page.trim().isEmpty()) {
+                    supportWebsiteUrl = page.trim();
+                }
+
+                String discord = links.get("Discord");
+                if (discord != null && !discord.trim().isEmpty()) {
+                    discordCommunityUrl = discord.trim();
+                }
+
+                logger.info("Enlaces remotos cargados. Web: {}, Discord: {}", supportWebsiteUrl, discordCommunityUrl);
+                return;
+            } catch (Exception e) {
+                logger.debug("No se pudo cargar enlaces desde {}: {}", linksUrl, e.getMessage());
+            }
+        }
+
+        logger.warn("No se pudieron cargar enlaces remotos desde GitHub");
     }
 
     private void updatePremiumStatus() {
@@ -526,10 +586,17 @@ public class PrincipalController {
         // tras editar)
         if (selectedInstance != null) {
             String selName = selectedInstance.getName();
-            instances.stream()
+            boolean selectedStillExists = instances.stream()
                     .filter(i -> selName.equals(i.getName()))
                     .findFirst()
-                    .ifPresent(this::selectInstance);
+                    .map(i -> {
+                        selectInstance(i);
+                        return true;
+                    })
+                    .orElse(false);
+            if (!selectedStillExists) {
+                selectedInstance = null;
+            }
         }
 
         // Si hay instancias, seleccionar la primera por defecto
@@ -544,6 +611,7 @@ public class PrincipalController {
         } else {
             updateSidebarCard(null);
         }
+        updateBannerInfo(selectedInstance);
     }
 
     /**
@@ -868,7 +936,7 @@ public class PrincipalController {
     }
 
     /**
-     * Acción cuando se hace clic en Jugar desde el sidebar
+     * Mismo flujo que doble clic en tarjeta: barra de progreso, hilo de lanzamiento y cierre del launcher.
      */
     @FXML
     private void onSidebarPlayClicked() {
@@ -876,34 +944,8 @@ public class PrincipalController {
             showError("Error", "Por favor selecciona una instancia primero.");
             return;
         }
-
         logger.info("Iniciando instancia desde el sidebar: {}", selectedInstance.getName());
-
-        try {
-            // Aquí llamaríamos a la lógica de lanzamiento.
-            // Para simplificar y dado que ya existe la lógica de LaunchService:
-            launchService.launchInstance(selectedInstance);
-
-            // Opcional: mostrar algún feedback visual en el botón
-            sidebarPlayButton.setText("¡Lanzando!");
-            sidebarPlayButton.setDisable(true);
-
-            // Rehabilitar después de un tiempo
-            new Thread(() -> {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException ignored) {
-                }
-                Platform.runLater(() -> {
-                    sidebarPlayButton.setText("▶ Jugar");
-                    sidebarPlayButton.setDisable(false);
-                });
-            }).start();
-
-        } catch (Exception e) {
-            logger.error("Error al lanzar la instancia desde el sidebar", e);
-            showError("Error de Lanzamiento", "No se pudo iniciar el juego: " + e.getMessage());
-        }
+        onPlayClicked();
     }
 
     /**
@@ -977,8 +1019,26 @@ public class PrincipalController {
 
     @FXML
     private void onSupportLinkClicked() {
-        logger.info("Abriendo enlace de soporte: https://monkeystudio.netlify.app/");
-        App.openWebPage("https://monkeystudio.netlify.app/");
+        if (supportWebsiteUrl == null || supportWebsiteUrl.isBlank()) {
+            showError("Enlace no disponible", "No se pudo cargar la URL de la página web desde GitHub.");
+            return;
+        }
+        logger.info("Abriendo enlace de soporte: {}", supportWebsiteUrl);
+        App.openWebPage(supportWebsiteUrl);
+    }
+
+    @FXML
+    private void onDiscordLinkClicked() {
+        if (discordCommunityUrl == null || discordCommunityUrl.isBlank()) {
+            showError("Enlace no disponible", "No se pudo cargar la URL de Discord desde GitHub.");
+            return;
+        }
+        logger.info("Abriendo enlace de Discord: {}", discordCommunityUrl);
+        App.openWebPage(discordCommunityUrl);
+    }
+
+    public String getSupportWebsiteUrl() {
+        return supportWebsiteUrl;
     }
 
     @FXML
@@ -1189,6 +1249,9 @@ public class PrincipalController {
 
         mainContentArea.setVisible(true);
         mainContentArea.setManaged(true);
+        if (footerLayer != null) {
+            footerLayer.toFront();
+        }
 
         // Quitar el estilo activo de los botones de navegación especial
         navModpacksButton.getStyleClass().remove("nav-button-active");
@@ -1218,6 +1281,15 @@ public class PrincipalController {
 
     // ==================== ACCIONES DE INSTANCIAS ====================
 
+    private void reEnableLaunchControls() {
+        if (createInstanceButton != null) {
+            createInstanceButton.setDisable(false);
+        }
+        if (sidebarPlayButton != null) {
+            sidebarPlayButton.setDisable(false);
+        }
+    }
+
     @FXML
     private void onPlayClicked() {
         if (selectedInstance == null)
@@ -1225,16 +1297,27 @@ public class PrincipalController {
 
         logger.info("Iniciando juego para instancia: {}", selectedInstance.getName());
 
-        // Deshabilitar botones mientras se lanza
-        createInstanceButton.setDisable(true);
+        if (createInstanceButton != null) {
+            createInstanceButton.setDisable(true);
+        }
+        if (sidebarPlayButton != null) {
+            sidebarPlayButton.setDisable(true);
+        }
 
-        // Mostrar y configurar barra de progreso
-        if (progressBar != null) {
+        // Barra de progreso (visible también al lanzar desde el sidebar: mismo flujo que doble clic)
+        if (progressContainer != null) {
             progressContainer.setVisible(true);
+            progressContainer.setManaged(true);
+            if (footerLayer != null) {
+                footerLayer.toFront();
+            }
+        }
+        if (progressBar != null) {
             progressBar.setProgress(0.01);
             progressBar.setStyle("-fx-accent: #4CAF50; -fx-control-inner-background: #2d2d2d;");
-            if (progressLabel != null)
-                progressLabel.setText("1%");
+        }
+        if (progressLabel != null) {
+            progressLabel.setText("1%");
         }
 
         // Lanzar en un hilo separado para no bloquear la UI
@@ -1270,9 +1353,11 @@ public class PrincipalController {
                         int exitCode = process.exitValue();
                         if (exitCode != 0) {
                             Platform.runLater(() -> {
-                                if (progressContainer != null)
+                                if (progressContainer != null) {
                                     progressContainer.setVisible(false);
-                                createInstanceButton.setDisable(false);
+                                    progressContainer.setManaged(false);
+                                }
+                                reEnableLaunchControls();
                                 showError("Error al iniciar el juego",
                                         "Minecraft se cerró con código de error: " + exitCode);
                             });
@@ -1329,8 +1414,9 @@ public class PrincipalController {
                 Platform.runLater(() -> {
                     if (progressContainer != null) {
                         progressContainer.setVisible(false);
+                        progressContainer.setManaged(false);
                     }
-                    createInstanceButton.setDisable(false);
+                    reEnableLaunchControls();
                     showError("Error al iniciar el juego", "No se pudo iniciar Minecraft: " + e.getMessage());
                 });
             }
@@ -1666,12 +1752,12 @@ public class PrincipalController {
         btnAction.setStyle("-fx-background-color: #0d1117; -fx-text-fill: " + (isCritical ? "#e67e22" : "#26d9a0") + "; -fx-font-weight: bold; -fx-background-radius: 4; -fx-cursor: hand; -fx-font-size: 11px;");
         VBox finalNotificationBox = notificationBox;
         btnAction.setOnAction(e -> {
-            if (isCritical && launcherDownloadUrl != null && !launcherDownloadUrl.isEmpty()) {
-                App.openWebPage(launcherDownloadUrl);
+            if (isCritical) {
+                startLauncherAutoUpdate(btnAction, finalNotificationBox, banner);
             } else {
-                onNavSettingsClicked();
+                openServidorView();
+                finalNotificationBox.getChildren().remove(banner);
             }
-            finalNotificationBox.getChildren().remove(banner);
         });
 
         Button btnClose = new Button("✕");
@@ -1687,5 +1773,73 @@ public class PrincipalController {
         javafx.animation.TranslateTransition tt = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(400), banner);
         tt.setToY(0);
         tt.play();
+    }
+
+    /**
+     * Descarga la nueva versión del launcher y ejecuta el instalador automáticamente.
+     */
+    private void startLauncherAutoUpdate(Button btnAction, VBox notificationBox, HBox banner) {
+        if (launcherDownloadUrl == null || launcherDownloadUrl.isEmpty()) {
+            showError("Actualización no disponible", "No se encontró una URL válida para descargar el launcher.");
+            return;
+        }
+
+        btnAction.setDisable(true);
+        btnAction.setText("Descargando...");
+
+        new Thread(() -> {
+            try {
+                String installerName = buildInstallerFileName(launcherDownloadUrl);
+                Path updatesDir = PlatformUtil.getLauncherDirectory().resolve("updates");
+                Path installerPath = updatesDir.resolve(installerName);
+
+                logger.info("Descargando actualización del launcher desde {} a {}", launcherDownloadUrl, installerPath);
+                downloadService.downloadFile(launcherDownloadUrl, installerPath);
+
+                logger.info("Descarga completada. Ejecutando instalador: {}", installerPath);
+                launchInstaller(installerPath);
+
+                Platform.runLater(() -> {
+                    notificationBox.getChildren().remove(banner);
+                    Stage mainStage = (Stage) centerStack.getScene().getWindow();
+                    if (mainStage != null) {
+                        mainStage.close();
+                    }
+                });
+            } catch (Exception ex) {
+                logger.error("Error al actualizar launcher automáticamente", ex);
+                Platform.runLater(() -> {
+                    btnAction.setDisable(false);
+                    btnAction.setText("Actualizar");
+                    showError("Error de actualización", "No se pudo descargar o ejecutar la actualización: " + ex.getMessage());
+                });
+            }
+        }, "LauncherAutoUpdater").start();
+    }
+
+    private static String buildInstallerFileName(String url) {
+        String cleanUrl = url;
+        int queryIndex = cleanUrl.indexOf('?');
+        if (queryIndex >= 0) {
+            cleanUrl = cleanUrl.substring(0, queryIndex);
+        }
+
+        String fileName = Paths.get(cleanUrl).getFileName() != null
+                ? Paths.get(cleanUrl).getFileName().toString()
+                : "";
+        if (fileName.isBlank()) {
+            fileName = "MultiMinecraft_Update.exe";
+        }
+        return fileName;
+    }
+
+    private void launchInstaller(Path installerPath) throws IOException {
+        String absolute = installerPath.toAbsolutePath().toString();
+        switch (PlatformUtil.getOS()) {
+            case WINDOWS -> new ProcessBuilder("cmd", "/c", "start", "", "\"" + absolute + "\"").start();
+            case MACOS -> new ProcessBuilder("open", absolute).start();
+            case LINUX -> new ProcessBuilder("xdg-open", absolute).start();
+            default -> throw new IOException("Sistema operativo no soportado para auto-instalación");
+        }
     }
 }
