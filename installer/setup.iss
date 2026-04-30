@@ -27,12 +27,12 @@ PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=..\target\installer
 OutputBaseFilename=MultiMinecraft-Setup-{#MyAppVersion}
 ; Ícono del instalador
-SetupIconFile=..\src\main\resources\icons\app.ico
+SetupIconFile=..\src\main\resources\recursos2\app.ico
 ; Compresión
 Compression=lzma2/ultra64
 SolidCompression=yes
 ; Visual
-WizardStyle=modern
+WizardStyle=modern dark windows11
 WizardSizePercent=110
 ; Desinstalador
 UninstallDisplayIcon={app}\{#MyAppExeName}

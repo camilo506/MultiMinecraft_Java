@@ -7,7 +7,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -73,32 +72,6 @@
                         <Button onAction="#onResetClicked" styleClass="config-section-reset-btn" text="↺" />
                     </HBox>
                 </VBox>
-            </VBox>
-
-            <!-- SECCIÓN: TEMA E IDIOMA -->
-            <VBox spacing="12" styleClass="config-section">
-                <HBox alignment="CENTER_LEFT" spacing="8">
-                    <Label styleClass="config-section-icon" text="🎨" />
-                    <VBox spacing="2">
-                        <Label styleClass="config-section-title" text="Apariencia" />
-                        <Label styleClass="config-section-description" text="Personaliza el tema y el idioma del launcher" />
-                    </VBox>
-                </HBox>
-                <HBox spacing="40">
-                    <VBox spacing="6">
-                        <Label styleClass="config-field-label" text="Tema" />
-                        <ComboBox fx:id="themeComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
-                    </VBox>
-                    <VBox spacing="6">
-                        <Label styleClass="config-field-label" text="Idioma" />
-                        <ComboBox fx:id="languageComboBox" maxWidth="200" prefHeight="38" styleClass="config-combo-box" />
-                    </VBox>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <VBox alignment="BOTTOM_CENTER" spacing="8">
-                        <Button onAction="#onSaveClicked" styleClass="config-section-save-btn" text="💾" />
-                        <Button onAction="#onResetClicked" styleClass="config-section-reset-btn" text="↺" />
-                    </VBox>
-                </HBox>
             </VBox>
 
             <!-- SECCIÓN: ACTUALIZACIÓN -->

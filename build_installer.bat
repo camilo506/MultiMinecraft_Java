@@ -14,7 +14,7 @@ set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot
 set JPACKAGE="%JAVA_HOME%\bin\jpackage.exe"
 set ISCC="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 set PROJECT_DIR=%~dp0
-set ICO_FILE=%PROJECT_DIR%src\main\resources\icons\app.ico
+set ICO_FILE=%PROJECT_DIR%src\main\resources\recursos2\app.ico
 set APP_VERSION=1.0.0
 
 REM --- Paso 1: Compilar el proyecto con Maven ---

@@ -1,5 +1,6 @@
 package com.multiminecraft.launcher.util;
 
+import com.multiminecraft.launcher.App;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
@@ -24,13 +25,12 @@ public class AlertUtil {
         // Cargar hojas de estilo
         String mainCss = AlertUtil.class.getResource("/css/main.css") != null
                 ? AlertUtil.class.getResource("/css/main.css").toExternalForm() : null;
-        String darkCss = AlertUtil.class.getResource("/css/dark-theme.css") != null
-                ? AlertUtil.class.getResource("/css/dark-theme.css").toExternalForm() : null;
+        String themeCss = App.getActiveThemeCssExternalForm(AlertUtil.class);
         String alertCss = AlertUtil.class.getResource("/css/alert.css") != null
                 ? AlertUtil.class.getResource("/css/alert.css").toExternalForm() : null;
 
         if (mainCss != null) dialogPane.getStylesheets().add(mainCss);
-        if (darkCss != null) dialogPane.getStylesheets().add(darkCss);
+        if (themeCss != null) dialogPane.getStylesheets().add(themeCss);
         if (alertCss != null) dialogPane.getStylesheets().add(alertCss);
 
         dialogPane.getStyleClass().add("custom-alert");

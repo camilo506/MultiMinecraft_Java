@@ -19,10 +19,37 @@ public class SkinDeploymentService {
 
     private static final Logger logger = LoggerFactory.getLogger(SkinDeploymentService.class);
 
+    /** Marca el JSON generado por este launcher (LocalSkin-only); se usa para borrarlo al migrar a skins de servidor. */
+    private static final String CSL_LAUNCHER_FINGERPRINT = "\"forceDisableCache\": true";
+
     private final ConfigService configService;
 
     public SkinDeploymentService(ConfigService configService) {
         this.configService = configService;
+    }
+
+    /**
+     * Elimina {@code CustomSkinLoader.json} si fue generado por este launcher (solo LocalSkin),
+     * para que mods como SkinRestorer o la configuración por defecto de CSL vuelvan a aplicar.
+     */
+    public void clearLauncherForcedCustomSkinLoader(Instance instance) {
+        try {
+            Path instanceDir = configService.getInstanceMinecraftDirectory(instance.getName());
+            Path cslConfigFile = instanceDir.resolve("CustomSkinLoader").resolve("CustomSkinLoader.json");
+            if (!Files.exists(cslConfigFile)) {
+                return;
+            }
+            String content = Files.readString(cslConfigFile, StandardCharsets.UTF_8);
+            if (!content.contains(CSL_LAUNCHER_FINGERPRINT)
+                    || !content.contains("\"name\": \"LocalSkin\"")
+                    || !content.contains("LocalSkin/skins/{USERNAME}.png")) {
+                return;
+            }
+            Files.delete(cslConfigFile);
+            logger.info("Eliminado CustomSkinLoader.json forzado por el launcher (instancia sin skin local).");
+        } catch (Exception e) {
+            logger.warn("No se pudo limpiar CustomSkinLoader.json: {}", e.getMessage());
+        }
     }
 
     public void deploySkinToInstance(Instance instance, String playerName) {

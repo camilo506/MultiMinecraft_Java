@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,5 +61,13 @@ public class BienvenidaController {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
+    }
+
+    @FXML
+    private void onCloseClicked() {
+        Stage stage = (Stage) continueButton.getScene().getWindow();
+        if (stage != null) {
+            stage.close();
+        }
     }
 }

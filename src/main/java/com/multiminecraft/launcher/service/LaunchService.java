@@ -51,7 +51,8 @@ public class LaunchService {
         this.currentPlayerName = (pName != null && !pName.trim().isEmpty()) ? pName.trim() : "Player";
         logger.info("Lanzando instancia: {}", instance.getName());
 
-        // Preparar skin local del jugador para CustomSkinLoader
+        // CustomSkinLoader solo si la instancia tiene skin local; si no, no pisar
+        // CustomSkinLoader.json (p. ej. SkinRestorer u otro proveedor en el servidor).
         preparePlayerSkin(instance);
 
         Path minecraftDir = configService.getInstanceMinecraftDirectory(instance.getName());
@@ -991,11 +992,17 @@ public class LaunchService {
     }
 
     /**
-     * Despliega la skin configurada de la instancia al directorio de
-     * CustomSkinLoader y fuerza una configuración LocalSkin-only.
+     * Si la instancia tiene skin en disco, despliega CustomSkinLoader (local).
+     * Si no tiene skin, quita el CustomSkinLoader.json que este launcher generó
+     * antes, para no forzar LocalSkin-only y permitir skins del servidor (p. ej. SkinRestorer).
      */
     private void preparePlayerSkin(Instance instance) {
-        skinDeploymentService.deploySkinToInstance(instance, currentPlayerName);
+        String path = instance.getSkinPath();
+        if (path != null && !path.isBlank()) {
+            skinDeploymentService.deploySkinToInstance(instance, currentPlayerName);
+        } else {
+            skinDeploymentService.clearLauncherForcedCustomSkinLoader(instance);
+        }
     }
 
     /**

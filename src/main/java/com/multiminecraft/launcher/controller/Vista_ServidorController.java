@@ -154,13 +154,12 @@ public class Vista_ServidorController {
         
         String mainCss = getClass().getResource("/css/main.css") != null
                 ? getClass().getResource("/css/main.css").toExternalForm() : null;
-        String darkCss = getClass().getResource("/css/dark-theme.css") != null
-                ? getClass().getResource("/css/dark-theme.css").toExternalForm() : null;
+        String themeCss = App.getActiveThemeCssExternalForm(getClass());
         String alertCss = getClass().getResource("/css/alert.css") != null
                 ? getClass().getResource("/css/alert.css").toExternalForm() : null;
 
         if (mainCss != null) dialogPane.getStylesheets().add(mainCss);
-        if (darkCss != null) dialogPane.getStylesheets().add(darkCss);
+        if (themeCss != null) dialogPane.getStylesheets().add(themeCss);
         if (alertCss != null) dialogPane.getStylesheets().add(alertCss);
 
         dialogPane.getStyleClass().add("custom-alert");
@@ -288,7 +287,10 @@ public class Vista_ServidorController {
             Scene scene = new Scene(configView, 750, 580);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            String themeCss = App.getActiveThemeCssExternalForm(getClass());
+            if (themeCss != null) {
+                scene.getStylesheets().add(themeCss);
+            }
             scene.getStylesheets().add(getClass().getResource("/css/configuracion.css").toExternalForm());
 
             configStage.setScene(scene);

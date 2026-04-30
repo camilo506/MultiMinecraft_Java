@@ -52,6 +52,7 @@ public class CrearEditarController {
     @FXML private ImageView skinPreview;
     @FXML private Label skinPlaceholder;
     @FXML private Label skinNameLabel;
+    @FXML private Button btnBrowseSkin;
     @FXML private Button btnRemoveSkin;
     private String selectedSkinPath;
     
@@ -139,6 +140,10 @@ public class CrearEditarController {
         
         // Cargar versiones
         loadVersions();
+
+        if (btnBrowseSkin != null) {
+            btnBrowseSkin.setDisable(true);
+        }
     }
 
     /**
@@ -262,7 +267,10 @@ public class CrearEditarController {
             Scene scene = new Scene(selectIconView, 700, 500);
             // Aplicar estilos
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            String themeCss = App.getActiveThemeCssExternalForm(getClass());
+            if (themeCss != null) {
+                scene.getStylesheets().add(themeCss);
+            }
             scene.getStylesheets().add(getClass().getResource("/css/select-icon.css").toExternalForm());
             
             selectIconStage.setScene(scene);
@@ -616,6 +624,9 @@ public class CrearEditarController {
      */
     @FXML
     private void onBrowseSkin() {
+        if (btnBrowseSkin != null && btnBrowseSkin.isDisabled()) {
+            return;
+        }
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Seleccionar Skin (.png)");
         fileChooser.getExtensionFilters().addAll(

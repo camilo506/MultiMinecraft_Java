@@ -98,7 +98,7 @@
                     <VBox spacing="5">
                         <Label fx:id="skinNameLabel" text="Global" styleClass="crear-subtitle" />
                         <HBox spacing="5">
-                            <Button text="Elegir" onAction="#onBrowseSkin" styleClass="btn-select-icon" />
+                            <Button fx:id="btnBrowseSkin" text="Elegir" onAction="#onBrowseSkin" styleClass="btn-select-icon" disable="true" />
                             <Button fx:id="btnRemoveSkin" text="🗑" onAction="#onRemoveSkin" styleClass="btn-cancel" />
                         </HBox>
                     </VBox>

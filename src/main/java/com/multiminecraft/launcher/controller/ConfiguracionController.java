@@ -33,8 +33,6 @@ public class ConfiguracionController {
 
     @FXML private TextField playerNameField;
     @FXML private ComboBox<String> memoryComboBox;
-    @FXML private ComboBox<String> themeComboBox;
-    @FXML private ComboBox<String> languageComboBox;
     @FXML private Label versionLabel;
     @FXML private Label updateStatusLabel;
     @FXML private Button btnUpdateLauncher;
@@ -45,19 +43,12 @@ public class ConfiguracionController {
         "1G", "2G", "3G", "4G", "6G", "8G", "10G", "12G", "16G"
     };
 
-    private static final String[] THEME_OPTIONS_DISPLAY = { "Oscuro", "Claro" };
-    private static final String[] THEME_VALUES = { "dark", "light" };
-
-    private static final String[] LANGUAGE_OPTIONS_DISPLAY = { "Español", "English" };
-    private static final String[] LANGUAGE_VALUES = { "es", "en" };
     private final DownloadService downloadService = new DownloadService();
 
     @FXML
     public void initialize() {
         logger.info("Inicializando vista de Configuración");
         memoryComboBox.setItems(FXCollections.observableArrayList(MEMORY_OPTIONS));
-        themeComboBox.setItems(FXCollections.observableArrayList(THEME_OPTIONS_DISPLAY));
-        languageComboBox.setItems(FXCollections.observableArrayList(LANGUAGE_OPTIONS_DISPLAY));
         
         // Listener para actualizar el nombre en el sidebar en tiempo real
         playerNameField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -88,14 +79,6 @@ public class ConfiguracionController {
             } else {
                 memoryComboBox.setValue("2G");
             }
-
-            String theme = config.getTheme();
-            int themeIndex = findIndex(THEME_VALUES, theme != null ? theme : "dark");
-            themeComboBox.getSelectionModel().select(themeIndex >= 0 ? themeIndex : 0);
-
-            String language = config.getLanguage();
-            int langIndex = findIndex(LANGUAGE_VALUES, language != null ? language : "es");
-            languageComboBox.getSelectionModel().select(langIndex >= 0 ? langIndex : 0);
 
             versionLabel.setText(UpdateService.LAUNCHER_VERSION);
             statusLabel.setText("");
@@ -129,17 +112,9 @@ public class ConfiguracionController {
                 config.setDefaultMemory(selectedMemory);
             }
 
-            int themeIndex = themeComboBox.getSelectionModel().getSelectedIndex();
-            if (themeIndex >= 0 && themeIndex < THEME_VALUES.length) {
-                String themeValue = THEME_VALUES[themeIndex];
-                config.setTheme(themeValue);
-                App.applyTheme(themeValue);
-            }
-
-            int langIndex = languageComboBox.getSelectionModel().getSelectedIndex();
-            if (langIndex >= 0 && langIndex < LANGUAGE_VALUES.length) {
-                config.setLanguage(LANGUAGE_VALUES[langIndex]);
-            }
+            // Cambio de tema deshabilitado temporalmente: se fuerza modo oscuro.
+            config.setTheme("dark");
+            App.applyTheme("dark");
 
             configService.saveLauncherConfig();
 
@@ -174,8 +149,6 @@ public class ConfiguracionController {
         if (confirmed) {
             playerNameField.setText("");
             memoryComboBox.setValue("2G");
-            themeComboBox.getSelectionModel().select(0);
-            languageComboBox.getSelectionModel().select(0);
             statusLabel.setText("⟳ Valores restablecidos (sin guardar)");
             statusLabel.getStyleClass().setAll("config-status-saved");
         }
@@ -300,10 +273,4 @@ public class ConfiguracionController {
         }
     }
 
-    private int findIndex(String[] array, String value) {
-        for (int i = 0; i < array.length; i++) {
-            if (array[i].equals(value)) return i;
-        }
-        return -1;
-    }
 }

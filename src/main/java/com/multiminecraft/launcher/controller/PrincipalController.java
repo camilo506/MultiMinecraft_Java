@@ -265,7 +265,9 @@ public class PrincipalController {
                         this.remoteAccessKey = config.get("acceso_server");
                         logger.info("Clave de acceso remoto cargada desde Acceso_Vista_Server.json");
                         
-                        // Verificar inmediatamente si el usuario es Premium
+                        // Verificar inmediatamente si la clave guardada sigue siendo válida.
+                        validateSavedAccessKey();
+                        // Actualizar estado visual de acceso.
                         Platform.runLater(this::updatePremiumStatus);
                     }
                 }
@@ -288,6 +290,32 @@ public class PrincipalController {
                 logger.warn("No se pudo cargar la configuración remota: {}", e.getMessage());
             }
         }, "RemoteConfigInit").start();
+    }
+
+    /**
+     * Verifica la clave guardada localmente contra la clave remota de GitHub.
+     * Si no coincide, limpia la clave local para forzar re-autenticación.
+     */
+    private void validateSavedAccessKey() {
+        if (remoteAccessKey == null || remoteAccessKey.isBlank()) {
+            return;
+        }
+        try {
+            LauncherConfig config = ConfigService.getInstance().getLauncherConfig();
+            String savedKey = config.getLastAccessKey();
+            if (savedKey == null || savedKey.isBlank()) {
+                return;
+            }
+            if (!remoteAccessKey.equals(savedKey)) {
+                logger.info("La clave guardada no coincide con la clave remota. Se limpiará el acceso guardado.");
+                config.setLastAccessKey("");
+                ConfigService.getInstance().saveLauncherConfig();
+            } else {
+                logger.info("La clave guardada coincide con la clave remota.");
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo validar la clave guardada contra la clave remota", e);
+        }
     }
 
     private void loadRemoteSocialLinks() {
@@ -1120,7 +1148,10 @@ public class PrincipalController {
 
         javafx.scene.control.DialogPane dialogPane = dialog.getDialogPane();
         dialogPane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-        dialogPane.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+        String themeCss = App.getActiveThemeCssExternalForm(getClass());
+        if (themeCss != null) {
+            dialogPane.getStylesheets().add(themeCss);
+        }
         
         // Contenedor principal del diálogo
         VBox root = new VBox(15);
@@ -1471,7 +1502,10 @@ public class PrincipalController {
 
             Scene scene = new Scene(recursosView, 400, 250);
             scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-            scene.getStylesheets().add(getClass().getResource("/css/dark-theme.css").toExternalForm());
+            String themeCss = App.getActiveThemeCssExternalForm(getClass());
+            if (themeCss != null) {
+                scene.getStylesheets().add(themeCss);
+            }
             scene.getStylesheets().add(getClass().getResource("/css/recursos-view.css").toExternalForm());
 
             recursosStage.setScene(scene);

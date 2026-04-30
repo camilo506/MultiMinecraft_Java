@@ -28,6 +28,7 @@ public class App extends Application {
     private static Scene scene;
     private static Stage primaryStage;
     private static App instance;
+    private static String activeTheme = "dark";
 
     public App() {
         instance = this;
@@ -94,7 +95,7 @@ public class App extends Application {
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             logger.debug("Escena creada");
 
-            // Aplicar tema por defecto
+            // Cambio de tema deshabilitado temporalmente: usar siempre oscuro.
             applyTheme("dark");
 
             // Cargar CSS de bienvenida si es la vista inicial
@@ -180,6 +181,8 @@ public class App extends Application {
         }
 
         try {
+            String normalizedTheme = "light".equalsIgnoreCase(theme) ? "light" : "dark";
+            activeTheme = normalizedTheme;
             scene.getStylesheets().clear();
 
             // Cargar CSS principal
@@ -191,12 +194,12 @@ public class App extends Application {
             }
 
             // Cargar CSS del tema
-            var themeCss = App.class.getResource("/css/" + theme + "-theme.css");
+            var themeCss = App.class.getResource("/css/" + normalizedTheme + "-theme.css");
             if (themeCss != null) {
                 scene.getStylesheets().add(themeCss.toExternalForm());
-                logger.info("Tema aplicado: {}", theme);
+                logger.info("Tema aplicado: {}", normalizedTheme);
             } else {
-                logger.warn("No se encontró el archivo CSS del tema: /css/{}-theme.css", theme);
+                logger.warn("No se encontró el archivo CSS del tema: /css/{}-theme.css", normalizedTheme);
             }
 
             // Cargar CSS específico de la ventana principal
@@ -213,6 +216,17 @@ public class App extends Application {
         } catch (Exception e) {
             logger.error("Error al aplicar el tema: {}", theme, e);
         }
+    }
+
+    /**
+     * Obtiene el CSS del tema activo como URL externa para cualquier controlador.
+     */
+    public static String getActiveThemeCssExternalForm(Class<?> resourceClass) {
+        if (resourceClass == null) {
+            return null;
+        }
+        var themeCss = resourceClass.getResource("/css/" + activeTheme + "-theme.css");
+        return themeCss != null ? themeCss.toExternalForm() : null;
     }
 
     /**

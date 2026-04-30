@@ -1,5 +1,6 @@
 package com.multiminecraft.launcher.controller;
 
+import com.multiminecraft.launcher.App;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -259,8 +260,8 @@ public class DescargaProgresoController {
 
             // Cargar CSS
             try {
-                java.net.URL darkCss = DescargaProgresoController.class.getResource("/css/dark-theme.css");
-                if (darkCss != null) scene.getStylesheets().add(darkCss.toExternalForm());
+                String themeCss = App.getActiveThemeCssExternalForm(DescargaProgresoController.class);
+                if (themeCss != null) scene.getStylesheets().add(themeCss);
                 
                 java.net.URL progCss = DescargaProgresoController.class.getResource("/css/descarga-progreso.css");
                 if (progCss != null) scene.getStylesheets().add(progCss.toExternalForm());
