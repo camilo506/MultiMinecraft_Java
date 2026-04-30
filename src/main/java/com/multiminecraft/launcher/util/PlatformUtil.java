@@ -55,28 +55,30 @@ public class PlatformUtil {
             case WINDOWS: // para windows
                 String appData = System.getenv("APPDATA");
                 if (appData != null) {
-                    launcherDir = Paths.get(appData, ".MultiMinecraft_developer"); // C:\Users\LEGOLAS\AppData\Roaming\.MultiMinecraft
+                    launcherDir = Paths.get(appData, ".MultiMinecraft_Developer"); // C:\Users\LEGOLAS\AppData\Roaming\.MultiMinecraft
+                                                                                   // .MultiMinecraft_Developer
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // C:\Users\LEGOLAS\.MultiMinecraft
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Developer"); // C:\Users\LEGOLAS\.MultiMinecraft
+                                                                                    // .MultiMinecraft_Developer
                 }
                 break;
 
             case MACOS: // para mac
-                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft_developer"); // /Users/LEGOLAS/Library/Application
-                                                                                                                 // Support/MultiMinecraft_Java
+                launcherDir = Paths.get(userHome, "Library", "Application Support", "MultiMinecraft"); // /Users/LEGOLAS/Library/Application
+                                                                                                       // Support/.MultiMinecraft
                 break;
 
             case LINUX: // para linux
                 String xdgData = System.getenv("XDG_DATA_HOME");
                 if (xdgData != null) {
-                    launcherDir = Paths.get(xdgData, "MultiMinecraft_developer");
+                    launcherDir = Paths.get(xdgData, "MultiMinecraft");
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // /home/LEGOLAS/.MultiMinecraft
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft"); // /home/LEGOLAS/.MultiMinecraft
                 }
                 break;
 
             default:
-                launcherDir = Paths.get(userHome, ".MultiMinecraft_developer"); // /home/LEGOLAS/.MultiMinecraft
+                launcherDir = Paths.get(userHome, ".MultiMinecraft"); // /home/LEGOLAS/.MultiMinecraft
                 break;
         }
 
