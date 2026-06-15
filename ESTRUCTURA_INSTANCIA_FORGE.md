@@ -97,7 +97,7 @@ Instancias/
 ### ⚠️ DIFERENCIAS con la estructura ideal:
 
 1. **Librerías**:
-   - **Ideal**: Librerías en directorio compartido (`.MultiMinecraft_Java/libraries/`)
+   - **Ideal**: Librerías en directorio compartido (`.MultiMinecraft/libraries/`)
    - **Actual**: ✅ **CORREGIDO** - Las librerías se descargan primero al directorio compartido
    - **Comportamiento**: El sistema busca primero en compartidas, luego en instancia (fallback)
    - **Impacto**: ✅ Optimizado - Evita duplicados y ahorra espacio
