@@ -7,6 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 /**
@@ -313,12 +319,40 @@ public class ModpackService {
             var jarFiles = stream
                 .filter(p -> Files.isRegularFile(p) && p.toString().toLowerCase().endsWith(".jar"))
                 .collect(java.util.stream.Collectors.toList());
-            
-            for (Path jarFile : jarFiles) {
-                Path dest = targetModsDir.resolve(jarFile.getFileName());
-                Files.copy(jarFile, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                logger.debug("Mod copiado: {}", jarFile.getFileName());
-                count++;
+
+            if (jarFiles.isEmpty()) {
+                return 0;
+            }
+
+            int threadCount = Math.min(jarFiles.size(), Math.max(2, Runtime.getRuntime().availableProcessors() / 2));
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            List<Future<Void>> futures = new ArrayList<>();
+
+            try {
+                for (Path jarFile : jarFiles) {
+                    futures.add(executor.submit(() -> {
+                        Path dest = targetModsDir.resolve(jarFile.getFileName());
+                        Files.copy(jarFile, dest, StandardCopyOption.REPLACE_EXISTING);
+                        logger.debug("Mod copiado: {}", jarFile.getFileName());
+                        return null;
+                    }));
+                }
+
+                for (Future<Void> future : futures) {
+                    future.get();
+                    count++;
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("La copia de mods fue interrumpida", e);
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException ioException) {
+                    throw ioException;
+                }
+                throw new IOException("Error al copiar mods nuevos", cause);
+            } finally {
+                executor.shutdown();
             }
         }
         
@@ -368,18 +402,46 @@ public class ModpackService {
      */
     private void deployModpackFiles(Path source, Path target) throws IOException {
         String[] essentialFolders = {"mods", "config", "resourcepacks", "shaderpacks"};
+        List<FolderCopyTask> tasks = new ArrayList<>();
         
         for (String folder : essentialFolders) {
             Path srcPath = findItem(source, folder, true);
             if (srcPath != null) {
                 logger.info("Encontrada carpeta: {} -> {}", folder, srcPath);
-                Path destPath = target.resolve(folder);
-                if (Files.exists(destPath)) {
-                    FileUtil.deleteDirectory(destPath);
-                }
-                Files.createDirectories(destPath);
-                copyFolder(srcPath, destPath);
+                tasks.add(new FolderCopyTask(srcPath, target.resolve(folder)));
             }
+        }
+
+        if (tasks.isEmpty()) {
+            return;
+        }
+
+        int threadCount = Math.min(tasks.size(), Math.max(2, Runtime.getRuntime().availableProcessors() / 2));
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        List<Future<Void>> futures = new ArrayList<>();
+
+        try {
+            for (FolderCopyTask task : tasks) {
+                futures.add(executor.submit(() -> {
+                    copyFolderToDestination(task.source, task.destination);
+                    return null;
+                }));
+            }
+
+            for (Future<Void> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("La copia del modpack fue interrumpida", e);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException ioException) {
+                throw ioException;
+            }
+            throw new IOException("Error al copiar archivos del modpack", cause);
+        } finally {
+            executor.shutdown();
         }
     }
 
@@ -415,6 +477,24 @@ public class ModpackService {
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) throw (IOException) e.getCause();
             throw e;
+        }
+    }
+
+    private void copyFolderToDestination(Path source, Path destination) throws IOException {
+        if (Files.exists(destination)) {
+            FileUtil.deleteDirectory(destination);
+        }
+        Files.createDirectories(destination);
+        copyFolder(source, destination);
+    }
+
+    private static class FolderCopyTask {
+        private final Path source;
+        private final Path destination;
+
+        private FolderCopyTask(Path source, Path destination) {
+            this.source = source;
+            this.destination = destination;
         }
     }
 }
