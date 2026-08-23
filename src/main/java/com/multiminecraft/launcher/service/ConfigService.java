@@ -24,8 +24,10 @@ public class ConfigService {
 
     private static ConfigService instance;
     private LauncherConfig launcherConfig;
+    private final JavaRuntimeService javaRuntimeService;
 
     private ConfigService() {
+        this.javaRuntimeService = new JavaRuntimeService();
         loadLauncherConfig();
     }
 
@@ -204,9 +206,19 @@ public class ConfigService {
             return instance.getJavaPath();
         }
 
-        // Auto-detectar Java adecuado según la versión de Minecraft
-        // Minecraft 1.20.5+ requiere Java 21, 1.17+ requiere Java 17
+        // Resolver/instalar Java según la versión de Minecraft de la instancia
         String minecraftVersion = instance.getVersion();
+        if (minecraftVersion != null && !minecraftVersion.isBlank()) {
+            try {
+                String ensured = javaRuntimeService.ensureJavaForMinecraftVersion(minecraftVersion, null);
+                if (ensured != null && !ensured.isBlank()) {
+                    return ensured;
+                }
+            } catch (Exception e) {
+                logger.warn("No se pudo resolver automáticamente Java para Minecraft {}", minecraftVersion, e);
+            }
+        }
+
         if (minecraftVersion != null) {
             int required = PlatformUtil.getRequiredJavaVersion(minecraftVersion);
             int current = PlatformUtil.getCurrentJavaVersion();
@@ -260,15 +272,15 @@ public class ConfigService {
      * @return Ruta al ejecutable de Java
      */
     public String getJavaPathForVersion(String minecraftVersion) {
-        int required = PlatformUtil.getRequiredJavaVersion(minecraftVersion);
-        int current = PlatformUtil.getCurrentJavaVersion();
-        
-        if (current < required) {
-            String autoDetected = PlatformUtil.findJavaInstallation(required);
-            if (autoDetected != null) {
-                return autoDetected;
+        try {
+            String ensured = javaRuntimeService.ensureJavaForMinecraftVersion(minecraftVersion, null);
+            if (ensured != null && !ensured.isBlank()) {
+                return ensured;
             }
+        } catch (Exception e) {
+            logger.warn("No se pudo resolver automáticamente Java para versión {}", minecraftVersion, e);
         }
+
         return getDefaultJavaPath();
     }
 }

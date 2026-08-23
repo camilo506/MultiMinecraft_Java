@@ -55,10 +55,10 @@ public class PlatformUtil {
             case WINDOWS: // para windows
                 String appData = System.getenv("APPDATA");
                 if (appData != null) {
-                    launcherDir = Paths.get(appData, ".MultiMinecraft_Developer"); // C:\Users\LEGOLAS\AppData\Roaming\.MultiMinecraft
+                    launcherDir = Paths.get(appData, ".MultiMinecraft"); // C:\Users\LEGOLAS\AppData\Roaming\.MultiMinecraft
                                                                                    // .MultiMinecraft_Developer
                 } else {
-                    launcherDir = Paths.get(userHome, ".MultiMinecraft_Developer"); // C:\Users\LEGOLAS\.MultiMinecraft
+                    launcherDir = Paths.get(userHome, ".MultiMinecraft"); // C:\Users\LEGOLAS\.MultiMinecraft
                                                                                     // .MultiMinecraft_Developer
                 }
                 break;
@@ -165,33 +165,56 @@ public class PlatformUtil {
 
     /**
      * Determina la versión mínima de Java requerida para una versión de Minecraft.
+     * - Minecraft 26.x+ (esquema anual) requiere Java 25
+     * - Minecraft 25.x (esquema anual) requiere Java 21
      * - Minecraft 1.20.5+ requiere Java 21
      * - Minecraft 1.17+ requiere Java 17
      * - Versiones anteriores funcionan con Java 8+
      *
-     * @param minecraftVersion Versión de Minecraft (ej: "1.21.11", "1.20.1")
-     * @return Versión mínima de Java requerida (21, 17, 8)
+     * @param minecraftVersion Versión de Minecraft (ej: "26.1.2", "1.21.11", "1.20.1")
+     * @return Versión mínima de Java requerida (25, 21, 17, 8)
      */
     public static int getRequiredJavaVersion(String minecraftVersion) {
         try {
-            String[] parts = minecraftVersion.split("\\.");
+            String normalized = minecraftVersion == null ? "" : minecraftVersion.trim();
+            String[] parts = normalized.split("\\.");
+            if (parts.length < 1) {
+                return 8;
+            }
+
+            int first = parseLeadingInt(parts[0]);
+            if (first < 0) {
+                return 8;
+            }
+
+            // Esquema anual (26.1 = 2026, 25.1 = 2025, etc.)
+            if (first >= 26) {
+                return 25;
+            }
+            if (first >= 25) {
+                return 21;
+            }
+
+            // Esquema clásico 1.x.x
             if (parts.length >= 2) {
-                int major = Integer.parseInt(parts[0]);
-                int minor = Integer.parseInt(parts[1]);
-                // 1.20.5+ requiere Java 21
-                if (major > 1 || (major == 1 && minor >= 21)) {
+                int minor = parseLeadingInt(parts[1]);
+                if (minor < 0) {
+                    return 8;
+                }
+                if (first == 1 && minor >= 21) {
                     return 21;
                 }
-                if (major == 1 && minor == 20) {
+                if (first == 1 && minor == 20) {
                     // 1.20.5+ requiere Java 21, 1.20.0-1.20.4 requiere Java 17
                     if (parts.length >= 3) {
-                        int patch = Integer.parseInt(parts[2]);
-                        if (patch >= 5)
+                        int patch = parseLeadingInt(parts[2]);
+                        if (patch >= 5) {
                             return 21;
+                        }
                     }
                     return 17;
                 }
-                if (major == 1 && minor >= 17) {
+                if (first == 1 && minor >= 17) {
                     return 17;
                 }
             }
@@ -199,6 +222,17 @@ public class PlatformUtil {
             logger.debug("No se pudo parsear versión de Minecraft: {}", minecraftVersion);
         }
         return 8; // Java 8 por defecto para versiones antiguas
+    }
+
+    private static int parseLeadingInt(String token) {
+        if (token == null || token.isBlank()) {
+            return -1;
+        }
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^(\\d+)").matcher(token.trim());
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        }
+        return -1;
     }
 
     /**
@@ -227,6 +261,8 @@ public class PlatformUtil {
         java.util.List<Path> candidates = new java.util.ArrayList<>();
 
         if (getOS() == OS.WINDOWS) {
+            // Runtime administrado por el launcher
+            addJavaCandidates(candidates, getLauncherDirectory().resolve("runtime").toString(), minRequiredVersion, javaBin);
             // Eclipse Adoptium / Temurin
             addJavaCandidates(candidates, "C:\\Program Files\\Eclipse Adoptium", minRequiredVersion, javaBin);
             // Oracle JDK
@@ -261,6 +297,57 @@ public class PlatformUtil {
         }
 
         logger.warn("No se encontró una instalación de Java >= {} en el sistema", minRequiredVersion);
+        return null;
+    }
+
+    /**
+     * Busca una instalación de Java de versión exacta.
+     * Útil para rangos de Minecraft que requieren Java 8 o Java 17 específicos.
+     */
+    public static String findJavaInstallationExact(int requiredVersion) {
+        String javaBin = getOS() == OS.WINDOWS ? "java.exe" : "java";
+
+        int currentVersion = getCurrentJavaVersion();
+        if (currentVersion == requiredVersion) {
+            return getSystemJavaPath();
+        }
+
+        java.util.List<Path> candidates = new java.util.ArrayList<>();
+
+        if (getOS() == OS.WINDOWS) {
+            addJavaCandidates(candidates, getLauncherDirectory().resolve("runtime").toString(), requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\Eclipse Adoptium", requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\Java", requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\Microsoft", requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\Amazon Corretto", requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\Zulu", requiredVersion, javaBin);
+            addJavaCandidates(candidates, "C:\\Program Files\\BellSoft", requiredVersion, javaBin);
+        } else if (getOS() == OS.MACOS) {
+            addJavaCandidates(candidates, "/Library/Java/JavaVirtualMachines", requiredVersion, javaBin);
+            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java", requiredVersion, javaBin);
+        } else {
+            addJavaCandidates(candidates, "/usr/lib/jvm", requiredVersion, javaBin);
+            addJavaCandidates(candidates, System.getProperty("user.home") + "/.sdkman/candidates/java", requiredVersion, javaBin);
+        }
+
+        for (Path candidate : candidates) {
+            if (!java.nio.file.Files.exists(candidate) || !java.nio.file.Files.isExecutable(candidate)) {
+                continue;
+            }
+
+            Path javaHome = candidate.getParent() != null ? candidate.getParent().getParent() : null;
+            if (javaHome == null) {
+                continue;
+            }
+
+            int version = detectJavaVersionFromPath(javaHome.toString());
+            if (version == requiredVersion) {
+                logger.info("Encontrada instalación exacta de Java {} en: {}", requiredVersion, candidate);
+                return candidate.toString();
+            }
+        }
+
+        logger.warn("No se encontró una instalación exacta de Java {}", requiredVersion);
         return null;
     }
 

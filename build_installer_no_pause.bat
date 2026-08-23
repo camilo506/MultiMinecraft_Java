@@ -2,6 +2,7 @@
 REM ============================================================================
 REM  MultiMinecraft Launcher - Script de Build del Instalador
 REM  Genera el instalador .exe para distribuir a tus amigos
+REM  E:\GitHub\MultiMinecraft_Java\target\installer
 REM ============================================================================
 echo.
 echo ============================================
@@ -10,9 +11,10 @@ echo ============================================
 echo.
 
 REM --- Configuración ---
-set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17.0.17.10-hotspot
+set JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-21.0.11.10-hotspot
 set JPACKAGE="%JAVA_HOME%\bin\jpackage.exe"
 set ISCC="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+if not exist %ISCC% set ISCC="%LocalAppData%\Programs\Inno Setup 6\ISCC.exe"
 set PROJECT_DIR=%~dp0
 set ICO_FILE=%PROJECT_DIR%src\main\resources\recursos2\app.ico
 set APP_VERSION=1.0.0
@@ -70,16 +72,23 @@ echo       OK - Binarios de Java incluidos.
 REM --- Paso 5: Compilar instalador .exe con Inno Setup ---
 echo [5/5] Compilando instalador .exe con Inno Setup...
 if not exist %ISCC% (
-    echo ERROR: Inno Setup no encontrado en %ISCC%
-    echo        Instala Inno Setup 6 desde: https://jrsoftware.org/isinfo.php
-    REM pause
-    exit /b 1
+    echo ADVERTENCIA: Inno Setup no encontrado en %ISCC%
+    echo              Instala Inno Setup 6 desde: https://jrsoftware.org/isinfo.php para poder generar el instalador de configuracion.
+    echo.
+    echo ============================================
+    echo   EJECUTABLE CREADO EXITOSAMENTE! - Sin instalador
+    echo ============================================
+    echo.
+    echo   Archivo ejecutable: target\dist\MultiMinecraft\MultiMinecraft.exe
+    echo.
+    exit /b 0
 )
 if not exist "%PROJECT_DIR%target\installer" mkdir "%PROJECT_DIR%target\installer"
+echo Ejecutando Inno Setup con: %ISCC% "%PROJECT_DIR%installer\setup.iss"
 %ISCC% "%PROJECT_DIR%installer\setup.iss"
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Inno Setup fallo al compilar el instalador.
-    REM pause
+    echo        Asegúrate de que setup.iss existe en la carpeta installer
     exit /b 1
 )
 
@@ -95,3 +104,4 @@ echo   Ellos solo necesitan ejecutarlo para instalar el launcher.
 echo   NO necesitan tener Java instalado!
 echo.
 REM pause
+

@@ -170,6 +170,7 @@ public class PrincipalController {
 
     // Nodo de la vista cargada dinámicamente (para poder removerla)
     private javafx.scene.Node activeSubViewNode;
+    private volatile String launchProgressStatus = "";
 
     private String remoteAccessKey = null;
     private String launcherDownloadUrl = null;
@@ -1350,22 +1351,22 @@ public class PrincipalController {
         if (progressLabel != null) {
             progressLabel.setText("1%");
         }
+        launchProgressStatus = "";
 
         // Lanzar en un hilo separado para no bloquear la UI
         new Thread(() -> {
             try {
-                Thread.sleep(50);
-
-                updateProgress(0.1);
-                Thread.sleep(100);
-
-                updateProgress(0.2);
-                Thread.sleep(100);
+            updateProgress(0.05);
+            setLaunchProgressStatus("Preparando lanzamiento...");
 
                 logger.debug("Lanzando proceso de Minecraft...");
-                Process process = launchService.launchInstance(selectedInstance);
+            Process process = launchService.launchInstance(
+                selectedInstance,
+                this::setLaunchProgressStatus,
+                this::updateProgress);
 
-                updateProgress(0.4);
+            setLaunchProgressStatus("Minecraft iniciado");
+            updateProgress(0.4);
                 Thread.sleep(200);
 
                 int maxWaitTime = 30000;
@@ -1399,6 +1400,7 @@ public class PrincipalController {
                 }
 
                 updateProgress(1.0);
+                setLaunchProgressStatus("Completado");
 
                 logger.debug("Esperando a que aparezca la ventana de Minecraft...");
                 int maxWindowWaitTime = 15000;
@@ -1454,6 +1456,17 @@ public class PrincipalController {
         }).start();
     }
 
+    private void setLaunchProgressStatus(String status) {
+        launchProgressStatus = status == null ? "" : status.trim();
+        Platform.runLater(() -> {
+            if (progressLabel == null || progressBar == null) {
+                return;
+            }
+            int percent = (int) Math.round(progressBar.getProgress() * 100);
+            progressLabel.setText(formatProgressLabel(percent));
+        });
+    }
+
     /**
      * Actualiza el progreso de la barra de forma segura
      */
@@ -1464,11 +1477,19 @@ public class PrincipalController {
                 progressBar.setProgress(clampedProgress);
                 progressBar.setStyle("-fx-accent: #4CAF50; -fx-control-inner-background: #2d2d2d;");
                 if (progressLabel != null) {
-                    progressLabel.setText((int) (clampedProgress * 100) + "%");
+                    int percent = (int) Math.round(clampedProgress * 100);
+                    progressLabel.setText(formatProgressLabel(percent));
                 }
                 logger.debug("Progreso actualizado: {}% (valor: {})", (int) (clampedProgress * 100), clampedProgress);
             }
         });
+    }
+
+    private String formatProgressLabel(int percent) {
+        if (launchProgressStatus == null || launchProgressStatus.isBlank()) {
+            return percent + "%";
+        }
+        return launchProgressStatus + " (" + percent + "%)";
     }
 
     private void onModifyAction() {
