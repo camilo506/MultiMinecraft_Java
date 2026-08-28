@@ -91,8 +91,6 @@ public class PrincipalController {
     @FXML
     private Button minimizeBtn;
     @FXML
-    private Button maximizeBtn;
-    @FXML
     private Button closeBtn;
 
     // Sidebar - Navegación
@@ -1019,12 +1017,6 @@ public class PrincipalController {
     private void onMinimizeClicked() {
         Stage stage = (Stage) titleBar.getScene().getWindow();
         stage.setIconified(true);
-    }
-
-    @FXML
-    private void onMaximizeClicked() {
-        Stage stage = (Stage) titleBar.getScene().getWindow();
-        stage.setMaximized(!stage.isMaximized());
     }
 
     @FXML

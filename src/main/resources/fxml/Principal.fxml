@@ -30,10 +30,9 @@
             </left>
             <right>
                 <HBox alignment="CENTER_RIGHT" spacing="12">
-                    <!-- Controles de la ventana (Minimizar, Maximizar, Cerrar) -->
+                    <!-- Controles de la ventana (Minimizar, Cerrar) -->
                     <HBox alignment="CENTER_RIGHT" spacing="0">
                         <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
-                        <Button fx:id="maximizeBtn" onAction="#onMaximizeClicked" styleClass="title-bar-button" text="☐" />
                         <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
                     </HBox>
                 </HBox>
