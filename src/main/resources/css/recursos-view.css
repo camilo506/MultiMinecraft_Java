@@ -3,7 +3,10 @@
    Estilos de la vista de mods/resourcepacks
    ============================================ */
 
-/* No hay estilos adicionales por ahora.
-   Esta vista reutiliza los estilos globales
-   de dark-theme.css (labels, text-field,
-   action-button, scroll-bar, etc.)           */
+/* ---- Borde verde de la ventana completa ---- */
+.root-pane {
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}

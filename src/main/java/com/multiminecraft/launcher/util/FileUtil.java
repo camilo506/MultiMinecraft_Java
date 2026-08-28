@@ -149,7 +149,6 @@ public class FileUtil {
             
             switch (PlatformUtil.getOS()) {
                 case WINDOWS:
-                    // Abrir la carpeta directamente
                     Runtime.getRuntime().exec("explorer.exe \"" + file.getAbsolutePath() + "\"");
                     break;
                 case MACOS:

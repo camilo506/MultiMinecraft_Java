@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
@@ -120,7 +121,6 @@ public class MojangService {
         // Crear directorios necesarios
         Path versionsDir = minecraftDir.resolve("versions").resolve(versionId);
         // PRIORIDAD: Usar directorio COMPARTIDO de librerías para evitar duplicados
-        // Las librerías se comparten entre todas las instancias
         Path librariesDir = PlatformUtil.getSharedLibrariesDirectory();
         FileUtil.createDirectory(versionsDir);
         FileUtil.createDirectory(librariesDir);
@@ -131,40 +131,63 @@ public class MojangService {
         if (progressCallback != null)
             progressCallback.accept(0.05);
 
-        // Descargar client JAR (5% - 30%)
+        // ========== DESCARGA PARALELA: Client JAR + Librerías al mismo tiempo ==========
         if (statusCallback != null)
-            statusCallback.accept("Descargando cliente de Minecraft...");
+            statusCallback.accept("Descargando cliente y librerías en paralelo...");
+
+        // Preparar descarga del client JAR
         JsonObject downloads = versionData.getAsJsonObject("downloads");
         JsonObject client = downloads.getAsJsonObject("client");
         String clientUrl = client.get("url").getAsString();
         String clientSha1 = client.get("sha1").getAsString();
-
         Path clientJar = versionsDir.resolve(versionId + ".jar");
-        if (!FileUtil.verifyFileHash(clientJar, clientSha1)) {
-            downloadService.downloadFile(clientUrl, clientJar, progress -> {
-                if (progressCallback != null) {
-                    progressCallback.accept(0.05 + progress * 0.25);
-                }
-            });
-        } else {
-            logger.info("Cliente ya descargado y verificado");
-        }
-        if (progressCallback != null)
-            progressCallback.accept(0.30);
 
-        // Descargar librerías (30% - 95%)
-        if (statusCallback != null)
-            statusCallback.accept("Descargando librerías...");
-        downloadLibraries(versionData, librariesDir, progress -> {
-            if (progressCallback != null) {
-                progressCallback.accept(0.30 + progress * 0.65);
+        // Lanzar descarga del client JAR en paralelo (5% - 30%)
+        CompletableFuture<Void> clientFuture = CompletableFuture.runAsync(() -> {
+            try {
+                if (!FileUtil.verifyFileHash(clientJar, clientSha1)) {
+                    downloadService.downloadFile(clientUrl, clientJar, progress -> {
+                        if (progressCallback != null) {
+                            progressCallback.accept(0.05 + progress * 0.25);
+                        }
+                    });
+                } else {
+                    logger.info("Cliente ya descargado y verificado");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Error al descargar cliente: " + e.getMessage(), e);
             }
         });
+
+        // Lanzar descarga de librerías en paralelo (30% - 95%)
+        CompletableFuture<Void> librariesFuture = CompletableFuture.runAsync(() -> {
+            try {
+                if (statusCallback != null)
+                    statusCallback.accept("Descargando librerías...");
+                downloadLibraries(versionData, librariesDir, progress -> {
+                    if (progressCallback != null) {
+                        progressCallback.accept(0.30 + progress * 0.65);
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException("Error al descargar librerías: " + e.getMessage(), e);
+            }
+        });
+
+        // Esperar a que AMBAS terminen
+        try {
+            CompletableFuture.allOf(clientFuture, librariesFuture).join();
+        } catch (java.util.concurrent.CompletionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) throw (IOException) cause;
+            if (cause instanceof InterruptedException) throw (InterruptedException) cause;
+            throw new IOException("Error en descarga paralela: " + cause.getMessage(), cause);
+        }
+
         if (progressCallback != null)
             progressCallback.accept(0.95);
 
-        // Descargar solo el índice de assets (los assets se descargarán cuando se lance
-        // el juego)
+        // Descargar solo el índice de assets (los assets se descargarán cuando se lance el juego)
         if (statusCallback != null)
             statusCallback.accept("Preparando assets...");
         downloadAssetIndex(versionData, minecraftDir);
@@ -245,7 +268,7 @@ public class MojangService {
 
         if (!downloadTasks.isEmpty()) {
             logger.info("Descargando {} librerías en paralelo...", downloadTasks.size());
-            downloadService.downloadFilesParallel(downloadTasks, 8, progress -> {
+            downloadService.downloadFilesParallel(downloadTasks, com.multiminecraft.launcher.config.Config.LIBRARY_DOWNLOAD_THREADS, progress -> {
                 logger.debug("Progreso de librerías: {:.0f}%", progress * 100);
                 if (progressCallback != null) {
                     progressCallback.accept(progress);

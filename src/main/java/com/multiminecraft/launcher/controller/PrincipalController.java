@@ -1488,7 +1488,46 @@ public class PrincipalController {
         if (selectedInstance == null)
             return;
         logger.debug("Modificar instancia: {}", selectedInstance.getName());
-        showError("Funcionalidad pendiente", "La modificación de instancias estará disponible en una futura versión.");
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditInstanceView.fxml"));
+            Parent editInstanceView = loader.load();
+
+            EditInstanceController controller = loader.getController();
+            controller.setInstance(selectedInstance);
+
+            Stage editStage = new Stage();
+            editStage.setTitle("Modificar Instancia");
+            editStage.initModality(Modality.WINDOW_MODAL);
+            editStage.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+            if (createInstanceButton != null && createInstanceButton.getScene() != null) {
+                editStage.initOwner(createInstanceButton.getScene().getWindow());
+            }
+
+            Scene scene = new Scene(editInstanceView, 540, 150);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            scene.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+            String themeCss = App.getActiveThemeCssExternalForm(getClass());
+            if (themeCss != null) {
+                scene.getStylesheets().add(themeCss);
+            }
+            scene.getStylesheets().add(getClass().getResource("/css/edit-instance.css").toExternalForm());
+
+            editStage.setScene(scene);
+            editStage.setMinWidth(500);
+            editStage.setMinHeight(420);
+            editStage.showAndWait();
+
+            if (controller.isSaved()) {
+                selectedInstance = null;
+                refreshInstances();
+            }
+
+        } catch (IOException e) {
+            logger.error("Error al abrir ventana de editar instancia", e);
+            showError("Error", "No se pudo abrir la ventana de modificación: " + e.getMessage());
+        }
     }
 
     private void onRecursosAction() {

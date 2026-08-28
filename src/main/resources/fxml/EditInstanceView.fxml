@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<BorderPane styleClass="root-pane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.multiminecraft.launcher.controller.EditInstanceController">
+    
+    <!-- Barra de título personalizada -->
+    <top>
+        <HBox fx:id="titleBar" alignment="CENTER_LEFT" spacing="0" styleClass="custom-title-bar">
+            <padding>
+                <Insets bottom="0" left="12" right="0" top="0" />
+            </padding>
+            <Label styleClass="title-bar-text" text="MultiMinecraft" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="minimizeBtn" onAction="#onMinimizeClicked" styleClass="title-bar-button" text="—" />
+            <Button fx:id="closeBtn" onAction="#onCloseClicked" styleClass="title-bar-button, close-button" text="✕" />
+        </HBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true">
+            <VBox spacing="12">
+                <padding>
+                    <Insets top="15" right="20" bottom="15" left="20"/>
+                </padding>
+                
+                <!-- Header -->
+                <Label alignment="CENTER" maxWidth="Infinity" text="Modificar Instancia" styleClass="label-title"/>
+                <Separator/>
+                
+                <!-- Formulario -->
+                <GridPane hgap="12" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="140" prefWidth="140"/>
+                        <ColumnConstraints minWidth="200" prefWidth="280" hgrow="SOMETIMES"/>
+                    </columnConstraints>
+                    
+                    <!-- Nombre de la instancia -->
+                    <Label text="Nombre de Instancia:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="nameField" maxWidth="200" prefWidth="200" promptText="Nombre de la instancia" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    
+                    <!-- Nombre del Jugador -->
+                    <Label text="Nombre del Jugador:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="playerNameField" maxWidth="200" prefWidth="200" promptText="Nombre del jugador" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    
+                    <!-- Versión (solo lectura) -->
+                    <Label text="Versión:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <Label fx:id="versionLabel" text="" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    
+                    <!-- Loader (solo lectura) -->
+                    <Label text="Tipo:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <Label fx:id="loaderLabel" text="" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    
+                    <!-- Memoria RAM -->
+                    <Label text="Memoria RAM:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                        <Slider fx:id="memorySlider" min="1" max="16" value="4" showTickLabels="false" 
+                                showTickMarks="true" majorTickUnit="4" minorTickCount="3" prefWidth="300"/>
+                        <Label fx:id="memoryLabel" text="4 GB"/>
+                    </HBox>
+                    
+                    <!-- Icono de Instancia -->
+                    <Label text="Icono:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                        <ImageView fx:id="iconPreview" fitWidth="40" fitHeight="40" preserveRatio="true"/>
+                        <Button text="Cambiar Icono" onAction="#onBrowseIcon"/>
+                    </HBox>
+                </GridPane>
+                
+                <Separator/>
+                
+                <!-- Botones -->
+                <HBox spacing="12" alignment="CENTER">
+                    <Button text="Cancelar" onAction="#onCancel"/>
+                    <Button fx:id="saveButton" text="Guardar Cambios" styleClass="button-primary" onAction="#onSave"/>
+                </HBox>
+                
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+</BorderPane>

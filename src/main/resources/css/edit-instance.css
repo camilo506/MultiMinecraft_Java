@@ -1,0 +1,38 @@
+/* ============================================
+   Vista: EditInstanceView (Modificar Instancia)
+   Estilos del formulario de edición
+   ============================================ */
+
+/* ---- Borde verde de la ventana ---- */
+.root-pane {
+    -fx-border-color: #26d9a0;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+/* ---- Labels de información (solo lectura) ---- */
+.info-value {
+    -fx-text-fill: #8ab4d0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* ---- Slider de RAM en verde ---- */
+.slider .track {
+    -fx-background-color: #1a2940;
+    -fx-background-radius: 5;
+}
+
+.slider .thumb {
+    -fx-background-color: #26d9a0;
+    -fx-background-radius: 50;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: #33edb0;
+}
+
+.slider .colored-track {
+    -fx-background-color: #26d9a0;
+}
