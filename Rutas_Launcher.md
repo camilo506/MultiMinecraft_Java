@@ -5,3 +5,5 @@
 - [Installer.java](./installer/Installer.java#L175)
 - [ConfigManager.java](./src/main/java/com/multiminecraft/launcher/manager/ConfigManager.java#L150)
 - [ConfigService.java](./src/main/java/com/multiminecraft/launcher/service/ConfigService.java#L187)
+
+E:\GitHub\MultiMinecraft_Java\target\installer\MultiMinecraft-Setup-1.0.0.exe
