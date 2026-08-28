@@ -6,7 +6,7 @@
 
 /* ---- Root / Base ---- */
 .root {
-    -fx-background-color: #0f1923;
+    -fx-background-color: #0d1520;
     -fx-text-fill: #e0e0e0;
 }
 
@@ -14,9 +14,9 @@
 .custom-title-bar {
     -fx-background-color: #0a1018;
     -fx-background-radius: 8 8 0 0;
-    -fx-pref-height: 32;
-    -fx-min-height: 32;
-    -fx-max-height: 32;
+    -fx-pref-height: 38;
+    -fx-min-height: 38;
+    -fx-max-height: 38;
 }
 
 .title-bar-text {
@@ -28,7 +28,7 @@
     -fx-background-color: transparent;
     -fx-text-fill: #8899aa;
     -fx-font-size: 13px;
-    -fx-padding: 6 14 6 14;
+    -fx-padding: 8 14 8 14;
     -fx-cursor: hand;
     -fx-background-radius: 0;
     -fx-border-width: 0;
@@ -46,20 +46,20 @@
 
 /* ---- Root pane ---- */
 .root-pane {
-    -fx-background-color: #0f1923;
+    -fx-background-color: #0d1520;
 }
 
 /* ---- Backgrounds ---- */
 .background-primary {
-    -fx-background-color: #162030;
+    -fx-background-color: #131c28;
 }
 
 .background-secondary {
-    -fx-background-color: #131d2a;
+    -fx-background-color: #0d1520;
 }
 
 .background-tertiary {
-    -fx-background-color: #0f1923;
+    -fx-background-color: #0a1018;
 }
 
 /* ---- Text Fields ---- */
@@ -104,7 +104,7 @@
 
 /* ---- ScrollBar ---- */
 .scroll-bar {
-    -fx-background-color: #162030;
+    -fx-background-color: #131c28;
 }
 
 .scroll-bar .thumb {
@@ -131,7 +131,7 @@
 /* ---- Progress Bar ---- */
 .progress-bar {
     -fx-accent: #26d9a0;
-    -fx-control-inner-background: #0f1923;
+    -fx-control-inner-background: #0d1520;
 }
 
 .progress-bar > .bar {
@@ -191,4 +191,16 @@
     -fx-background-color: #f44336;
     -fx-border-color: #f44336;
     -fx-text-fill: white;
+}
+
+/* ---- Tooltip ---- */
+.tooltip {
+    -fx-background-color: #1a2635;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #2a3f55;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 11px;
+    -fx-padding: 6 10;
 }

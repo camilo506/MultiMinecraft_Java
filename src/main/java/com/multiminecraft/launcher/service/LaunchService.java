@@ -23,6 +23,7 @@ import java.util.zip.ZipFile;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 /**
  * Servicio para lanzar instancias de Minecraft
@@ -33,24 +34,45 @@ public class LaunchService {
 
     private final ConfigService configService;
     private final MojangService mojangService;
+    private final SkinDeploymentService skinDeploymentService;
+    private final JavaRuntimeService javaRuntimeService;
     private String currentPlayerName = "Player";
 
     public LaunchService() {
         this.configService = ConfigService.getInstance();
         this.mojangService = new MojangService();
+        this.skinDeploymentService = new SkinDeploymentService(this.configService);
+        this.javaRuntimeService = new JavaRuntimeService();
     }
 
     /**
      * Lanza una instancia de Minecraft
      */
     public Process launchInstance(Instance instance) throws Exception {
+        return launchInstance(instance, null, null);
+    }
+
+    /**
+     * Lanza una instancia reportando estado y progreso de preparación.
+     */
+    public Process launchInstance(Instance instance, Consumer<String> statusCallback, Consumer<Double> progressCallback)
+            throws Exception {
         // Establecer nombre del jugador desde la instancia
         String pName = instance.getPlayerName();
         this.currentPlayerName = (pName != null && !pName.trim().isEmpty()) ? pName.trim() : "Player";
         logger.info("Lanzando instancia: {}", instance.getName());
+        publishStatus(statusCallback, "Preparando lanzamiento...");
+        publishProgress(progressCallback, 0.05);
+
+        // CustomSkinLoader solo si la instancia tiene skin local; si no, no pisar
+        // CustomSkinLoader.json (p. ej. SkinRestorer u otro proveedor en el servidor).
+        preparePlayerSkin(instance);
 
         Path minecraftDir = configService.getInstanceMinecraftDirectory(instance.getName());
         String baseVersion = instance.getVersion();
+        String javaPath = resolveJavaPathForInstance(instance, baseVersion, statusCallback, progressCallback);
+        publishStatus(statusCallback, "Java listo");
+        publishProgress(progressCallback, 0.45);
 
         // Si es una instancia Forge o Fabric, buscar la versión del loader instalada
         // IMPORTANTE: Para loaders, NO usamos el JSON de vanilla, sino el JSON del
@@ -98,6 +120,8 @@ public class LaunchService {
 
         // Verificar y descargar librerías faltantes (Auto-repair)
         verifyAndDownloadLibraries(versionData, minecraftDir);
+        publishStatus(statusCallback, "Librerías verificadas");
+        publishProgress(progressCallback, 0.6);
 
         // Descargar assets ANTES de lanzar (CRÍTICO: Sin assets, Minecraft crashea
         // inmediatamente)
@@ -125,12 +149,16 @@ public class LaunchService {
         } catch (Exception e) {
             logger.warn("Error descargando assets (se intentará continuar): {}", e.getMessage());
         }
+        publishStatus(statusCallback, "Assets preparados");
+        publishProgress(progressCallback, 0.7);
 
         // Extraer natives (CRÍTICO: Sin esto falla con UnsatisfiedLinkError)
         extractNatives(versionData, minecraftDir, finalVersion);
+        publishStatus(statusCallback, "Natives extraídos");
+        publishProgress(progressCallback, 0.8);
 
         // Construir comando de lanzamiento (operación rápida)
-        List<String> command = buildLaunchCommand(instance, minecraftDir, versionData, finalVersion);
+        List<String> command = buildLaunchCommand(instance, minecraftDir, versionData, finalVersion, javaPath);
 
         // IMPORTANTE: Filtrar argumentos de módulos que causan problemas con Forge
         // PERO preservar --add-opens y --add-exports de java.base que son necesarios
@@ -147,8 +175,10 @@ public class LaunchService {
         command = filterDemoArguments(command);
 
         // CRÍTICO: Asegurar que el client JAR de vanilla esté en el ignoreList de Forge
-        // Sin esto, el BootstrapLauncher carga el JAR como módulo automático (ej: _1._20._1)
-        // lo que causa ResolutionException por conflicto de paquetes con el módulo "minecraft"
+        // Sin esto, el BootstrapLauncher carga el JAR como módulo automático (ej:
+        // _1._20._1)
+        // lo que causa ResolutionException por conflicto de paquetes con el módulo
+        // "minecraft"
         if (instance.getLoader() == com.multiminecraft.launcher.model.LoaderType.FORGE) {
             fixForgeIgnoreList(command, versionData);
         }
@@ -165,9 +195,12 @@ public class LaunchService {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(minecraftDir.toFile());
         processBuilder.redirectErrorStream(true);
+        publishStatus(statusCallback, "Iniciando Minecraft...");
+        publishProgress(progressCallback, 0.9);
 
         // Lanzar proceso inmediatamente (esta es la operación crítica)
         Process process = processBuilder.start();
+        publishProgress(progressCallback, 1.0);
 
         logger.info("Proceso de Minecraft iniciado para instancia: {}", instance.getName());
 
@@ -194,12 +227,11 @@ public class LaunchService {
     /**
      * Construye el comando de lanzamiento
      */
-    private List<String> buildLaunchCommand(Instance instance, Path minecraftDir, JsonObject versionData,
-            String versionId) {
+        private List<String> buildLaunchCommand(Instance instance, Path minecraftDir, JsonObject versionData,
+            String versionId, String javaPath) {
         List<String> command = new ArrayList<>();
 
         // Java executable
-        String javaPath = configService.getJavaPath(instance);
         command.add(javaPath);
 
         // JVM Arguments
@@ -305,6 +337,51 @@ public class LaunchService {
         addArguments(command, versionData, "game", minecraftDir, versionData, false);
 
         return command;
+    }
+
+    private String resolveJavaPathForInstance(Instance instance, String minecraftVersion,
+            Consumer<String> statusCallback, Consumer<Double> progressCallback) {
+        if (instance.getJavaPath() != null && !instance.getJavaPath().isBlank()) {
+            logger.info("Usando Java personalizado de instancia: {}", instance.getJavaPath());
+            return instance.getJavaPath();
+        }
+
+        try {
+            publishStatus(statusCallback, "Comprobando Java compatible...");
+            String javaPath = javaRuntimeService.ensureJavaForMinecraftVersion(minecraftVersion, status -> {
+                if (status != null && !status.isBlank()) {
+                    logger.info(status);
+                    publishStatus(statusCallback, status);
+                }
+            }, javaProgress -> {
+                if (javaProgress == null) {
+                    return;
+                }
+                // Mapea progreso real de Java al tramo de preparación 10%-45%.
+                double mapped = 0.1 + (Math.max(0.0, Math.min(1.0, javaProgress)) * 0.35);
+                publishProgress(progressCallback, mapped);
+            });
+            if (javaPath != null && !javaPath.isBlank()) {
+                logger.info("Java resuelto automáticamente para {}: {}", minecraftVersion, javaPath);
+                return javaPath;
+            }
+        } catch (Exception e) {
+            logger.warn("No se pudo resolver Java automáticamente para {}. Se usará fallback.", minecraftVersion, e);
+        }
+
+        return configService.getJavaPath(instance);
+    }
+
+    private void publishStatus(Consumer<String> callback, String status) {
+        if (callback != null && status != null && !status.isBlank()) {
+            callback.accept(status);
+        }
+    }
+
+    private void publishProgress(Consumer<Double> callback, double value) {
+        if (callback != null) {
+            callback.accept(Math.max(0.0, Math.min(1.0, value)));
+        }
     }
 
     private void addArguments(List<String> command, JsonObject sourceData, String type, Path minecraftDir,
@@ -904,14 +981,17 @@ public class LaunchService {
         // Determinar directorio de librerías
         // IMPORTANTE: Para Forge, ${library_directory} debe apuntar al directorio de
         // librerías de la INSTANCIA, porque el instalador de Forge descarga sus JARs
-        // (ASM, securejarhandler, bootstraplauncher, etc.) ahí, NO al directorio compartido.
+        // (ASM, securejarhandler, bootstraplauncher, etc.) ahí, NO al directorio
+        // compartido.
         // Si la instancia tiene un directorio de librerías con contenido Forge (cpw/),
         // usar ese; de lo contrario, usar el compartido.
         Path instanceLibDir = minecraftDir.resolve("libraries");
         Path libraryDirectory;
-        if (Files.exists(instanceLibDir.resolve("cpw")) || Files.exists(instanceLibDir.resolve("net").resolve("minecraftforge"))) {
+        if (Files.exists(instanceLibDir.resolve("cpw"))
+                || Files.exists(instanceLibDir.resolve("net").resolve("minecraftforge"))) {
             libraryDirectory = instanceLibDir;
-            logger.debug("Usando directorio de librerías de la instancia para ${library_directory}: {}", libraryDirectory);
+            logger.debug("Usando directorio de librerías de la instancia para ${library_directory}: {}",
+                    libraryDirectory);
         } else {
             libraryDirectory = PlatformUtil.getSharedLibrariesDirectory();
             logger.debug("Usando directorio de librerías compartido para ${library_directory}: {}", libraryDirectory);
@@ -981,9 +1061,24 @@ public class LaunchService {
     }
 
     /**
+     * Si la instancia tiene skin en disco, despliega CustomSkinLoader (local).
+     * Si no tiene skin, quita el CustomSkinLoader.json que este launcher generó
+     * antes, para no forzar LocalSkin-only y permitir skins del servidor (p. ej. SkinRestorer).
+     */
+    private void preparePlayerSkin(Instance instance) {
+        String path = instance.getSkinPath();
+        if (path != null && !path.isBlank()) {
+            skinDeploymentService.deploySkinToInstance(instance, currentPlayerName);
+        } else {
+            skinDeploymentService.clearLauncherForcedCustomSkinLoader(instance);
+        }
+    }
+
+    /**
      * Busca la versión de Forge instalada para una versión de Minecraft
      * Mejora: Busca también variaciones del formato (como en Python)
      */
+
     private String findForgeVersion(Path minecraftDir, String minecraftVersion) {
         try {
             Path versionsDir = minecraftDir.resolve("versions");
@@ -1547,18 +1642,22 @@ public class LaunchService {
     }
 
     /**
-     * Corrige el argumento -DignoreList de Forge para asegurar que el JAR de vanilla esté en él.
-     * Esto previene que el BootstrapLauncher lo cargue como un módulo automático, lo que
-     * causaría un ResolutionException por conflicto de paquetes (ej. net.minecraft.data).
+     * Corrige el argumento -DignoreList de Forge para asegurar que el JAR de
+     * vanilla esté en él.
+     * Esto previene que el BootstrapLauncher lo cargue como un módulo automático,
+     * lo que
+     * causaría un ResolutionException por conflicto de paquetes (ej.
+     * net.minecraft.data).
      */
     private void fixForgeIgnoreList(List<String> command, JsonObject versionData) {
         try {
             // Verificar si tenemos información de la versión base
-            if (!versionData.has("inheritsFrom")) return;
-            
+            if (!versionData.has("inheritsFrom"))
+                return;
+
             String baseVersion = versionData.get("inheritsFrom").getAsString();
             String vanillaJarName = baseVersion + ".jar";
-            
+
             // Buscar el argumento -DignoreList
             for (int i = 0; i < command.size(); i++) {
                 String arg = command.get(i);
@@ -1567,14 +1666,14 @@ public class LaunchService {
                     if (arg.contains(vanillaJarName)) {
                         return;
                     }
-                    
+
                     // Agregar el jar de vanilla al final de la lista
                     String newArg = arg;
                     if (!arg.endsWith(",")) {
                         newArg += ",";
                     }
                     newArg += vanillaJarName;
-                    
+
                     command.set(i, newArg);
                     logger.debug("Corección de Forge: Añadido {} a {}", vanillaJarName, newArg);
                     return;

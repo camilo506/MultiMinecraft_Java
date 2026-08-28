@@ -6,12 +6,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WelcomeController {
+public class BienvenidaController {
 
-    private static final Logger logger = LoggerFactory.getLogger(WelcomeController.class);
+    private static final Logger logger = LoggerFactory.getLogger(BienvenidaController.class);
 
     @FXML private TextField playerNameField;
     @FXML private Label errorLabel;
@@ -50,7 +51,7 @@ public class WelcomeController {
 
         // Navegar a la ventana principal
         try {
-            App.setRoot("MainWindow");
+            App.setRoot("Principal");
         } catch (Exception e) {
             logger.error("Error al cargar ventana principal", e);
         }
@@ -60,5 +61,13 @@ public class WelcomeController {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
+    }
+
+    @FXML
+    private void onCloseClicked() {
+        Stage stage = (Stage) continueButton.getScene().getWindow();
+        if (stage != null) {
+            stage.close();
+        }
     }
 }

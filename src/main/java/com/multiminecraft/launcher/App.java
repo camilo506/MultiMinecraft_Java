@@ -17,20 +17,37 @@ import java.io.IOException;
  * Clase principal de la aplicación JavaFX
  */
 public class App extends Application {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(App.class);
-    private static final String APP_TITLE = "Monkey Studio";
-    private static final int WINDOW_WIDTH = 800;  /** Ancho de la ventana en píxeles */
-    private static final int WINDOW_HEIGHT = 530; /** Alto de la ventana en píxeles */
-    
+    private static final String APP_TITLE = "MultiMinecraft";
+    private static final int WINDOW_WIDTH = 1080;
+    /** Ancho de la ventana en píxeles */
+    private static final int WINDOW_HEIGHT = 660;
+    /** Alto de la ventana en píxeles */
+
     private static Scene scene;
     private static Stage primaryStage;
+    private static App instance;
+    private static String activeTheme = "dark";
+
+    public App() {
+        instance = this;
+    }
+
+    /**
+     * Abre una página web en el navegador predeterminado
+     */
+    public static void openWebPage(String url) {
+        if (instance != null && url != null) {
+            instance.getHostServices().showDocument(url);
+        }
+    }
 
     @Override
     public void init() throws Exception {
         super.init();
         logger.info("Inicializando aplicación JavaFX...");
-        
+
         // Verificar que JavaFX esté disponible
         try {
             // Intentar acceder a clases de JavaFX para verificar disponibilidad
@@ -54,57 +71,58 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         primaryStage = stage;
-        
+
         try {
             logger.info("Iniciando MultiMinecraft Launcher...");
-            
+
             // Determinar vista inicial según si hay nombre de jugador
             String initialView;
             ConfigService configService = ConfigService.getInstance();
             String playerName = configService.getLauncherConfig().getPlayerName();
             if (playerName == null || playerName.trim().isEmpty()) {
-                initialView = "WelcomeView";
+                initialView = "Bienvenida";
                 logger.info("No hay nombre de jugador configurado, mostrando pantalla de bienvenida");
             } else {
-                initialView = "MainWindow";
+                initialView = "Principal";
                 logger.info("Jugador: {}", playerName);
             }
-            
+
             logger.debug("Cargando archivo FXML: {}", initialView);
             Parent root = loadFXML(initialView);
             logger.debug("FXML cargado correctamente");
-            
+
             scene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             logger.debug("Escena creada");
-            
-            // Aplicar tema por defecto
+
+            // Cambio de tema deshabilitado temporalmente: usar siempre oscuro.
             applyTheme("dark");
-            
-            // Cargar CSS de welcome si es la vista inicial
-            if ("WelcomeView".equals(initialView)) {
+
+            // Cargar CSS de bienvenida si es la vista inicial
+            if ("Bienvenida".equals(initialView)) {
                 var welcomeCss = App.class.getResource("/css/welcome.css");
                 if (welcomeCss != null) {
                     scene.getStylesheets().add(welcomeCss.toExternalForm());
                 }
             }
-            
+
             stage.setTitle(APP_TITLE);
             stage.initStyle(StageStyle.TRANSPARENT);
             stage.setScene(scene);
             stage.setMinWidth(650);
             stage.setMinHeight(400);
             stage.show();
-            
+
             logger.info("Launcher iniciado correctamente");
-            
+
         } catch (Exception e) {
             logger.error("Error crítico al iniciar la aplicación", e);
             e.printStackTrace();
-            
+
             // Mostrar error al usuario si es posible
             try {
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.ERROR);
                 alert.setTitle("Error al iniciar");
                 alert.setHeaderText("No se pudo iniciar el launcher");
                 alert.setContentText("Error: " + e.getMessage() + "\n\nRevisa los logs para más detalles.");
@@ -114,7 +132,7 @@ public class App extends Application {
                 System.err.println("ERROR CRÍTICO: " + e.getMessage());
                 e.printStackTrace();
             }
-            
+
             throw new RuntimeException("No se pudo iniciar la aplicación", e);
         }
     }
@@ -132,17 +150,17 @@ public class App extends Application {
     private static Parent loadFXML(String fxml) throws IOException {
         String resourcePath = "/fxml/" + fxml + ".fxml";
         logger.debug("Intentando cargar recurso: {}", resourcePath);
-        
+
         java.net.URL resource = App.class.getResource(resourcePath);
         if (resource == null) {
             String errorMsg = "No se encontró el archivo FXML: " + resourcePath;
             logger.error(errorMsg);
             throw new IOException(errorMsg);
         }
-        
+
         logger.debug("Recurso encontrado: {}", resource);
         FXMLLoader fxmlLoader = new FXMLLoader(resource);
-        
+
         try {
             Parent root = fxmlLoader.load();
             logger.debug("FXML cargado exitosamente: {}", fxml);
@@ -161,10 +179,12 @@ public class App extends Application {
             logger.warn("No se puede aplicar el tema: la escena no está inicializada");
             return;
         }
-        
+
         try {
+            String normalizedTheme = "light".equalsIgnoreCase(theme) ? "light" : "dark";
+            activeTheme = normalizedTheme;
             scene.getStylesheets().clear();
-            
+
             // Cargar CSS principal
             var mainCss = App.class.getResource("/css/main.css");
             if (mainCss != null) {
@@ -172,24 +192,55 @@ public class App extends Application {
             } else {
                 logger.warn("No se encontró el archivo CSS principal: /css/main.css");
             }
-            
+
             // Cargar CSS del tema
-            var themeCss = App.class.getResource("/css/" + theme + "-theme.css");
+            var themeCss = App.class.getResource("/css/" + normalizedTheme + "-theme.css");
             if (themeCss != null) {
                 scene.getStylesheets().add(themeCss.toExternalForm());
-                logger.info("Tema aplicado: {}", theme);
+                logger.info("Tema aplicado: {}", normalizedTheme);
             } else {
-                logger.warn("No se encontró el archivo CSS del tema: /css/{}-theme.css", theme);
+                logger.warn("No se encontró el archivo CSS del tema: /css/{}-theme.css", normalizedTheme);
             }
-            
+
             // Cargar CSS específico de la ventana principal
             var mainWindowCss = App.class.getResource("/css/main-window.css");
             if (mainWindowCss != null) {
                 scene.getStylesheets().add(mainWindowCss.toExternalForm());
             }
+
+            // Cargar CSS de la vista de configuración
+            var configCss = App.class.getResource("/css/configuracion.css");
+            if (configCss != null) {
+                scene.getStylesheets().add(configCss.toExternalForm());
+            }
         } catch (Exception e) {
             logger.error("Error al aplicar el tema: {}", theme, e);
         }
+    }
+
+    /**
+     * Obtiene el CSS del tema activo como URL externa para cualquier controlador.
+     */
+    public static String getActiveThemeCssExternalForm(Class<?> resourceClass) {
+        if (resourceClass == null) {
+            return null;
+        }
+        var themeCss = resourceClass.getResource("/css/" + activeTheme + "-theme.css");
+        return themeCss != null ? themeCss.toExternalForm() : null;
+    }
+
+    /**
+     * Se ejecuta al cerrar la aplicación
+     */
+    @Override
+    public void stop() throws Exception {
+        logger.info("Cerrando MultiMinecraft Launcher y guardando configuración...");
+        try {
+            ConfigService.getInstance().saveLauncherConfig();
+        } catch (Exception e) {
+            logger.error("Error al guardar configuración durante el cierre", e);
+        }
+        super.stop();
     }
 
     /**

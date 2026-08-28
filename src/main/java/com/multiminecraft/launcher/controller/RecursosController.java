@@ -25,6 +25,9 @@ public class RecursosController {
     @FXML private HBox titleBar;
     @FXML private Label titleLabel;
     @FXML private Button modPackButton;
+    @FXML private Button modButton;
+    @FXML private Button shadersButton;
+    @FXML private Button resourcePacksButton;
     
     // Variables para arrastrar la ventana
     private double xOffset = 0;

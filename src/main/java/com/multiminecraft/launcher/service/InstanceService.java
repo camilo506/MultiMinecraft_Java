@@ -10,9 +10,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -21,6 +26,12 @@ import java.util.stream.Stream;
 public class InstanceService {
 
     private static final Logger logger = LoggerFactory.getLogger(InstanceService.class);
+
+    /**
+     * Instancias con prioridad especial en el grid (sin distinguir mayúsculas). Se
+     * muestran primero, ordenadas entre sí por antigüedad.
+     */
+    private static final List<String> PINNED_INSTANCE_NAMES = List.of("pajaland", "exiliados");
 
     private final ConfigService configService;
     private final MojangService mojangService;
@@ -40,7 +51,8 @@ public class InstanceService {
     /**
      * Crea una nueva instancia de Minecraft con callback de progreso numérico
      */
-    public void createInstance(Instance instance, Consumer<String> statusCallback, Consumer<Double> progressCallback) throws Exception {
+    public void createInstance(Instance instance, Consumer<String> statusCallback, Consumer<Double> progressCallback)
+            throws Exception {
         logger.info("Creando instancia: {}", instance.getName());
 
         // Validar nombre
@@ -51,6 +63,10 @@ public class InstanceService {
         // Verificar que no exista ya
         if (instanceExists(instance.getName())) {
             throw new IllegalArgumentException("Ya existe una instancia con ese nombre");
+        }
+
+        if (instance.getCreatedAt() == null) {
+            instance.setCreatedAt(LocalDateTime.now());
         }
 
         Path instanceDir = configService.getInstanceDirectory(instance.getName());
@@ -107,20 +123,20 @@ public class InstanceService {
                     String defaultIconName = "art-Crafting_Table.png";
                     String resourcePath = "/icons/" + defaultIconName;
                     java.io.InputStream iconStream = getClass().getResourceAsStream(resourcePath);
-                    
+
                     if (iconStream != null) {
                         Path iconDir = instanceDir.resolve("icons");
                         FileUtil.createDirectory(iconDir);
                         Path iconFile = iconDir.resolve(defaultIconName);
-                        
+
                         // Copiar el ícono desde resources a la carpeta de la instancia
                         Files.copy(iconStream, iconFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                         iconStream.close();
-                        
+
                         // Actualizar el nombre del ícono en la instancia
                         instance.setIcon(defaultIconName);
                         configService.saveInstanceConfig(instance);
-                        
+
                         logger.info("Ícono por defecto copiado: {}", iconFile);
                     } else {
                         logger.warn("No se encontró el ícono por defecto en resources: {}", resourcePath);
@@ -169,7 +185,8 @@ public class InstanceService {
         switch (instance.getLoader()) {
             case FORGE:
                 ForgeService forgeService = new ForgeService();
-                // installForge ahora maneja toda la verificación y descarga de librerías internamente
+                // installForge ahora maneja toda la verificación y descarga de librerías
+                // internamente
                 forgeService.installForge(instance.getVersion(), minecraftDir, statusCallback);
                 logger.info("Forge instalado y verificado para instancia: {}", instance.getName());
                 break;
@@ -196,22 +213,63 @@ public class InstanceService {
             return instances;
         }
 
+        List<Path> dirs;
         try (Stream<Path> paths = Files.list(instancesDir)) {
-            paths.filter(Files::isDirectory)
-                    .forEach(instanceDir -> {
-                        try {
-                            String instanceName = instanceDir.getFileName().toString();
-                            Instance instance = configService.loadInstanceConfig(instanceName);
-                            instances.add(instance);
-                        } catch (IOException e) {
-                            logger.warn("No se pudo cargar instancia: {}", instanceDir, e);
-                        }
-                    });
+            dirs = paths.filter(Files::isDirectory).collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Error al listar instancias", e);
+            return instances;
         }
 
+        for (Path instanceDir : dirs) {
+            try {
+                String instanceName = instanceDir.getFileName().toString();
+                Instance instance = configService.loadInstanceConfig(instanceName);
+                instances.add(instance);
+            } catch (IOException e) {
+                logger.warn("No se pudo cargar instancia: {}", instanceDir, e);
+            }
+        }
+
+        // Orden: primero las instancias con prioridad especial ("pajaland",
+        // "exiliados"),
+        // ordenadas entre sí por antigüedad (más vieja primero).
+        // Luego el resto de instancias, también por antigüedad.
+        instances.sort(Comparator
+                .comparing((Instance i) -> isPinnedInstance(i) ? 0 : 1)
+                .thenComparingLong(i -> creationOrderMillis(i, instancesDir)));
+
         return instances;
+    }
+
+    /**
+     * Determina si una instancia tiene prioridad especial en el grid.
+     * Compara el nombre (sin distinguir mayúsculas) contra la lista de nombres
+     * pinneados.
+     */
+    private static boolean isPinnedInstance(Instance instance) {
+        if (instance.getName() == null) {
+            return false;
+        }
+        String name = instance.getName().trim();
+        return PINNED_INSTANCE_NAMES.stream()
+                .anyMatch(pinned -> name.equalsIgnoreCase(pinned));
+    }
+
+    /**
+     * Marca de tiempo para ordenar: preferir {@code createdAt} guardado; si no
+     * existe, fecha de creación del directorio.
+     */
+    private static long creationOrderMillis(Instance instance, Path instancesDir) {
+        if (instance.getCreatedAt() != null) {
+            return instance.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        }
+        try {
+            Path dir = instancesDir.resolve(instance.getName());
+            return Files.readAttributes(dir, BasicFileAttributes.class).creationTime().toMillis();
+        } catch (IOException e) {
+            return Long.MAX_VALUE;
+        }
     }
 
     /**

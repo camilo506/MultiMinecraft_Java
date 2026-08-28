@@ -14,8 +14,12 @@ public class Instance {
     private String memory;
     private String icon;
     private String playerName;
+    private String skinPath = "";
     private LocalDateTime lastPlayed;
+    /** Fecha/hora en que se creó la instancia en el launcher (persistida en instance.json) */
+    private LocalDateTime createdAt;
     private long totalPlaytime; // en segundos
+    private boolean isSpecial; // Marcador para instancias automáticas de la vista Server
 
     public Instance() {
         this.loader = LoaderType.VANILLA;
@@ -97,6 +101,14 @@ public class Instance {
         this.playerName = playerName;
     }
 
+    public String getSkinPath() {
+        return skinPath != null ? skinPath : "";
+    }
+
+    public void setSkinPath(String skinPath) {
+        this.skinPath = skinPath;
+    }
+
     public LocalDateTime getLastPlayed() {
         return lastPlayed;
     }
@@ -105,12 +117,28 @@ public class Instance {
         this.lastPlayed = lastPlayed;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public long getTotalPlaytime() {
         return totalPlaytime;
     }
 
     public void setTotalPlaytime(long totalPlaytime) {
         this.totalPlaytime = totalPlaytime;
+    }
+
+    public boolean isSpecial() {
+        return isSpecial;
+    }
+
+    public void setSpecial(boolean special) {
+        isSpecial = special;
     }
 
     /**
